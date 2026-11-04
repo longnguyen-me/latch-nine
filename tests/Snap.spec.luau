@@ -1,0 +1,26 @@
+--!strict
+local Snap=require("../src/shared/GridSnap")
+local count=0
+local function test(name: string,fn: ()->()) local ok,err=pcall(fn);assert(ok,name..": "..tostring(err));count+=1;print("PASS snap: "..name) end
+test("a centered grab projects onto integer target cells",function()
+ local x,y=Snap.project(270,150,100,40,40,0.5,0.5);assert(x==4 and y==2)
+end)
+test("fractional grab point survives a different target cell size",function()
+ local x,y=Snap.project(205,145,100,40,20,1.25,0.25);assert(x==4 and y==5)
+end)
+test("grabbing a far occupied cell preserves the whole footprint anchor",function()
+ local x,y=Snap.project(290,170,100,40,40,2.75,1.25);assert(x==2 and y==2)
+end)
+test("subpixel pointer jitter does not bounce a centered phantom",function()
+ for n=-4,4 do local x,y=Snap.project(200+n*0.1,100+n*0.1,0,0,40,0,0.5);assert(x==5 and y==2) end
+end)
+test("out of bounds projects to an explicit invalid candidate",function()
+ local x,y=Snap.project(-50,-50,0,0,40,0.5,0.5);assert(x<0 and y<0)
+end)
+test("mouse click movement under five pixels is not a drag",function()
+ assert(not Snap.started(4,0,0,0,false));assert(Snap.started(5,0,0,0,false))
+end)
+test("touch movement has its own eight pixel threshold",function()
+ assert(not Snap.started(7,0,0,0,true));assert(Snap.started(8,0,0,0,true))
+end)
+print(count.." snap projection tests passed")
