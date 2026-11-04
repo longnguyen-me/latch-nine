@@ -13,6 +13,7 @@ local function apply()
  local stage=if stageName then workspace:FindFirstChild(stageName) else nil
  local mount=if stage then stage:FindFirstChild("CameraMount",true) else nil
  if mount and mount:IsA("BasePart") then
+  mount.LocalTransparencyModifier=1
   camera.CameraType=Enum.CameraType.Scriptable
   camera.CFrame=mount.CFrame;camera.Focus=CFrame.new(mount.Position+mount.CFrame.LookVector*20)
   return

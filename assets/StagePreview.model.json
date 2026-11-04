@@ -1602,6 +1602,47 @@
       "Properties": {}
     },
     {
+      "Children": [
+        {
+          "Children": [
+            {
+              "ClassName": "Frame",
+              "Name": "Border",
+              "Properties": {
+                "BackgroundTransparency": 1,
+                "BorderColor3": [
+                  0.9450980392156862,
+                  0.7607843137254902,
+                  0.4549019607843137
+                ],
+                "BorderSizePixel": 5,
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "ClassName": "SurfaceGui",
+          "Name": "EditOutline",
+          "Properties": {
+            "CanvasSize": [
+              320,
+              100
+            ],
+            "Face": "Back",
+            "LightInfluence": 0
+          }
+        }
+      ],
       "ClassName": "Part",
       "Name": "RegisterBox",
       "Properties": {
@@ -1640,6 +1681,47 @@
       }
     },
     {
+      "Children": [
+        {
+          "Children": [
+            {
+              "ClassName": "Frame",
+              "Name": "Border",
+              "Properties": {
+                "BackgroundTransparency": 1,
+                "BorderColor3": [
+                  0.43529411764705883,
+                  0.8549019607843137,
+                  0.7686274509803922
+                ],
+                "BorderSizePixel": 5,
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "ClassName": "SurfaceGui",
+          "Name": "EditOutline",
+          "Properties": {
+            "CanvasSize": [
+              320,
+              100
+            ],
+            "Face": "Back",
+            "LightInfluence": 0
+          }
+        }
+      ],
       "ClassName": "Part",
       "Name": "NextCustomerButton",
       "Properties": {
@@ -1678,6 +1760,47 @@
       }
     },
     {
+      "Children": [
+        {
+          "Children": [
+            {
+              "ClassName": "Frame",
+              "Name": "Border",
+              "Properties": {
+                "BackgroundTransparency": 1,
+                "BorderColor3": [
+                  0.9490196078431372,
+                  0.4980392156862745,
+                  0.47058823529411764
+                ],
+                "BorderSizePixel": 5,
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "ClassName": "SurfaceGui",
+          "Name": "EditOutline",
+          "Properties": {
+            "CanvasSize": [
+              320,
+              100
+            ],
+            "Face": "Back",
+            "LightInfluence": 0
+          }
+        }
+      ],
       "ClassName": "Part",
       "Name": "DismissCustomerButton",
       "Properties": {
@@ -1779,18 +1902,18 @@
         "CanTouch": false,
         "CastShadow": false,
         "Color": [
-          0.44313725490196076,
-          0.8196078431372549,
-          0.7137254901960784
+          0.43529411764705883,
+          0.8549019607843137,
+          0.7686274509803922
         ],
         "Material": "SmoothPlastic",
         "Size": [
-          0.2,
-          0.2,
-          0.2
+          1.5,
+          1,
+          0.3
         ],
         "TopSurface": "Smooth",
-        "Transparency": 1
+        "Transparency": 0.25
       }
     },
     {

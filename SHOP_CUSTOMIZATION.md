@@ -5,6 +5,10 @@
 3. Select parts and use Move, Scale or Rotate. The three clickable controls are grouped under ShopTemplate → InteractionControls. Add decorations or group them into folders/models inside ShopTemplate. The runtime clones the saved model instead of rebuilding it.
 4. Save the place. Use Play to check the layout and input.
 
+After pulling a release that changes `ShopTemplate` parts, open the updated `LatchNine.rbxlx` from the cloned folder in Studio. A Rojo script sync alone may leave an older already-open place model unchanged. Copy any custom furniture from your older saved place into the updated template before saving.
+
+`CameraMount` is a visible cyan marker at about Z=70 in Edit mode. Select it in Explorer and press F to focus, then move or rotate it. The game hides that marker for the local player during Play. The three controls under `InteractionControls` have permanent, text-free SurfaceGui borders so they can be seen and edited even when Play is stopped; runtime code adds hover highlights and click behavior.
+
 Make permanent changes in Edit mode. During Play, the template lives in ServerStorage and each player gets a separate Shop_<UserId> clone. Play-mode movement is temporary.
 
 | Keep this name | Purpose |

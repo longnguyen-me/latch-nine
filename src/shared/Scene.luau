@@ -92,14 +92,21 @@ function Scene.build(parent: Instance, origin: Vector3, name: string): Model
  board("BuyBoard",12,4.9,9.1,13,5.9,-22)
  board("VisitorBoard",12,11.1,2,13,5.9)
  local controls=Instance.new("Model");controls.Name="InteractionControls";controls.Parent=m
- board("RegisterBox",-14,4.9,7.4,4.6,2.8).Parent=controls
- board("NextCustomerButton",-14,2.8,9.2,4.6,1.1).Parent=controls
- board("DismissCustomerButton",-14,1.5,9.2,4.6,1.1).Parent=controls
+ local function control(name: string,y: number,z: number,h: number,color: Color3)
+  local base=board(name,-14,y,z,4.6,h);base.Parent=controls
+  local face=Instance.new("SurfaceGui");face.Name="EditOutline";face.Face=Enum.NormalId.Back
+  face.CanvasSize=Vector2.new(320,100);face.LightInfluence=0;face.Parent=base
+  local border=Instance.new("Frame");border.Name="Border";border.Size=UDim2.fromScale(1,1)
+  border.BackgroundTransparency=1;border.BorderSizePixel=5;border.BorderColor3=color;border.Parent=face
+ end
+ control("RegisterBox",4.9,7.4,2.8,C(241,194,116))
+ control("NextCustomerButton",2.8,9.2,1.1,C(111,218,196))
+ control("DismissCustomerButton",1.5,9.2,1.1,C(242,127,120))
  local function marker(name: string,x: number,y: number,z: number)
   local value=p(name,x,y,z,0.2,0.2,0.2,C(113,209,182));value.Transparency=1
  end
  marker("ViewTarget",0,4.5,0)
- marker("CameraMount",0,4.5,70)
+ local mount=p("CameraMount",0,4.5,70,1.5,1,0.3,C(111,218,196));mount.Transparency=0.25
  marker("VisitorStand",-2,5.2,-1.8)
  marker("VisitorEntry",-14,5.2,-1.8)
  marker("VisitorExit",14,5.2,-1.8)

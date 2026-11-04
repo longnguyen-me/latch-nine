@@ -12,6 +12,8 @@ Rare bulk sellers offer 5–15% off the whole remaining haul. The receipt shows 
 
 CameraMount in ShopTemplate controls the seller camera position and rotation. Move or rotate it in Studio Edit mode. Lighting is authored in Studio. InteractionControls groups the physical register, next-customer and dismiss buttons so they can be edited independently. Dialogue remains until a trade or explicit dismissal; Dismiss Customer sends the visitor right and leaves the counter empty.
 
+When a Git update changes the physical template, open the updated `LatchNine.rbxlx` in Studio; Rojo live script sync might not replace a model in an already-open older place. The camera marker and the control borders are now visible in Edit mode. Keep a separate copy of any Studio furniture changes before opening a rebuilt place.
+
 In Studio Edit mode, move or decorate `Workspace → ShopTemplate` and save the place. Runtime clones preserve those changes. `SHOP_CUSTOMIZATION.md` describes the named interactive parts and source rebuild limits.
 
 ## Live source sync
