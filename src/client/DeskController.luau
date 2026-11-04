@@ -80,9 +80,9 @@ function Desk.new(send: (any)->())
    receiptDrag={input=input,start=pointer(input),position=receipt.AbsolutePosition};movedReceipt=true
   end
  end)
- local body=scroll(receipt);body.Name="ReceiptLines";body.Position=UDim2.fromOffset(0,48);body.Size=UDim2.new(1,0,1,-173)
- make("Frame",{Name="ReceiptDivider",Position=UDim2.new(0,10,1,-116),Size=UDim2.new(1,-20,0,1),BackgroundColor3=P.line,BorderSizePixel=0},receipt)
- local total=text(receipt,"TOTAL 0 CR",UDim2.new(0,14,1,-108),UDim2.new(1,-28,0,28),18,P.ink);total.TextXAlignment=Enum.TextXAlignment.Right
+ local body=scroll(receipt);body.Name="ReceiptLines";body.Position=UDim2.fromOffset(0,48);body.Size=UDim2.new(1,0,1,-209)
+ make("Frame",{Name="ReceiptDivider",Position=UDim2.new(0,10,1,-153),Size=UDim2.new(1,-20,0,1),BackgroundColor3=P.line,BorderSizePixel=0},receipt)
+ local total=text(receipt,"TOTAL 0 CR",UDim2.new(0,14,1,-145),UDim2.new(1,-28,0,28),18,P.ink);total.TextXAlignment=Enum.TextXAlignment.Right
  local status=text(root,"",UDim2.new(0.25,0,1,-24),UDim2.new(0.73,0,0,22),12,P.gold)
  local tooltip=panel(root,"ItemTooltip");tooltip.Visible=false;tooltip.Active=false;tooltip.ZIndex=60;tooltip.Size=UDim2.fromOffset(276,158)
  make("Frame",{Name="TooltipAccent",Position=UDim2.fromOffset(0,0),Size=UDim2.new(0,4,1,0),BackgroundColor3=P.teal,BorderSizePixel=0,ZIndex=61},tooltip)
@@ -125,11 +125,10 @@ function Desk.new(send: (any)->())
   end
   if not current then return end
   local def=Items.Definitions[current.kind];local q=Tags.Qualities[current.qualityTag or Tags.DefaultQuality]
-  local market=if current.marketCondition=="bulk" then "Bulk -"..tostring(current.marketPercent or 5).."%" else "Retail +15%"
   local crime=Tags.Criminality[current.criminality or "none"].name
   tipTitle.Text=def.name
   tipPrice.Text=tostring(price or current.marketPrice or current.value or current.paid).." CR"
-  tipText.Text=Tags.Categories[def.tagCategory].name.."  •  "..q.name.."\n"..market.."  •  "..crime
+  tipText.Text=Tags.Categories[def.tagCategory].name.."  •  "..q.name.."\n"..crime
   local tx=math.clamp(x+16,0,math.max(0,root.AbsoluteSize.X-280))
   local ty=math.clamp(y+18,0,math.max(0,root.AbsoluteSize.Y-162))
   tooltip.Position=UDim2.fromOffset(tx,math.max(0,ty-8))
@@ -155,15 +154,21 @@ function Desk.new(send: (any)->())
  local registerButton=button(register.root,"REGISTER",UDim2.new(),UDim2.fromScale(1,1),function()
   if drag then return end
   receipt.Visible=true;tooltip.Visible=false;render()
- end);registerButton.Name="RegisterButton";registerButton.BackgroundColor3=P.panel;registerButton.TextColor3=P.teal;registerButton.TextSize=30
+ end);registerButton.Name="RegisterButton";registerButton.Text="";registerButton.BackgroundTransparency=1
  local outline=make("Highlight",{Name="RegisterOutline",Enabled=false,FillTransparency=1,OutlineTransparency=0,OutlineColor=P.teal,DepthMode=Enum.HighlightDepthMode.Occluded},workspace)
  registerButton.MouseEnter:Connect(function() outline.Enabled=true end)
  registerButton.MouseLeave:Connect(function() outline.Enabled=false end)
+ local nextSurface=surface("next",320,100)
+ local nextButton=button(nextSurface.root,"",UDim2.new(),UDim2.fromScale(1,1),function() cancel();request("NextCustomer") end)
+ nextButton.Name="CallCustomerButton";nextButton.BackgroundTransparency=1
+ local nextOutline=make("Highlight",{Name="NextCustomerOutline",Enabled=false,FillTransparency=1,OutlineTransparency=0,OutlineColor=P.teal,DepthMode=Enum.HighlightDepthMode.Occluded},workspace)
+ nextButton.MouseEnter:Connect(function() nextOutline.Enabled=true end)
+ nextButton.MouseLeave:Connect(function() nextOutline.Enabled=false end)
  local function bindStage(name: string?)
   if mountedStage==name then return end
   mountedStage=name;mountEpoch+=1;local epoch=mountEpoch
   for _,layer in pairs(surfaces) do layer.part=nil;layer.gui.Adornee=nil;layer.gui.Enabled=false end
-  outline.Enabled=false;outline.Adornee=nil
+  outline.Enabled=false;outline.Adornee=nil;nextOutline.Enabled=false;nextOutline.Adornee=nil
   local function attempt()
    if epoch~=mountEpoch then return end
    local stage=if name then workspace:FindFirstChild(name) else nil
@@ -171,7 +176,7 @@ function Desk.new(send: (any)->())
    for key,partName in pairs({inventory="InventoryBoard",basket="BuyBoard",offers="VisitorBoard",register="RegisterBox",next="NextCustomerButton"}) do
     local part=if stage then stage:FindFirstChild(partName,true) else nil
     local layer=surfaces[key];layer.part=part;layer.gui.Adornee=part;layer.gui.Enabled=part~=nil
-    if key=="register" then outline.Adornee=part end
+    if key=="register" then outline.Adornee=part elseif key=="next" then nextOutline.Adornee=part end
     if not part then complete=false end
    end
    if not complete then task.delay(0.25,attempt) end
@@ -187,11 +192,12 @@ function Desk.new(send: (any)->())
   if c.quote then request(if c.mode=="Buyer" then "ConfirmSale" else "ConfirmPurchase",{customerId=c.id,quoteId=c.quote.id})
   else request(if c.mode=="Buyer" then "ReviewSale" else "ReviewPurchase",{customerId=c.id}) end
  end);buy.Name="BuyButton";make("UICorner",{CornerRadius=UDim.new(0,5)},buy)
+ local bulk=button(receipt,"BUY BULK",UDim2.new(0,12,1,-112),UDim2.new(1,-24,0,34),function()
+  local c=self.state and self.state.customer
+  if c and c.mode=="Seller" and c.bulkPercent and c.state=="Interact" then request("BuyBulk",{customerId=c.id}) end
+ end);bulk.Name="BuyBulkButton";bulk.Visible=false;bulk.BackgroundColor3=P.gold;make("UICorner",{CornerRadius=UDim.new(0,5)},bulk)
  local clearButton=button(receipt,"CLEAR",UDim2.new(0,12,1,-36),UDim2.new(1,-24,0,26),function() local c=self.state and self.state.customer;if c then request("ClearBasket",{customerId=c.id}) end end)
  clearButton.BackgroundColor3=P.raised;clearButton.TextColor3=P.muted;make("UICorner",{CornerRadius=UDim.new(0,5)},clearButton)
- local nextSurface=surface("next",320,100)
- local nextButton=button(nextSurface.root,"NEXT CUSTOMER",UDim2.new(),UDim2.fromScale(1,1),function() cancel();request("NextCustomer") end)
- nextButton.Name="CallCustomerButton";nextButton.TextSize=24
  local function rotate()
   if drag then
    local _,_,h=Grid.cells(drag.item.kind,drag.rotation)
@@ -336,6 +342,11 @@ for _,item in ipairs(c.basket) do staged[item.id]=true;table.insert(basket,item)
   local q=c and c.quote
   total.Text=(if c and c.mode=="Buyer" then "RECEIVE " else "TOTAL ")..tostring(if q then q.total else 0).." CR"
   buy.Text=(if c and c.mode=="Buyer" then "SELL" else "BUY")..(if q then " / "..q.total.." CR" else "")
+  bulk.Visible=c~=nil and c.mode=="Seller" and c.bulkPercent~=nil and c.state=="Interact"
+  if bulk.Visible then
+   bulk.Text="BUY BULK / "..c.bulkOriginal.." → "..c.bulkPrice.." CR (-"..c.bulkPercent.."%)"
+   if not q then rowText(body,"BULK OFFER / "..#c.goods.." ITEMS",P.gold) end
+  end
   if q then
    for index,line in ipairs(q.lines) do receiptLine(body,line.name,line.price,index) end
    if not q.affordable then rowText(body,"Insufficient funds",P.red) end

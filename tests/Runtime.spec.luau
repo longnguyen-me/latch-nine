@@ -78,7 +78,7 @@ check(snapshots[1].origin.X~=snapshots[2].origin.X,"each player has a separate s
 advance(4.1)
 local s=snapshots[1];local visitor=s.customer;local first=visitor.goods[1]
 check(visitor.mode=="Seller" and visitor.state=="Interact" and #visitor.goods>=4 and #visitor.goods<=10,"empty shops receive a seller carrying a random supply")
-local distribution={};for _,entry in ipairs(visitor.goods) do distribution[entry.item.kind]=(distribution[entry.item.kind] or 0)+1;check(entry.item.rarity==nil and entry.item.marketCondition~=nil and entry.item.criminality~=nil,"public item shows market/crime tags but hides rarity") end
+local distribution={};for _,entry in ipairs(visitor.goods) do distribution[entry.item.kind]=(distribution[entry.item.kind] or 0)+1;check(entry.item.rarity==nil and entry.item.marketCondition==nil and entry.item.criminality~=nil,"ore has no market tag and hides rarity") end
 for _,n in pairs(distribution) do check(n<10,"seller carries fewer than ten of the same ore") end
 check(visitor.dialogue:find("Looking to sell")~=nil,"seller intent is included in the public dialogue")
 local bypass=request(a,"Buy",{id=first.item.id})

@@ -6,7 +6,9 @@ The bottom 15×7 physical SurfaceGui is your stock. A seller's ores appear on th
 
 Click the physical **REGISTER** box to open the movable receipt and confirm the itemized transaction. The receipt does not open when staging. Hovering the box outlines it. The physical **NEXT CUSTOMER** button calls another visitor. Credits appear on the wall terminal. Numbered grid title bars and the old guide, expansion and label editor are absent.
 
-The active catalog is mixed ore, cobalt, titanium, lapis, volcanic rock, amethyst, topaz, diamond, sapphire, obsidian, emerald, ruby, cuprite, uranium and mythril. Basic, quality, market, criminality and hidden rarity tags are described in `TAG_CONFIG.md`.
+The active catalog is mixed ore, cobalt, titanium, lapis, volcanic rock, amethyst, topaz, diamond, sapphire, obsidian, emerald, ruby, cuprite, uranium and mythril. Basic, quality, criminality and hidden rarity tags are described in `TAG_CONFIG.md`.
+
+Rare bulk sellers offer 5–15% off the whole remaining haul. The receipt shows both original and bulk prices. The physical register and next-customer controls have no text and outline on hover.
 
 In Studio Edit mode, move or decorate `Workspace → ShopTemplate` and save the place. Runtime clones preserve those changes. `SHOP_CUSTOMIZATION.md` describes the named interactive parts and source rebuild limits.
 
@@ -16,4 +18,4 @@ The project root is the folder containing `default.project.json`. From that fold
 
 After this project is pushed to GitHub, use `git pull` in this folder to receive future commits. Keep your Studio place saved separately when changing physical shop furniture.
 
-Studio uses session-only data by default; published servers use the cloud save code. Existing version 5 stock and legacy migrations remain supported. The receipt uses separate item rows and a fixed checkout area; item hover cards show a title, divider, price and tags. The project includes editable Luau sources, tests, build tools and the native `.rbxlx` place. All 17 scripts compile and 231 local checks pass. Actual Studio input, rendering, cloud saves and device performance still need a live playtest.
+Studio uses session-only data by default; published servers use the cloud save code. Existing version 5 stock and legacy migrations remain supported. The receipt uses separate item rows and a fixed checkout area; item hover cards show a title, divider, price and tags. The project includes editable Luau sources, tests, build tools and the native `.rbxlx` place. All 17 scripts compile and 238 local checks pass. Actual Studio input, rendering, cloud saves and device performance still need a live playtest.

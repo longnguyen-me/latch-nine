@@ -29,7 +29,7 @@ local slots: {[number]: boolean} = {}
 local closing = false
 local rng = Random.new()
 local function publicItem(item: any): any
- local out: any = {marketCondition=item.marketCondition,marketPercent=item.marketPercent,criminality=item.criminality or "none",id=item.id,kind=item.kind,inspected=item.inspected,paid=item.paid,gridX=item.gridX,gridY=item.gridY,rotation=item.rotation,qualityTag=item.qualityTag or Tags.DefaultQuality,categoryTag=Items.Definitions[item.kind].tagCategory,marketPrice=Rules.value(item)}
+ local out: any = {criminality=item.criminality or "none",id=item.id,kind=item.kind,inspected=item.inspected,paid=item.paid,gridX=item.gridX,gridY=item.gridY,rotation=item.rotation,qualityTag=item.qualityTag or Tags.DefaultQuality,categoryTag=Items.Definitions[item.kind].tagCategory,marketPrice=Rules.value(item)}
  if item.inspected then
   out.condition=item.condition; out.authentic=item.authentic
   out.restricted=item.restricted; out.value=Rules.value(item)
@@ -37,9 +37,8 @@ local function publicItem(item: any): any
  return out
 end
 local function makeOffer(kind: string,p: any): any
- local market=if rng:NextNumber()<0.25 then "bulk" else "retailer"
  local qualityRoll=rng:NextInteger(1,100)
- local item={id=Http:GenerateGUID(false),kind=kind,rarity=Items.Definitions[kind].rarity,marketCondition=market,marketPercent=if market=="bulk" then rng:NextInteger(5,15) else Tags.MarketConditions.retailer.percent,
+ local item={id=Http:GenerateGUID(false),kind=kind,rarity=Items.Definitions[kind].rarity,
   criminality=if kind=="uranium" then "mid" elseif kind=="mythril" then "high" elseif rng:NextNumber()<0.08 then "low" else "none",paid=0,qualityTag=Tags.QualityOrder[if qualityRoll<=20 then 1 elseif qualityRoll>80 then 3 else 2],condition=rng:NextInteger(65,100),
   authentic=rng:NextNumber()>0.17,restricted=kind=="chip" and rng:NextNumber()<0.35,inspected=false}
  local price=math.max(8,math.floor(Rules.value(item)*0.58))
@@ -81,7 +80,10 @@ local function push(player: Player,message: string?, moveAck: number?, moveOk: b
    for _,line in ipairs(q.lines) do table.insert(lines,{id=line.id,kind=line.kind,name=line.name,price=line.price,basePrice=line.basePrice}) end
    quote={id=q.id,mode=q.mode,lines=lines,subtotal=q.subtotal,discount=q.discount,total=q.total,count=q.count,affordable=q.mode=="Sale" or s.profile.cash>=q.total}
   end
+  local bulkOriginal,bulkPrice=0,0
+  if c.bulkPercent then for _,entry in ipairs(c.goods) do bulkOriginal+=entry.price;bulkPrice+=math.max(1,math.floor(entry.price*(100-c.bulkPercent)/100)) end end
   customer={id=c.id,name=c.name,personality=c.personality,faction=c.faction,kind=c.kind,itemId=c.itemId,requestTag=c.requestTag,
+   bulkPercent=c.bulkPercent,bulkOriginal=bulkOriginal,bulkPrice=bulkPrice,
    mode=c.mode,goods=goods,basket=basket,basketRevision=c.basketRevision,quote=quote,
    dialogue=c.dialogue,offer=c.offer,patience=c.patience,state=c.state,color=c.color,deadline=c.deadline}
  end
@@ -113,6 +115,10 @@ schedule=function(player: Player)
   s.pendingArrival=false
   if s.customer then push(player); return end
   local c=Customers.create(s.profile,Rules,rng)
+  if c.mode=="Seller" and rng:NextNumber()<Tags.BulkSellerChance then
+   c.bulkPercent=rng:NextInteger(Tags.BulkDiscountMin,Tags.BulkDiscountMax)
+   c.dialogue="I brought a planetary mineral haul. Buy the whole batch and I'll take "..c.bulkPercent.."% off."
+  end
   local display={inventory={},upgrade=0,legacyRows=0}
   local repeats: {[string]: number}={}
   local supplyCount=if c.mode=="Seller" then rng:NextInteger(4,10) else 0
@@ -201,12 +207,13 @@ action.OnServerEvent:Connect(function(player: Player,request: any)
   else ok,message=Trade.unstageStock(c,request.id,request.revision) end
   if ok and #c.basket>0 then ok,message=if c.mode=="Buyer" then Trade.reviewSale(s.profile,c,Http:GenerateGUID(false)) else Trade.review(s.profile,c,Http:GenerateGUID(false)) end
   push(player,message,request.moveId,ok);return
- elseif name=="ClearBasket" or name=="ReviewPurchase" or name=="ConfirmPurchase" or name=="ReviewSale" or name=="ConfirmSale" then
+ elseif name=="ClearBasket" or name=="ReviewPurchase" or name=="ConfirmPurchase" or name=="BuyBulk" or name=="ReviewSale" or name=="ConfirmSale" then
   local c=matchingCustomer(s,request)
   if not c then push(player,"That visitor is no longer trading.");return end
   local ok,message
   if name=="ClearBasket" then ok,message=Trade.clear(c)
   elseif name=="ReviewPurchase" then ok,message=Trade.review(s.profile,c,Http:GenerateGUID(false))
+  elseif name=="BuyBulk" then ok,message=Trade.buyBulk(s.profile,c,Http:GenerateGUID(false));if ok then leave(player,message,"The whole haul is yours.");return end
   elseif name=="ReviewSale" then ok,message=Trade.reviewSale(s.profile,c,Http:GenerateGUID(false))
   elseif name=="ConfirmSale" then ok,message=Trade.confirmSale(s.profile,c,request.quoteId);if ok then leave(player,message,"I'll take these ores. Pleasure trading.");return end
   else ok,message=Trade.confirm(s.profile,c,request.quoteId);if ok then leave(player,message,"Deal. These goods are yours.");return end end

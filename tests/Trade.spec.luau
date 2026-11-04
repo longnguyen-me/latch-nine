@@ -23,6 +23,20 @@ test("three grids support an itemized atomic batch purchase",function()
  assert(c.quote.count==3 and c.quote.subtotal==121 and c.quote.total==121 and #c.quote.lines==3)
  assert(T.confirm(p,c,"quote1"));assert(p.cash==39 and p.costs==121 and #p.inventory==3 and #c.goods==0 and #c.basket==0 and R.validate(p))
 end)
+test("rare bulk seller offers entire batch at one customer discount",function()
+ local p=R.newProfile();local c=visitor();c.mode="Seller";c.bulkPercent=10
+ assert(T.buyBulk(p,c,"bulk-1"))
+ assert(p.cash==52 and p.costs==108 and #p.inventory==3 and #c.goods==0 and R.validate(p))
+ assert(not T.confirm(p,c,"bulk-1") and not T.buyBulk(p,c,"bulk-1"))
+end)
+test("bulk checkout rejects insufficient cash or storage without partial transfer",function()
+ local p=R.newProfile();p.cash=1;local c=visitor();c.mode="Seller";c.bulkPercent=15
+ assert(not T.buyBulk(p,c,"bulk-2") and p.cash==1 and #p.inventory==0 and #c.goods==3)
+ p.cash=1000
+ for i=1,10 do assert(R.purchase(p,item("owned"..i,"filter"),24)) end
+ local before=p.cash
+ assert(not T.buyBulk(p,c,"bulk-3") and p.cash==before and #c.goods==3)
+end)
 test("replayed confirmations cannot duplicate stock or spend twice",function()
  local p=R.newProfile();local c=visitor();all(c);T.review(p,c,"q");assert(T.confirm(p,c,"q"));local cash=p.cash
  assert(not T.confirm(p,c,"q"));assert(p.cash==cash and #p.inventory==3)

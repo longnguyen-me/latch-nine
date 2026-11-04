@@ -41,7 +41,7 @@ return function(config: any, definitions: any, grid: any, tags: any)
 		if not validGrid(p, 5) then return false end
 		for _, item in ipairs(p.inventory) do
 			if type((item :: any).qualityTag) ~= "string" or not tags.Qualities[(item :: any).qualityTag] then return false end
-			if item.marketCondition~=nil and not tags.MarketConditions[item.marketCondition] then return false end
+			if item.marketCondition~=nil and not tags.LegacyMarketConditions[item.marketCondition] then return false end
 			if item.marketCondition=="bulk" and not integer(item.marketPercent,5,15) then return false end
 			if item.criminality~=nil and not tags.Criminality[item.criminality] then return false end
 			if item.rarity~=nil and not tags.RarityWeights[item.rarity] then return false end
@@ -99,8 +99,6 @@ return function(config: any, definitions: any, grid: any, tags: any)
 		if not item.authentic then value *= 0.58 end
 		if item.restricted then value *= 1.15 end
 		value *= tags.Qualities[item.qualityTag or tags.DefaultQuality].multiplier
-		if item.marketCondition=="retailer" then value*=1+tags.MarketConditions.retailer.percent/100
-		elseif item.marketCondition=="bulk" then value*=1-(item.marketPercent or 5)/100 end
 		value *= tags.Criminality[item.criminality or "none"].multiplier
 		return math.max(1, math.floor(value + 0.5))
 	end

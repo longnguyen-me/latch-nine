@@ -4,7 +4,9 @@
 local Tags = {
  BuyerCategories={"ore","metal","gem","volcanic","radioactive","exotic"},
  RarityWeights={common=55,uncommon=26,rare=10,legendary=2},
- MarketConditions={retailer={name="Retailer markup",percent=15},bulk={name="Bulk buy"}},
+ LegacyMarketConditions={retailer=true,bulk=true},
+ BulkSellerChance=0.10,
+ BulkDiscountMin=5,BulkDiscountMax=15,
  Criminality={none={name="Legal",multiplier=1},low={name="Low contraband",multiplier=1.05},mid={name="Mid contraband",multiplier=1.12},high={name="High contraband",multiplier=1.25}},
  DefaultQuality = "standard",
  QualityOrder = {"low", "standard", "high"},

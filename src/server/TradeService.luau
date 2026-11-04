@@ -60,6 +60,34 @@ return function(config: any, definitions: any, rules: any, inventoryGrid: any, t
    lines=lines,subtotal=subtotal,discount=subtotal-total,total=total,count=#lines,plan=plan.inventory}
   return true,"Purchase review."
  end
+ function Trade.reviewBulk(profile: any,customer: any,quoteId: string): (boolean,string)
+  if not customer or customer.mode~="Seller" or customer.state~="Interact" or not customer.bulkPercent or #customer.goods==0 then return false,"No bulk offer." end
+  local discount=customer.bulkPercent
+  if not rules.integer(discount,5,15) then return false,"Invalid bulk offer." end
+  local plan={inventory=clone(profile.inventory),upgrade=profile.upgrade,legacyRows=profile.legacyRows}
+  local lines={};local subtotal,total=0,0
+  for _,raw in ipairs(customer.goods) do
+   local entry: any=raw
+   local item=clone(entry.item);item.qualityTag=item.qualityTag or rules.DefaultQuality
+   local x,y,rotation=inventoryGrid.firstFit(plan,item.kind)
+   if x==nil then customer.quote=nil;return false,"Insufficient storage space for the entire batch." end
+   local price=math.max(1,math.floor(entry.price*(100-discount)/100))
+   item.gridX=x;item.gridY=y;item.rotation=rotation;item.paid=price
+   table.insert(plan.inventory,item)
+   table.insert(lines,{id=item.id,kind=item.kind,name=definitions[item.kind].name,basePrice=entry.price,price=price,item=item})
+   subtotal+=entry.price;total+=price
+  end
+  customer.quote={id=quoteId,mode="Bulk",basketRevision=customer.basketRevision,gridRevision=profile.gridRevision,
+   lines=lines,subtotal=subtotal,discount=subtotal-total,total=total,count=#lines,plan=plan.inventory}
+  return true,"Whole batch review."
+ end
+ function Trade.buyBulk(profile: any,customer: any,quoteId: string): (boolean,string)
+  local ok,message=Trade.reviewBulk(profile,customer,quoteId)
+  if not ok then return false,message end
+  local bought,reason=Trade.confirm(profile,customer,quoteId)
+  if not bought then customer.quote=nil end
+  return bought,reason
+ end
  function Trade.confirm(profile: any,customer: any,quoteId: any): (boolean,string)
   if not customer or customer.mode=="Buyer" or customer.state~="Interact" then return false,"The visitor has left." end
   local q=customer.quote

@@ -6,7 +6,7 @@
 | --- | --- |
 | Shared / Config | Economy, timers, grid sizes and persistence settings |
 | Shared / Items | Ore definitions, shape masks, fixed Basic category and hidden rarity IDs |
-| Shared / ItemTags | Configurable Basic/quality/market/criminality tags and rarity spawn weights |
+| Shared / ItemTags | Configurable Basic/quality/criminality tags, rare bulk seller chance and rarity spawn weights |
 | Shared / Grid | Pure shape rotation, packing, collision and validation |
 | Shared / GridSnap | Fractional grab anchors, nearest-cell projection and click/touch thresholds |
 | Shared / Scene | Original booth geometry, local visitor art and physical cash SurfaceGui |
@@ -47,17 +47,19 @@ Quality affects server valuation, which feeds sales and negotiation. An item ret
 
 Visitor goods occupy a separate 12 x 5 offer grid. Sellers draw 4–10 ore units with weighted rarity and at most nine units per kind, subject to fitting the offer tray. StageOffer and UnstageOffer only change the temporary purchase selection. The server reviews line prices and a packing plan. ConfirmPurchase verifies the token, visitor/deadline, basket and inventory revisions, stock identity, funds and geometry before committing the entire purchase. Replays cannot duplicate stock. Inspection metadata changed after quoting is preserved. Completing or cancelling a visit clears unpurchased selections.
 
+A rare bulk seller offers a customer-level discount of 5–15% on every remaining offered unit. BuyBulk packs the whole haul into storage and commits one server-priced transaction; lack of credits or fitting space rejects the entire purchase. Item-level market fields from older saves are ignored in valuation and hidden from the client.
+
 For buyers, the same middle tray receives owned inventory through StageStock and UnstageStock. Only Basic category matches and fitting footprints are staged. ReviewSale quotes each owned unit and checks the buyer's budget. ConfirmSale verifies the token, selections, prices and inventory revisions, then removes all quoted stock and pays the shop atomically. Replays cannot pay twice.
 
 ## Category buyers
 
-Alternating visitors are buyers or sellers. Buyers select a Basic requestTag from ItemTags.BuyerCategories independently of owned stock. They can request an out-of-stock category. A matching owned item is an optional convenience selection; it does not determine the request. Sellers bring merchandise; buyers carry no goods. Public dialogue describes the intent and requested category. Rules.matches is shared by negotiation and sale validation. Client prices, categories and multipliers are not trusted. The receipt shows the staged sale quote and the nameplate displays the requested category. Quality, market and criminality affect server value.
+Alternating visitors are buyers or sellers. Buyers select a Basic requestTag from ItemTags.BuyerCategories independently of owned stock. They can request an out-of-stock category. A matching owned item is an optional convenience selection; it does not determine the request. Sellers bring merchandise; buyers carry no goods. Public dialogue describes the intent and requested category. Rules.matches is shared by negotiation and sale validation. Client prices, categories and multipliers are not trusted. The receipt shows the staged sale quote and the nameplate displays the requested category. Quality and criminality affect server value.
 
 ## Receipt and hover details
 
 The earlier dark palette is restored. The receipt starts hidden and only RegisterButton activation opens it. A client-only workspace Highlight outlines RegisterBox on hover and clears on exit. A mouse/touch title-bar drag moves the receipt and clamps it inside the viewport. Other fingers cannot hijack that drag. X, Escape or visitor departure closes it. Resize preserves the moved position where possible.
 
-The receipt scroll body ends above the fixed total, Buy and Clear controls. There is no full-screen modal. The movable receipt can overlap a grid, but its covered rectangle rejects item input. Buy reads the latest server quote token when activated. Each occupied cell has a transparent hit button above its text and badge. Decorations and the hover popup are passive. MouseEnter resolves the current snapshot item by ID and displays price and tags; MouseLeave hides it immediately. Public market prices are available without revealing hidden condition data.
+The receipt scroll body ends above the fixed total, Buy, optional Buy Bulk, and Clear controls. There is no full-screen modal. The movable receipt can overlap a grid, but its covered rectangle rejects item input. Buy reads the latest server quote token when activated. Each occupied cell has a transparent hit button above its text and badge. Decorations and the hover popup are passive. MouseEnter resolves the current snapshot item by ID and displays price and tags; MouseLeave hides it immediately. Public item prices are available without revealing hidden condition data.
 
 ## Cash display
 

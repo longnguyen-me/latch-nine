@@ -74,7 +74,7 @@ local function customer(prefix)
  return {id=prefix,name="Mara Venn",faction="Dock Union",personality="Patient",patience=4,state="Interact",mode="Seller",basket={},basketRevision=0,
   goods={{item=item(prefix.."f","filter",0,0),price=24},{item=item(prefix.."s","servo",3,0),price=39},{item=item(prefix.."c","chip",6,0),price=58}}}
 end
-local c=customer("visitor1")
+local c=customer("visitor1");c.bulkPercent=10;c.bulkOriginal=121;c.bulkPrice=108
 local playerGui=Instance.new("PlayerGui")
 local Input={InputChanged=signal(),InputEnded=signal(),InputBegan=signal(),WindowFocusReleased=signal(),GetFocusedTextBox=function() return nil end,GetMouseLocation=function() return cursor end}
 local services={Players={LocalPlayer={WaitForChild=function() return playerGui end}},UserInputService=Input,
@@ -144,11 +144,16 @@ end
 desk.render(snapshot())
 check(widget("offers").Parent.Parent.Adornee==boards.VisitorBoard and widget("basket").Parent.Parent.Adornee==boards.BuyBoard and widget("inventory").Parent.Parent.Adornee==boards.InventoryBoard,"three grids bind to their physical surfaces")
 check(named("GridBoard",widget("inventory")).AbsolutePosition.X~=named("GridBoard",widget("inventory")).Position.X.Offset,"test supplies non-canvas absolute positions to surface objects")
-check(button("NEXT CUSTOMER").Parent==named("nextSurface").children[1] and named("nextSurface").Adornee==boards.NextCustomerButton,"Next Customer is mounted on the physical button")
+check(named("CallCustomerButton").Parent==named("nextSurface").children[1] and named("nextSurface").Adornee==boards.NextCustomerButton,"Next Customer is mounted on the physical button")
 check(not named("Receipt").Visible,"receipt starts hidden")
+check(named("BuyBulkButton").Visible and named("BuyBulkButton").Text:find("121") and named("BuyBulkButton").Text:find("108"),"bulk receipt shows original and whole-batch discounted prices")
+named("BuyBulkButton").Activated:Fire();check(requests[#requests].action=="BuyBulk","bulk receipt requests server-priced whole-batch checkout")
 local reg=named("RegisterButton")
 reg.MouseEnter:Fire();check(named("RegisterOutline").Enabled and named("RegisterOutline").Adornee==boards.RegisterBox,"hover outlines the physical register")
 reg.MouseLeave:Fire();check(not named("RegisterOutline").Enabled,"register outline clears on hover exit")
+check(reg.Text=="" and named("CallCustomerButton").Text=="","physical controls show only their outline")
+named("CallCustomerButton").MouseEnter:Fire();check(named("NextCustomerOutline").Enabled and named("NextCustomerOutline").Adornee==boards.NextCustomerButton,"next customer outlines on hover")
+named("CallCustomerButton").MouseLeave:Fire();check(not named("NextCustomerOutline").Enabled,"next customer outline clears")
 reg.Activated:Fire();check(named("Receipt").Visible,"register click opens the receipt")
 local receipt=named("Receipt");local handle=named("ReceiptHandle");local old=receipt.AbsolutePosition
 handle.InputBegan:Fire(mouse({X=old.X+10,Y=old.Y+10,Z=0}));move({X=old.X+110,Y=old.Y+50,Z=0});release({X=old.X+110,Y=old.Y+50,Z=0})
@@ -171,7 +176,7 @@ unit("offers",c.goods[1].item.id).MouseLeave:Fire(801,160)
 check(not named("ItemTooltip").Visible,"hover details disappear immediately on leave")
 local buy=named("BuyButton");local lines=named("ReceiptLines")
 check(lines.AbsolutePosition.Y+lines.AbsoluteSize.Y<=buy.AbsolutePosition.Y,"scrolling receipt text cannot cover purchase button")
-button("NEXT CUSTOMER").Activated:Fire();check(requests[#requests].action=="NextCustomer","next customer button is connected")
+named("CallCustomerButton").Activated:Fire();check(requests[#requests].action=="NextCustomer","next customer button is connected")
 check(not find(function(o) return o.ClassName=="TextLabel" and type(o.Text)=="string" and (o.Text:find("Drag ") or o.Text:find("Press ") or o.Text:find("Top:")) end),"instructional guide text is absent")
 check(not find(function(o) return o.ClassName=="TextLabel" and type(o.Text)=="string" and (o.Text:find("160 cr") or o.Text:find("CASH")) end),"balance is not drawn in the screen HUD")
 local start=point("offers",0,0);local before=0

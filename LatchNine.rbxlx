@@ -167,7 +167,9 @@ return table.freeze(Snap)
 local Tags = {
  BuyerCategories={"ore","metal","gem","volcanic","radioactive","exotic"},
  RarityWeights={common=55,uncommon=26,rare=10,legendary=2},
- MarketConditions={retailer={name="Retailer markup",percent=15},bulk={name="Bulk buy"}},
+ LegacyMarketConditions={retailer=true,bulk=true},
+ BulkSellerChance=0.10,
+ BulkDiscountMin=5,BulkDiscountMax=15,
  Criminality={none={name="Legal",multiplier=1},low={name="Low contraband",multiplier=1.05},mid={name="Mid contraband",multiplier=1.12},high={name="High contraband",multiplier=1.25}},
  DefaultQuality = "standard",
  QualityOrder = {"low", "standard", "high"},
@@ -474,7 +476,7 @@ local slots: {[number]: boolean} = {}
 local closing = false
 local rng = Random.new()
 local function publicItem(item: any): any
- local out: any = {marketCondition=item.marketCondition,marketPercent=item.marketPercent,criminality=item.criminality or "none",id=item.id,kind=item.kind,inspected=item.inspected,paid=item.paid,gridX=item.gridX,gridY=item.gridY,rotation=item.rotation,qualityTag=item.qualityTag or Tags.DefaultQuality,categoryTag=Items.Definitions[item.kind].tagCategory,marketPrice=Rules.value(item)}
+ local out: any = {criminality=item.criminality or "none",id=item.id,kind=item.kind,inspected=item.inspected,paid=item.paid,gridX=item.gridX,gridY=item.gridY,rotation=item.rotation,qualityTag=item.qualityTag or Tags.DefaultQuality,categoryTag=Items.Definitions[item.kind].tagCategory,marketPrice=Rules.value(item)}
  if item.inspected then
   out.condition=item.condition; out.authentic=item.authentic
   out.restricted=item.restricted; out.value=Rules.value(item)
@@ -482,9 +484,8 @@ local function publicItem(item: any): any
  return out
 end
 local function makeOffer(kind: string,p: any): any
- local market=if rng:NextNumber()<0.25 then "bulk" else "retailer"
  local qualityRoll=rng:NextInteger(1,100)
- local item={id=Http:GenerateGUID(false),kind=kind,rarity=Items.Definitions[kind].rarity,marketCondition=market,marketPercent=if market=="bulk" then rng:NextInteger(5,15) else Tags.MarketConditions.retailer.percent,
+ local item={id=Http:GenerateGUID(false),kind=kind,rarity=Items.Definitions[kind].rarity,
   criminality=if kind=="uranium" then "mid" elseif kind=="mythril" then "high" elseif rng:NextNumber()<0.08 then "low" else "none",paid=0,qualityTag=Tags.QualityOrder[if qualityRoll<=20 then 1 elseif qualityRoll>80 then 3 else 2],condition=rng:NextInteger(65,100),
   authentic=rng:NextNumber()>0.17,restricted=kind=="chip" and rng:NextNumber()<0.35,inspected=false}
  local price=math.max(8,math.floor(Rules.value(item)*0.58))
@@ -526,7 +527,10 @@ local function push(player: Player,message: string?, moveAck: number?, moveOk: b
    for _,line in ipairs(q.lines) do table.insert(lines,{id=line.id,kind=line.kind,name=line.name,price=line.price,basePrice=line.basePrice}) end
    quote={id=q.id,mode=q.mode,lines=lines,subtotal=q.subtotal,discount=q.discount,total=q.total,count=q.count,affordable=q.mode=="Sale" or s.profile.cash>=q.total}
   end
+  local bulkOriginal,bulkPrice=0,0
+  if c.bulkPercent then for _,entry in ipairs(c.goods) do bulkOriginal+=entry.price;bulkPrice+=math.max(1,math.floor(entry.price*(100-c.bulkPercent)/100)) end end
   customer={id=c.id,name=c.name,personality=c.personality,faction=c.faction,kind=c.kind,itemId=c.itemId,requestTag=c.requestTag,
+   bulkPercent=c.bulkPercent,bulkOriginal=bulkOriginal,bulkPrice=bulkPrice,
    mode=c.mode,goods=goods,basket=basket,basketRevision=c.basketRevision,quote=quote,
    dialogue=c.dialogue,offer=c.offer,patience=c.patience,state=c.state,color=c.color,deadline=c.deadline}
  end
@@ -558,6 +562,10 @@ schedule=function(player: Player)
   s.pendingArrival=false
   if s.customer then push(player); return end
   local c=Customers.create(s.profile,Rules,rng)
+  if c.mode=="Seller" and rng:NextNumber()<Tags.BulkSellerChance then
+   c.bulkPercent=rng:NextInteger(Tags.BulkDiscountMin,Tags.BulkDiscountMax)
+   c.dialogue="I brought a planetary mineral haul. Buy the whole batch and I'll take "..c.bulkPercent.."% off."
+  end
   local display={inventory={},upgrade=0,legacyRows=0}
   local repeats: {[string]: number}={}
   local supplyCount=if c.mode=="Seller" then rng:NextInteger(4,10) else 0
@@ -646,12 +654,13 @@ action.OnServerEvent:Connect(function(player: Player,request: any)
   else ok,message=Trade.unstageStock(c,request.id,request.revision) end
   if ok and #c.basket>0 then ok,message=if c.mode=="Buyer" then Trade.reviewSale(s.profile,c,Http:GenerateGUID(false)) else Trade.review(s.profile,c,Http:GenerateGUID(false)) end
   push(player,message,request.moveId,ok);return
- elseif name=="ClearBasket" or name=="ReviewPurchase" or name=="ConfirmPurchase" or name=="ReviewSale" or name=="ConfirmSale" then
+ elseif name=="ClearBasket" or name=="ReviewPurchase" or name=="ConfirmPurchase" or name=="BuyBulk" or name=="ReviewSale" or name=="ConfirmSale" then
   local c=matchingCustomer(s,request)
   if not c then push(player,"That visitor is no longer trading.");return end
   local ok,message
   if name=="ClearBasket" then ok,message=Trade.clear(c)
   elseif name=="ReviewPurchase" then ok,message=Trade.review(s.profile,c,Http:GenerateGUID(false))
+  elseif name=="BuyBulk" then ok,message=Trade.buyBulk(s.profile,c,Http:GenerateGUID(false));if ok then leave(player,message,"The whole haul is yours.");return end
   elseif name=="ReviewSale" then ok,message=Trade.reviewSale(s.profile,c,Http:GenerateGUID(false))
   elseif name=="ConfirmSale" then ok,message=Trade.confirmSale(s.profile,c,request.quoteId);if ok then leave(player,message,"I'll take these ores. Pleasure trading.");return end
   else ok,message=Trade.confirm(s.profile,c,request.quoteId);if ok then leave(player,message,"Deal. These goods are yours.");return end end
@@ -919,7 +928,7 @@ return function(config: any, definitions: any, grid: any, tags: any)
 		if not validGrid(p, 5) then return false end
 		for _, item in ipairs(p.inventory) do
 			if type((item :: any).qualityTag) ~= "string" or not tags.Qualities[(item :: any).qualityTag] then return false end
-			if item.marketCondition~=nil and not tags.MarketConditions[item.marketCondition] then return false end
+			if item.marketCondition~=nil and not tags.LegacyMarketConditions[item.marketCondition] then return false end
 			if item.marketCondition=="bulk" and not integer(item.marketPercent,5,15) then return false end
 			if item.criminality~=nil and not tags.Criminality[item.criminality] then return false end
 			if item.rarity~=nil and not tags.RarityWeights[item.rarity] then return false end
@@ -977,8 +986,6 @@ return function(config: any, definitions: any, grid: any, tags: any)
 		if not item.authentic then value *= 0.58 end
 		if item.restricted then value *= 1.15 end
 		value *= tags.Qualities[item.qualityTag or tags.DefaultQuality].multiplier
-		if item.marketCondition=="retailer" then value*=1+tags.MarketConditions.retailer.percent/100
-		elseif item.marketCondition=="bulk" then value*=1-(item.marketPercent or 5)/100 end
 		value *= tags.Criminality[item.criminality or "none"].multiplier
 		return math.max(1, math.floor(value + 0.5))
 	end
@@ -1129,6 +1136,34 @@ return function(config: any, definitions: any, rules: any, inventoryGrid: any, t
   customer.quote={id=quoteId,basketRevision=customer.basketRevision,gridRevision=profile.gridRevision,
    lines=lines,subtotal=subtotal,discount=subtotal-total,total=total,count=#lines,plan=plan.inventory}
   return true,"Purchase review."
+ end
+ function Trade.reviewBulk(profile: any,customer: any,quoteId: string): (boolean,string)
+  if not customer or customer.mode~="Seller" or customer.state~="Interact" or not customer.bulkPercent or #customer.goods==0 then return false,"No bulk offer." end
+  local discount=customer.bulkPercent
+  if not rules.integer(discount,5,15) then return false,"Invalid bulk offer." end
+  local plan={inventory=clone(profile.inventory),upgrade=profile.upgrade,legacyRows=profile.legacyRows}
+  local lines={};local subtotal,total=0,0
+  for _,raw in ipairs(customer.goods) do
+   local entry: any=raw
+   local item=clone(entry.item);item.qualityTag=item.qualityTag or rules.DefaultQuality
+   local x,y,rotation=inventoryGrid.firstFit(plan,item.kind)
+   if x==nil then customer.quote=nil;return false,"Insufficient storage space for the entire batch." end
+   local price=math.max(1,math.floor(entry.price*(100-discount)/100))
+   item.gridX=x;item.gridY=y;item.rotation=rotation;item.paid=price
+   table.insert(plan.inventory,item)
+   table.insert(lines,{id=item.id,kind=item.kind,name=definitions[item.kind].name,basePrice=entry.price,price=price,item=item})
+   subtotal+=entry.price;total+=price
+  end
+  customer.quote={id=quoteId,mode="Bulk",basketRevision=customer.basketRevision,gridRevision=profile.gridRevision,
+   lines=lines,subtotal=subtotal,discount=subtotal-total,total=total,count=#lines,plan=plan.inventory}
+  return true,"Whole batch review."
+ end
+ function Trade.buyBulk(profile: any,customer: any,quoteId: string): (boolean,string)
+  local ok,message=Trade.reviewBulk(profile,customer,quoteId)
+  if not ok then return false,message end
+  local bought,reason=Trade.confirm(profile,customer,quoteId)
+  if not bought then customer.quote=nil end
+  return bought,reason
  end
  function Trade.confirm(profile: any,customer: any,quoteId: any): (boolean,string)
   if not customer or customer.mode=="Buyer" or customer.state~="Interact" then return false,"The visitor has left." end
@@ -1356,9 +1391,9 @@ function Desk.new(send: (any)->())
    receiptDrag={input=input,start=pointer(input),position=receipt.AbsolutePosition};movedReceipt=true
   end
  end)
- local body=scroll(receipt);body.Name="ReceiptLines";body.Position=UDim2.fromOffset(0,48);body.Size=UDim2.new(1,0,1,-173)
- make("Frame",{Name="ReceiptDivider",Position=UDim2.new(0,10,1,-116),Size=UDim2.new(1,-20,0,1),BackgroundColor3=P.line,BorderSizePixel=0},receipt)
- local total=text(receipt,"TOTAL 0 CR",UDim2.new(0,14,1,-108),UDim2.new(1,-28,0,28),18,P.ink);total.TextXAlignment=Enum.TextXAlignment.Right
+ local body=scroll(receipt);body.Name="ReceiptLines";body.Position=UDim2.fromOffset(0,48);body.Size=UDim2.new(1,0,1,-209)
+ make("Frame",{Name="ReceiptDivider",Position=UDim2.new(0,10,1,-153),Size=UDim2.new(1,-20,0,1),BackgroundColor3=P.line,BorderSizePixel=0},receipt)
+ local total=text(receipt,"TOTAL 0 CR",UDim2.new(0,14,1,-145),UDim2.new(1,-28,0,28),18,P.ink);total.TextXAlignment=Enum.TextXAlignment.Right
  local status=text(root,"",UDim2.new(0.25,0,1,-24),UDim2.new(0.73,0,0,22),12,P.gold)
  local tooltip=panel(root,"ItemTooltip");tooltip.Visible=false;tooltip.Active=false;tooltip.ZIndex=60;tooltip.Size=UDim2.fromOffset(276,158)
  make("Frame",{Name="TooltipAccent",Position=UDim2.fromOffset(0,0),Size=UDim2.new(0,4,1,0),BackgroundColor3=P.teal,BorderSizePixel=0,ZIndex=61},tooltip)
@@ -1401,11 +1436,10 @@ function Desk.new(send: (any)->())
   end
   if not current then return end
   local def=Items.Definitions[current.kind];local q=Tags.Qualities[current.qualityTag or Tags.DefaultQuality]
-  local market=if current.marketCondition=="bulk" then "Bulk -"..tostring(current.marketPercent or 5).."%" else "Retail +15%"
   local crime=Tags.Criminality[current.criminality or "none"].name
   tipTitle.Text=def.name
   tipPrice.Text=tostring(price or current.marketPrice or current.value or current.paid).." CR"
-  tipText.Text=Tags.Categories[def.tagCategory].name.."  •  "..q.name.."\n"..market.."  •  "..crime
+  tipText.Text=Tags.Categories[def.tagCategory].name.."  •  "..q.name.."\n"..crime
   local tx=math.clamp(x+16,0,math.max(0,root.AbsoluteSize.X-280))
   local ty=math.clamp(y+18,0,math.max(0,root.AbsoluteSize.Y-162))
   tooltip.Position=UDim2.fromOffset(tx,math.max(0,ty-8))
@@ -1431,15 +1465,21 @@ function Desk.new(send: (any)->())
  local registerButton=button(register.root,"REGISTER",UDim2.new(),UDim2.fromScale(1,1),function()
   if drag then return end
   receipt.Visible=true;tooltip.Visible=false;render()
- end);registerButton.Name="RegisterButton";registerButton.BackgroundColor3=P.panel;registerButton.TextColor3=P.teal;registerButton.TextSize=30
+ end);registerButton.Name="RegisterButton";registerButton.Text="";registerButton.BackgroundTransparency=1
  local outline=make("Highlight",{Name="RegisterOutline",Enabled=false,FillTransparency=1,OutlineTransparency=0,OutlineColor=P.teal,DepthMode=Enum.HighlightDepthMode.Occluded},workspace)
  registerButton.MouseEnter:Connect(function() outline.Enabled=true end)
  registerButton.MouseLeave:Connect(function() outline.Enabled=false end)
+ local nextSurface=surface("next",320,100)
+ local nextButton=button(nextSurface.root,"",UDim2.new(),UDim2.fromScale(1,1),function() cancel();request("NextCustomer") end)
+ nextButton.Name="CallCustomerButton";nextButton.BackgroundTransparency=1
+ local nextOutline=make("Highlight",{Name="NextCustomerOutline",Enabled=false,FillTransparency=1,OutlineTransparency=0,OutlineColor=P.teal,DepthMode=Enum.HighlightDepthMode.Occluded},workspace)
+ nextButton.MouseEnter:Connect(function() nextOutline.Enabled=true end)
+ nextButton.MouseLeave:Connect(function() nextOutline.Enabled=false end)
  local function bindStage(name: string?)
   if mountedStage==name then return end
   mountedStage=name;mountEpoch+=1;local epoch=mountEpoch
   for _,layer in pairs(surfaces) do layer.part=nil;layer.gui.Adornee=nil;layer.gui.Enabled=false end
-  outline.Enabled=false;outline.Adornee=nil
+  outline.Enabled=false;outline.Adornee=nil;nextOutline.Enabled=false;nextOutline.Adornee=nil
   local function attempt()
    if epoch~=mountEpoch then return end
    local stage=if name then workspace:FindFirstChild(name) else nil
@@ -1447,7 +1487,7 @@ function Desk.new(send: (any)->())
    for key,partName in pairs({inventory="InventoryBoard",basket="BuyBoard",offers="VisitorBoard",register="RegisterBox",next="NextCustomerButton"}) do
     local part=if stage then stage:FindFirstChild(partName,true) else nil
     local layer=surfaces[key];layer.part=part;layer.gui.Adornee=part;layer.gui.Enabled=part~=nil
-    if key=="register" then outline.Adornee=part end
+    if key=="register" then outline.Adornee=part elseif key=="next" then nextOutline.Adornee=part end
     if not part then complete=false end
    end
    if not complete then task.delay(0.25,attempt) end
@@ -1463,11 +1503,12 @@ function Desk.new(send: (any)->())
   if c.quote then request(if c.mode=="Buyer" then "ConfirmSale" else "ConfirmPurchase",{customerId=c.id,quoteId=c.quote.id})
   else request(if c.mode=="Buyer" then "ReviewSale" else "ReviewPurchase",{customerId=c.id}) end
  end);buy.Name="BuyButton";make("UICorner",{CornerRadius=UDim.new(0,5)},buy)
+ local bulk=button(receipt,"BUY BULK",UDim2.new(0,12,1,-112),UDim2.new(1,-24,0,34),function()
+  local c=self.state and self.state.customer
+  if c and c.mode=="Seller" and c.bulkPercent and c.state=="Interact" then request("BuyBulk",{customerId=c.id}) end
+ end);bulk.Name="BuyBulkButton";bulk.Visible=false;bulk.BackgroundColor3=P.gold;make("UICorner",{CornerRadius=UDim.new(0,5)},bulk)
  local clearButton=button(receipt,"CLEAR",UDim2.new(0,12,1,-36),UDim2.new(1,-24,0,26),function() local c=self.state and self.state.customer;if c then request("ClearBasket",{customerId=c.id}) end end)
  clearButton.BackgroundColor3=P.raised;clearButton.TextColor3=P.muted;make("UICorner",{CornerRadius=UDim.new(0,5)},clearButton)
- local nextSurface=surface("next",320,100)
- local nextButton=button(nextSurface.root,"NEXT CUSTOMER",UDim2.new(),UDim2.fromScale(1,1),function() cancel();request("NextCustomer") end)
- nextButton.Name="CallCustomerButton";nextButton.TextSize=24
  local function rotate()
   if drag then
    local _,_,h=Grid.cells(drag.item.kind,drag.rotation)
@@ -1612,6 +1653,11 @@ for _,item in ipairs(c.basket) do staged[item.id]=true;table.insert(basket,item)
   local q=c and c.quote
   total.Text=(if c and c.mode=="Buyer" then "RECEIVE " else "TOTAL ")..tostring(if q then q.total else 0).." CR"
   buy.Text=(if c and c.mode=="Buyer" then "SELL" else "BUY")..(if q then " / "..q.total.." CR" else "")
+  bulk.Visible=c~=nil and c.mode=="Seller" and c.bulkPercent~=nil and c.state=="Interact"
+  if bulk.Visible then
+   bulk.Text="BUY BULK / "..c.bulkOriginal.." → "..c.bulkPrice.." CR (-"..c.bulkPercent.."%)"
+   if not q then rowText(body,"BULK OFFER / "..#c.goods.." ITEMS",P.gold) end
+  end
   if q then
    for index,line in ipairs(q.lines) do receiptLine(body,line.name,line.price,index) end
    if not q.affordable then rowText(body,"Insufficient funds",P.red) end
