@@ -1,0 +1,12 @@
+# Generated local files
+__pycache__/
+tests/tmp*.luau
+*.log
+.DS_Store
+
+# Local tool downloads and transfer helpers
+.latch-tools/
+.latch-transfer-*/
+
+# Archive exports; keep the editable source and native place in Git
+*.zip
