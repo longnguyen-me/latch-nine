@@ -36,14 +36,14 @@ function Widget.draw(parent: Instance,item: any,cells: {any},w: number,h: number
 end
 function Widget.new(parent: Instance,title: string,onBegin: any,onHover: any?): any
  local self: any={cellSize=24,items={},columns=15,rows=7}
- self.frame=make("Frame",{Name=title,BackgroundColor3=C(18,25,34),BorderSizePixel=0,ClipsDescendants=true},parent)
- make("UIStroke",{Color=C(68,66,75),Thickness=2},self.frame)
+ self.frame=make("Frame",{Name=title,BackgroundColor3=C(14,21,31),BorderSizePixel=0,ClipsDescendants=true},parent)
+ make("UIStroke",{Color=C(71,93,108),Thickness=1},self.frame)
  self.heading=make("TextLabel",{Name="Heading",Size=UDim2.new(1,0,0,28),BackgroundColor3=C(35,43,52),BorderSizePixel=0,Text="",
   Font=Enum.Font.Code,TextSize=14,TextColor3=C(225,229,207),Active=false},self.frame)
  self.heading.Visible=false
  self.scroll=make("ScrollingFrame",{Name="GridScroll",Position=UDim2.fromOffset(0,0),Size=UDim2.new(1,0,1,0),BackgroundTransparency=1,BorderSizePixel=0,
   CanvasSize=UDim2.new(),CanvasPosition=Vector2.zero,ScrollBarThickness=4,ScrollBarImageColor3=C(85,99,84),ScrollingDirection=Enum.ScrollingDirection.Y},self.frame)
- self.board=make("Frame",{Name="GridBoard",Position=UDim2.fromOffset(8,4),BackgroundColor3=C(70,67,78),BorderSizePixel=0},self.scroll)
+ self.board=make("Frame",{Name="GridBoard",Position=UDim2.fromOffset(8,4),BackgroundColor3=C(27,42,55),BorderSizePixel=0},self.scroll)
  function self.render(items: {any},cols: number,rows: number,geometry: any,canvas: Vector2?)
   local bounds=canvas or self.frame.AbsoluteSize
   self.canvasWidth=bounds.X;self.canvasHeight=bounds.Y
@@ -56,7 +56,7 @@ function Widget.new(parent: Instance,title: string,onBegin: any,onHover: any?): 
   self.board.Size=UDim2.fromOffset(cols*size,rows*size)
   self.boardX=math.max(8,math.floor((bounds.X-cols*size-4)/2));self.board.Position=UDim2.fromOffset(self.boardX,4)
   self.scroll.CanvasSize=UDim2.fromOffset(0,rows*size+10)
-  for y=0,rows-1 do for x=0,cols-1 do make("Frame",{Name="EmptyCell",Position=UDim2.fromOffset(x*size+1,y*size+1),Size=UDim2.fromOffset(size-2,size-2),BackgroundColor3=C(43,43,55),BorderSizePixel=0,Active=false},self.board) end end
+  for y=0,rows-1 do for x=0,cols-1 do make("Frame",{Name="EmptyCell",Position=UDim2.fromOffset(x*size+1,y*size+1),Size=UDim2.fromOffset(size-2,size-2),BackgroundColor3=C(29,43,56),BorderSizePixel=0,Active=false},self.board) end end
   for _,item in ipairs(items) do
    local cells,w,h=geometry.cells(item.kind,item.rotation)
    local view=Widget.draw(self.board,item,cells,w,h,size,false,onBegin,onHover);view.Position=UDim2.fromOffset(item.gridX*size,item.gridY*size);self.views[item.id]=view

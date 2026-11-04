@@ -16,4 +16,4 @@ The project root is the folder containing `default.project.json`. From that fold
 
 After this project is pushed to GitHub, use `git pull` in this folder to receive future commits. Keep your Studio place saved separately when changing physical shop furniture.
 
-Studio uses session-only data by default; published servers use the cloud save code. Existing version 5 stock and legacy migrations remain supported. This archive includes editable Luau sources, tests, build tools and the native `.rbxlx` place. All 17 scripts compile and 228 local checks pass. Actual Studio input, rendering, cloud saves and device performance still need a live playtest.
+Studio uses session-only data by default; published servers use the cloud save code. Existing version 5 stock and legacy migrations remain supported. The receipt uses separate item rows and a fixed checkout area; item hover cards show a title, divider, price and tags. The project includes editable Luau sources, tests, build tools and the native `.rbxlx` place. All 17 scripts compile and 231 local checks pass. Actual Studio input, rendering, cloud saves and device performance still need a live playtest.

@@ -2,6 +2,7 @@
 local Players=game:GetService("Players")
 local Input=game:GetService("UserInputService")
 local GuiService=game:GetService("GuiService")
+local TweenService=game:GetService("TweenService")
 local Shared=game:GetService("ReplicatedStorage"):WaitForChild("Shared")
 local Config=require(Shared.Config)
 local Items=require(Shared.Items)
@@ -14,22 +15,23 @@ local Widget=require(script.Parent.GridWidget)
 local Surface=require(script.Parent.SurfaceInput)
 local Desk={}
 local C=Color3.fromRGB
-local P={bg=C(18,25,34),panel=C(35,43,52),line=C(108,96,106),ink=C(225,229,207),muted=C(151,174,171),teal=C(113,209,182),gold=C(231,183,112),red=C(233,118,113)}
+local P={bg=C(14,21,31),panel=C(28,39,52),raised=C(35,49,63),line=C(71,93,108),ink=C(236,242,239),muted=C(164,187,191),teal=C(111,218,196),gold=C(241,194,116),red=C(242,127,120)}
 local function make(class: string,props: any,parent: Instance): any
  local obj=Instance.new(class);for k,v in pairs(props) do (obj :: any)[k]=v end;obj.Parent=parent;return obj
 end
 local function clear(parent: Instance) for _,child in ipairs(parent:GetChildren()) do child:Destroy() end end
 local function text(parent: Instance,value: string,pos: UDim2,size: UDim2,fontSize: number,color: Color3?): TextLabel
- return make("TextLabel",{Text=value,Position=pos,Size=size,TextColor3=color or P.ink,Font=Enum.Font.Code,TextSize=fontSize,TextWrapped=true,
+ return make("TextLabel",{Text=value,Position=pos,Size=size,TextColor3=color or P.ink,Font=Enum.Font.Gotham,TextSize=fontSize,TextWrapped=true,
   TextXAlignment=Enum.TextXAlignment.Left,TextYAlignment=Enum.TextYAlignment.Top,BackgroundTransparency=1},parent)
 end
 local function button(parent: Instance,value: string,pos: UDim2,size: UDim2,fn: ()->()): TextButton
- local b=make("TextButton",{Text=value,Position=pos,Size=size,BackgroundColor3=P.teal,TextColor3=P.bg,Font=Enum.Font.Code,TextSize=13,
+ local b=make("TextButton",{Text=value,Position=pos,Size=size,BackgroundColor3=P.teal,TextColor3=P.bg,Font=Enum.Font.GothamBold,TextSize=13,
   TextWrapped=true,BorderSizePixel=0,AutoButtonColor=true},parent);b.Activated:Connect(fn);return b
 end
 local function panel(parent: Instance,name: string): Frame
- local frame=make("Frame",{Name=name,BackgroundColor3=P.bg,BackgroundTransparency=0.04,BorderSizePixel=0},parent)
- make("UIStroke",{Color=P.line,Thickness=2},frame);return frame
+ local frame=make("Frame",{Name=name,BackgroundColor3=P.bg,BackgroundTransparency=0.02,BorderSizePixel=0},parent)
+ make("UICorner",{CornerRadius=UDim.new(0,8)},frame)
+ make("UIStroke",{Color=P.line,Thickness=1},frame);return frame
 end
 local function scroll(parent: Instance): ScrollingFrame
  local frame=make("ScrollingFrame",{Size=UDim2.fromScale(1,1),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=4,
@@ -38,10 +40,19 @@ local function scroll(parent: Instance): ScrollingFrame
  make("UIListLayout",{Padding=UDim.new(0,8),SortOrder=Enum.SortOrder.LayoutOrder},frame);return frame
 end
 local function rowText(parent: Instance,value: string,color: Color3?,size: number?): TextLabel
- local t=text(parent,value,UDim2.new(),UDim2.new(1,0,0,0),size or 14,color);t.AutomaticSize=Enum.AutomaticSize.Y;return t
+ return text(parent,value,UDim2.new(),UDim2.new(1,0,0,38),size or 14,color)
 end
 local function rowButton(parent: Instance,value: string,fn: ()->()): TextButton
- return button(parent,value,UDim2.new(),UDim2.new(1,0,0,36),fn)
+ local b=button(parent,value,UDim2.new(),UDim2.new(1,0,0,38),fn)
+ make("UICorner",{CornerRadius=UDim.new(0,5)},b);return b
+end
+local function receiptLine(parent: Instance,name: string,price: number,index: number): Frame
+ local row=make("Frame",{Name="ReceiptItem_"..index,Size=UDim2.new(1,0,0,52),BackgroundColor3=P.raised,BorderSizePixel=0},parent)
+ make("UICorner",{CornerRadius=UDim.new(0,5)},row)
+ text(row,string.format("%02d",index),UDim2.fromOffset(10,15),UDim2.fromOffset(30,20),12,P.teal)
+ local title=text(row,name,UDim2.fromOffset(43,7),UDim2.new(1,-140,0,38),14,P.ink);title.TextYAlignment=Enum.TextYAlignment.Center
+ local amount=text(row,tostring(price).." CR",UDim2.new(1,-96,0,16),UDim2.fromOffset(86,22),14,P.gold);amount.TextXAlignment=Enum.TextXAlignment.Right
+ return row
 end
 local function locate(items: {any},id: string?): any for _,item in ipairs(items) do if item.id==id then return item end end;return nil end
 function Desk.new(send: (any)->())
@@ -61,18 +72,25 @@ function Desk.new(send: (any)->())
  local visitorName=text(namePlate,"SERVICE WINDOW",UDim2.fromOffset(10,6),UDim2.new(1,-20,1,-12),16,P.ink)
  local receipt=panel(root,"Receipt");receipt.Visible=false;receipt.ZIndex=20
  local receiptDrag: any=nil;local movedReceipt=false;local receiptCustomer: string?=nil
- local title=button(receipt,"TRADE RECEIPT",UDim2.fromOffset(0,0),UDim2.new(1,-38,0,34),function() end);title.Name="ReceiptHandle";title.BackgroundColor3=P.panel;title.TextColor3=P.ink
- button(receipt,"X",UDim2.new(1,-34,0,0),UDim2.fromOffset(34,34),function() receipt.Visible=false;receiptDrag=nil end)
+ local title=button(receipt,"TRADE RECEIPT",UDim2.fromOffset(0,0),UDim2.new(1,-44,0,42),function() end);title.Name="ReceiptHandle";title.BackgroundColor3=P.panel;title.TextColor3=P.ink;title.TextXAlignment=Enum.TextXAlignment.Left;title.TextSize=15
+ make("UIPadding",{PaddingLeft=UDim.new(0,14)},title)
+ local close=button(receipt,"X",UDim2.new(1,-42,0,5),UDim2.fromOffset(34,32),function() receipt.Visible=false;receiptDrag=nil end);close.BackgroundColor3=P.raised;close.TextColor3=P.ink;make("UICorner",{CornerRadius=UDim.new(0,5)},close)
  title.InputBegan:Connect(function(input: InputObject)
   if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
    receiptDrag={input=input,start=pointer(input),position=receipt.AbsolutePosition};movedReceipt=true
   end
  end)
- local body=scroll(receipt);body.Name="ReceiptLines";body.Position=UDim2.fromOffset(0,40);body.Size=UDim2.new(1,0,1,-154)
- local total=text(receipt,"TOTAL 0 CR",UDim2.new(0,10,1,-106),UDim2.new(1,-20,0,26),18,P.ink)
+ local body=scroll(receipt);body.Name="ReceiptLines";body.Position=UDim2.fromOffset(0,48);body.Size=UDim2.new(1,0,1,-173)
+ make("Frame",{Name="ReceiptDivider",Position=UDim2.new(0,10,1,-116),Size=UDim2.new(1,-20,0,1),BackgroundColor3=P.line,BorderSizePixel=0},receipt)
+ local total=text(receipt,"TOTAL 0 CR",UDim2.new(0,14,1,-108),UDim2.new(1,-28,0,28),18,P.ink);total.TextXAlignment=Enum.TextXAlignment.Right
  local status=text(root,"",UDim2.new(0.25,0,1,-24),UDim2.new(0.73,0,0,22),12,P.gold)
- local tooltip=panel(root,"ItemTooltip");tooltip.Visible=false;tooltip.Active=false;tooltip.ZIndex=60;tooltip.Size=UDim2.fromOffset(240,100)
- local tipText=text(tooltip,"",UDim2.fromOffset(10,8),UDim2.new(1,-20,1,-16),14,P.ink);tipText.ZIndex=61;tipText.Active=false
+ local tooltip=panel(root,"ItemTooltip");tooltip.Visible=false;tooltip.Active=false;tooltip.ZIndex=60;tooltip.Size=UDim2.fromOffset(276,158)
+ make("Frame",{Name="TooltipAccent",Position=UDim2.fromOffset(0,0),Size=UDim2.new(0,4,1,0),BackgroundColor3=P.teal,BorderSizePixel=0,ZIndex=61},tooltip)
+ local tipTitle=text(tooltip,"",UDim2.fromOffset(16,12),UDim2.new(1,-30,0,24),17,P.ink);tipTitle.Font=Enum.Font.GothamBold;tipTitle.ZIndex=61;tipTitle.Active=false
+ make("Frame",{Name="TooltipDivider",Position=UDim2.fromOffset(16,43),Size=UDim2.new(1,-32,0,1),BackgroundColor3=P.line,BorderSizePixel=0,ZIndex=61},tooltip)
+ local tipPrice=text(tooltip,"",UDim2.fromOffset(16,52),UDim2.new(1,-32,0,26),18,P.gold);tipPrice.Font=Enum.Font.GothamBold;tipPrice.ZIndex=61;tipPrice.Active=false
+ local tipText=text(tooltip,"",UDim2.fromOffset(16,87),UDim2.new(1,-32,0,62),13,P.muted);tipText.ZIndex=61;tipText.Active=false
+ local tipTween: any=nil
  local ghost=make("Frame",{Name="TradeDragPreview",BackgroundTransparency=1,Visible=false,Active=false,ZIndex=40},root)
  local surfaces: any={};local mountedStage: any=nil;local mountEpoch=0
  local widgets: any={};local drag: any=nil;local pending: any=nil;local serial=0;local scrolling=false
@@ -93,19 +111,31 @@ function Desk.new(send: (any)->())
  end
  local function hover(origin: string,item: any,x: number,y: number)
   tooltip.Visible=false
+  if tipTween then tipTween:Cancel();tipTween=nil end
   if not item or drag or not self.state or covered(Vector2.new(x,y)) then return end
   local current=if origin=="inventory" then locate(self.state.inventory,item.id) else nil
   local price=nil
   if origin~="inventory" and self.state.customer then
    for _,entry in ipairs(self.state.customer.goods) do if entry.item.id==item.id then current=entry.item;price=entry.price;break end end
+   if not current and self.state.customer.mode=="Buyer" then
+    current=locate(self.state.inventory,item.id)
+    local quote=self.state.customer.quote
+    if quote then for _,line in ipairs(quote.lines) do if line.id==item.id then price=line.price;break end end end
+   end
   end
   if not current then return end
   local def=Items.Definitions[current.kind];local q=Tags.Qualities[current.qualityTag or Tags.DefaultQuality]
   local market=if current.marketCondition=="bulk" then "Bulk -"..tostring(current.marketPercent or 5).."%" else "Retail +15%"
   local crime=Tags.Criminality[current.criminality or "none"].name
-  tipText.Text=def.name.." / "..tostring(price or current.marketPrice or current.value or current.paid).." CR\n"..Tags.Categories[def.tagCategory].name.." / "..q.name.."\n"..market.." / "..crime
-  tooltip.Position=UDim2.fromOffset(math.clamp(x+16,0,math.max(0,root.AbsoluteSize.X-244)),math.clamp(y+18,0,math.max(0,root.AbsoluteSize.Y-104)))
+  tipTitle.Text=def.name
+  tipPrice.Text=tostring(price or current.marketPrice or current.value or current.paid).." CR"
+  tipText.Text=Tags.Categories[def.tagCategory].name.."  •  "..q.name.."\n"..market.."  •  "..crime
+  local tx=math.clamp(x+16,0,math.max(0,root.AbsoluteSize.X-280))
+  local ty=math.clamp(y+18,0,math.max(0,root.AbsoluteSize.Y-162))
+  tooltip.Position=UDim2.fromOffset(tx,math.max(0,ty-8))
   tooltip.Visible=true
+  tipTween=TweenService:Create(tooltip,TweenInfo.new(0.12,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{Position=UDim2.fromOffset(tx,ty)})
+  tipTween:Play()
  end
  local playerGui=Players.LocalPlayer:WaitForChild("PlayerGui")
  local function surface(name: string,width: number,height: number): any
@@ -151,13 +181,14 @@ function Desk.new(send: (any)->())
  local function canvasPoint(name: string,point: Vector2): Vector2?
   local layer=surfaces[name];return Surface.project(layer.part,layer.canvas,point)
  end
- local buy=button(receipt,"BUY",UDim2.new(0,10,1,-76),UDim2.new(1,-20,0,34),function()
+ local buy=button(receipt,"BUY",UDim2.new(0,12,1,-74),UDim2.new(1,-24,0,34),function()
   local c=self.state and self.state.customer
   if not c or c.state~="Interact" then return end
   if c.quote then request(if c.mode=="Buyer" then "ConfirmSale" else "ConfirmPurchase",{customerId=c.id,quoteId=c.quote.id})
   else request(if c.mode=="Buyer" then "ReviewSale" else "ReviewPurchase",{customerId=c.id}) end
- end);buy.Name="BuyButton"
- button(receipt,"CLEAR",UDim2.new(0,10,1,-36),UDim2.new(1,-20,0,26),function() local c=self.state and self.state.customer;if c then request("ClearBasket",{customerId=c.id}) end end)
+ end);buy.Name="BuyButton";make("UICorner",{CornerRadius=UDim.new(0,5)},buy)
+ local clearButton=button(receipt,"CLEAR",UDim2.new(0,12,1,-36),UDim2.new(1,-24,0,26),function() local c=self.state and self.state.customer;if c then request("ClearBasket",{customerId=c.id}) end end)
+ clearButton.BackgroundColor3=P.raised;clearButton.TextColor3=P.muted;make("UICorner",{CornerRadius=UDim.new(0,5)},clearButton)
  local nextSurface=surface("next",320,100)
  local nextButton=button(nextSurface.root,"NEXT CUSTOMER",UDim2.new(),UDim2.fromScale(1,1),function() cancel();request("NextCustomer") end)
  nextButton.Name="CallCustomerButton";nextButton.TextSize=24
@@ -306,7 +337,7 @@ for _,item in ipairs(c.basket) do staged[item.id]=true;table.insert(basket,item)
   total.Text=(if c and c.mode=="Buyer" then "RECEIVE " else "TOTAL ")..tostring(if q then q.total else 0).." CR"
   buy.Text=(if c and c.mode=="Buyer" then "SELL" else "BUY")..(if q then " / "..q.total.." CR" else "")
   if q then
-   for _,line in ipairs(q.lines) do rowText(body,line.name.." / "..line.price.." CR",P.ink,14) end
+   for index,line in ipairs(q.lines) do receiptLine(body,line.name,line.price,index) end
    if not q.affordable then rowText(body,"Insufficient funds",P.red) end
   elseif c and c.state=="Interact" and (c.itemId or c.requestTag) then
    rowText(body,"WANTED: "..(if c.requestTag then Tags.Categories[c.requestTag].name else Items.Definitions[c.kind].name),P.gold)

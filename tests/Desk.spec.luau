@@ -78,7 +78,8 @@ local c=customer("visitor1")
 local playerGui=Instance.new("PlayerGui")
 local Input={InputChanged=signal(),InputEnded=signal(),InputBegan=signal(),WindowFocusReleased=signal(),GetFocusedTextBox=function() return nil end,GetMouseLocation=function() return cursor end}
 local services={Players={LocalPlayer={WaitForChild=function() return playerGui end}},UserInputService=Input,
- GuiService={GetGuiInset=function() return inset end},ReplicatedStorage={WaitForChild=function() return {Config="Config",Items="Items",Grid="Grid",ItemTags="ItemTags",GridSnap="GridSnap"} end}}
+ GuiService={GetGuiInset=function() return inset end},TweenService={Create=function(_,object,_,props) return {Play=function() for k,v in pairs(props) do object[k]=v end end,Cancel=function() end} end},
+ ReplicatedStorage={WaitForChild=function() return {Config="Config",Items="Items",Grid="Grid",ItemTags="ItemTags",GridSnap="GridSnap"} end}}
 local modules={Config=Config,Items=Items,Grid=GridFactory,ItemTags=Tags,GridSnap=Snap}
 local boards={
  VisitorBoard={Name="VisitorBoard",Parent=true,rect={x=800,y=70,w=310,h=150}},
@@ -96,7 +97,7 @@ local camera={ViewportPointToRay=function(_,x,y) return {Origin={X=x,Y=-y,Z=10},
  WorldToViewportPoint=function(_,p) return {X=p.X,Y=-p.Y,Z=p.Z} end}
 local env={workspace={CurrentCamera=camera,children={},GetChildren=function(self) return self.children end,FindFirstChild=function(_,name) if name=="Shop_Test" then return {FindFirstChild=function(_,key) return boards[key] end} end end},game={GetService=function(_,name) return services[name] end},require=function(name) return modules[name] end,
  Instance=Instance,Enum=Enum,Vector2={new=v,zero=v(0,0)},Vector3={new=function(x,y,z) return {X=x,Y=y,Z=z} end},Color3={fromRGB=function(...) return {...} end},UDim={new=function(s,o) return {Scale=s,Offset=o} end},
- UDim2={new=dim,fromScale=function(a,b) return dim(a,0,b,0) end,fromOffset=function(a,b) return dim(0,a,0,b) end},task=taskMock,script={Parent={GridWidget="GridWidget",SurfaceInput="SurfaceInput"}}}
+ UDim2={new=dim,fromScale=function(a,b) return dim(a,0,b,0) end,fromOffset=function(a,b) return dim(0,a,0,b) end},TweenInfo={new=function(...) return {...} end},task=taskMock,script={Parent={GridWidget="GridWidget",SurfaceInput="SurfaceInput"}}}
 modules.SurfaceInput=load("SurfaceInput",env)
 modules.GridWidget=load("GridWidget",env)
 local Controller=load("DeskController",env)
@@ -164,7 +165,8 @@ check(not find(function(o) return o.ClassName=="TextButton" and o.Text and o.Tex
 check(not find(function(o) return o.ClassName=="TextButton" and type(o.Text)=="string" and (o.Text:find("INSPECT") or o.Text:find("BOOTH") or o.Text:find("RENT") or o.Text:find("EXPAND")) end),"removed controls are absent")
 check(named("GridBoard",widget("inventory")).AbsoluteSize.X/15==named("GridBoard",widget("inventory")).AbsoluteSize.Y/7,"inventory has exactly 15 columns and 7 rows")
 unit("offers",c.goods[1].item.id).MouseEnter:Fire(800,160)
-check(named("ItemTooltip").Visible and named("ItemTooltip").Active==false and find(function(o) return o.Text and o.Text:find("24 CR") and o.Text:find("Household good") end,named("ItemTooltip")),"hover shows passive price and tags")
+check(named("ItemTooltip").Visible and named("ItemTooltip").Active==false and find(function(o) return o.Text=="Water filter" end,named("ItemTooltip")) and find(function(o) return o.Text=="24 CR" end,named("ItemTooltip")) and find(function(o) return o.Text and o.Text:find("Household good") end,named("ItemTooltip")),"hover card separates title, price and tags")
+check(named("TooltipDivider",named("ItemTooltip")).AbsoluteSize.Y==1,"hover card has a visible divider")
 unit("offers",c.goods[1].item.id).MouseLeave:Fire(801,160)
 check(not named("ItemTooltip").Visible,"hover details disappear immediately on leave")
 local buy=named("BuyButton");local lines=named("ReceiptLines")
@@ -198,7 +200,7 @@ check(#requests==before and not find(function(o) return o.Name=="GridPhantom" en
 unit("offers",c.goods[1].item.id).InputBegan:Fire(mouse(point("offers",0,0)));move(point("basket",0,0))
 local phantom=named("GridPhantom",widget("basket"));local px,py=phantom.Position.X.Offset,phantom.Position.Y.Offset
 check(phantom.Parent==named("GridBoard",widget("basket")) and px==0 and py==0,"phantom is projected as a child of the actual destination grid")
-check(phantom.children[1].children[1].BackgroundColor3[1]==113,"valid snapped phantom uses the accepted placement color")
+check(phantom.children[1].children[1].BackgroundColor3[1]==111,"valid snapped phantom uses the accepted placement color")
 release(point("basket",0,0));local req=requests[#requests]
 check(req.action=="StageOffer" and req.x==0 and req.y==0 and profile.cash==160,"drop submits the exact phantom cells without spending")
 check(not find(function(o) return o.Name=="GridPhantom" end) and stageAck(),"phantom cleans up before server confirmation")
@@ -208,7 +210,10 @@ unit("offers",c.goods[3].item.id).InputBegan:Fire(mouse(point("offers",7,0)));mo
 phantom=named("GridPhantom",widget("basket"));local cell=named("GridBoard",widget("basket")).AbsoluteSize.X/12
 check(phantom.Position.X.Offset==3*cell,"grabbing another occupied cell preserves the full item anchor")
 release(point("basket",4,0));check(requests[#requests].x==3 and stageAck() and c.quote.total==82,"multi-item quote uses the projected chip position")
-reg.Activated:Fire();check(named("Receipt").Visible,"register opens the latest multi-item quote");button("BUY / 82").Activated:Fire();req=requests[#requests];assert(Trade.confirm(profile,c,req.quoteId));c.state="Leave";desk.render(snapshot())
+reg.Activated:Fire();check(named("Receipt").Visible,"register opens the latest multi-item quote")
+local firstLine=named("ReceiptItem_1",named("ReceiptLines"));local secondLine=named("ReceiptItem_2",named("ReceiptLines"))
+check(firstLine.Size.Y.Offset==52 and secondLine.Size.Y.Offset==52 and find(function(o) return o.Text=="24 CR" end,firstLine) and find(function(o) return o.Text=="58 CR" end,secondLine),"receipt gives each quoted item its own fixed-height row and price")
+button("BUY / 82").Activated:Fire();req=requests[#requests];assert(Trade.confirm(profile,c,req.quoteId));c.state="Leave";desk.render(snapshot())
 check(#profile.inventory==2 and profile.cash==78 and not named("Receipt").Visible,"confirmed merchandise appears in bottom storage")
 unit("inventory",profile.inventory[1].id).InputBegan:Fire(mouse(point("inventory",0,0)));release(point("inventory",0,0))
 button("High tier /").Activated:Fire();req=requests[#requests]
@@ -256,6 +261,9 @@ unit("inventory",ownedUnit.id).InputBegan:Fire(mouse(originPoint));move(point("b
 check(named("GridPhantom",widget("basket")).Position.X.Offset==0,"owned merchandise projects into shared buy/sell tray")
 release(point("basket",0,0));local saleReq=requests[#requests]
 check(saleReq.action=="StageStock" and saleReq.x==0 and stageAck(),"inventory-to-middle drag stages a buyer sale")
+unit("basket",ownedUnit.id).MouseEnter:Fire(850,380)
+check(named("ItemTooltip").Visible and find(function(o) return o.Text=="Water filter" end,named("ItemTooltip")),"staged buyer stock retains its hover details")
+unit("basket",ownedUnit.id).MouseLeave:Fire(850,380)
 check(not find(function(o) return o.Name=="Item_"..ownedUnit.id end,widget("inventory")) and find(function(o) return o.Name=="Item_"..ownedUnit.id end,widget("basket")),"staged stock moves visually from inventory to middle tray")
 reg.Activated:Fire();check(button("SELL /")~=nil and receipt.Visible,"register presents a sell receipt for the buyer")
 button("SELL /").Activated:Fire();saleReq=requests[#requests]
