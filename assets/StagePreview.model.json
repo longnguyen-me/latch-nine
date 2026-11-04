@@ -1597,6 +1597,11 @@
       }
     },
     {
+      "ClassName": "Model",
+      "Name": "InteractionControls",
+      "Properties": {}
+    },
+    {
       "ClassName": "Part",
       "Name": "RegisterBox",
       "Properties": {
@@ -1674,6 +1679,44 @@
     },
     {
       "ClassName": "Part",
+      "Name": "DismissCustomerButton",
+      "Properties": {
+        "Anchored": true,
+        "BottomSurface": "Smooth",
+        "CFrame": [
+          -14,
+          1.5,
+          9.2,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ],
+        "CanCollide": false,
+        "CanQuery": true,
+        "CanTouch": false,
+        "CastShadow": false,
+        "Color": [
+          0.10196078431372549,
+          0.13333333333333333,
+          0.17254901960784313
+        ],
+        "Material": "SmoothPlastic",
+        "Size": [
+          4.6,
+          1.1,
+          0.35
+        ],
+        "TopSurface": "Smooth"
+      }
+    },
+    {
+      "ClassName": "Part",
       "Name": "ViewTarget",
       "Properties": {
         "Anchored": true,
@@ -1682,6 +1725,45 @@
           0,
           4.5,
           0,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ],
+        "CanCollide": false,
+        "CanQuery": false,
+        "CanTouch": false,
+        "CastShadow": false,
+        "Color": [
+          0.44313725490196076,
+          0.8196078431372549,
+          0.7137254901960784
+        ],
+        "Material": "SmoothPlastic",
+        "Size": [
+          0.2,
+          0.2,
+          0.2
+        ],
+        "TopSurface": "Smooth",
+        "Transparency": 1
+      }
+    },
+    {
+      "ClassName": "Part",
+      "Name": "CameraMount",
+      "Properties": {
+        "Anchored": true,
+        "BottomSurface": "Smooth",
+        "CFrame": [
+          0,
+          4.5,
+          70,
           1,
           0,
           0,
@@ -1758,6 +1840,45 @@
         "BottomSurface": "Smooth",
         "CFrame": [
           -14,
+          5.2,
+          -1.8,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ],
+        "CanCollide": false,
+        "CanQuery": false,
+        "CanTouch": false,
+        "CastShadow": false,
+        "Color": [
+          0.44313725490196076,
+          0.8196078431372549,
+          0.7137254901960784
+        ],
+        "Material": "SmoothPlastic",
+        "Size": [
+          0.2,
+          0.2,
+          0.2
+        ],
+        "TopSurface": "Smooth",
+        "Transparency": 1
+      }
+    },
+    {
+      "ClassName": "Part",
+      "Name": "VisitorExit",
+      "Properties": {
+        "Anchored": true,
+        "BottomSurface": "Smooth",
+        "CFrame": [
+          14,
           5.2,
           -1.8,
           1,

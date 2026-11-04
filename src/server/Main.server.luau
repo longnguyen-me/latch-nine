@@ -2,7 +2,6 @@
 local Players = game:GetService("Players")
 local RS = game:GetService("ReplicatedStorage")
 local Http = game:GetService("HttpService")
-local Lighting = game:GetService("Lighting")
 local Shared = RS:WaitForChild("Shared")
 local Config = require(Shared.Config)
 local Items = require(Shared.Items)
@@ -16,8 +15,6 @@ local Trade = require(script.Parent.TradeService)(Config, Items.Definitions, Rul
 local Persistence = require(script.Parent.Persistence)
 local Customers = require(script.Parent.CustomerService)
 Players.CharacterAutoLoads = false
-Lighting.ClockTime = 0; Lighting.Brightness = 2
-Lighting.Ambient = Color3.fromRGB(135,145,160); Lighting.OutdoorAmbient = Lighting.Ambient
 local shopTemplate = workspace:FindFirstChild("ShopTemplate") or workspace:FindFirstChild("StagePreview")
 if shopTemplate then shopTemplate.Name="ShopTemplate";shopTemplate.Parent=game:GetService("ServerStorage") end
 local remotes = Instance.new("Folder"); remotes.Name = "Remotes"; remotes.Parent = RS
@@ -96,13 +93,13 @@ local function push(player: Player,message: string?, moveAck: number?, moveOk: b
   saveStatus=s.saveStatus,message=message,receipts=p.receipts,pendingArrival=s.pendingArrival,working=s.working})
 end
 local schedule: (Player)->()
-local function leave(player: Player,message: string,line: string?)
+local function leave(player: Player,message: string,line: string?,callNext: boolean?)
  local s=sessions[player]
  if not s or s.closed or not s.customer then return end
  local c=s.customer; c.dialogue=line or "See you another time.";c.state="Leave";c.basket={};c.basketRevision+=1;c.quote=nil; push(player,message)
  task.delay(Config.WalkSeconds,function()
   if sessions[player]~=s or s.closed or s.customer~=c then return end
-  s.customer=nil; push(player); schedule(player)
+  s.customer=nil; push(player); if callNext then schedule(player) end
  end)
 end
 schedule=function(player: Player)
@@ -142,19 +139,13 @@ schedule=function(player: Player)
   push(player,"A customer is approaching the counter.")
   task.delay(Config.WalkSeconds,function()
    if sessions[player]~=s or s.closed or s.customer~=c or c.state~="WalkToCounter" then return end
-   c.state="Interact"; c.deadline=workspace:GetServerTimeNow()+Config.ServiceSeconds
-   push(player)
-   task.delay(Config.ServiceSeconds,function()
-    if sessions[player]==s and not s.closed and s.customer==c and c.state=="Interact" then
-     leave(player,"The customer ran out of time and left.")
-    end
-   end)
+   c.state="Interact";push(player)
   end)
  end)
 end
 local function matchingCustomer(s: any,request: any): any
  local c=s.customer
- if c and c.id==request.customerId and c.state=="Interact" and c.deadline>workspace:GetServerTimeNow() then return c end
+ if c and c.id==request.customerId and c.state=="Interact" then return c end
  return nil
 end
 action.OnServerEvent:Connect(function(player: Player,request: any)
@@ -172,7 +163,7 @@ action.OnServerEvent:Connect(function(player: Player,request: any)
  if name=="NextCustomer" then
   if s.working then push(player,"Freight shift active.");return end
   if s.customer then
-   if s.customer.state~="Leave" then leave(player,"") end
+   if s.customer.state~="Leave" then leave(player,"",nil,true) end
   else schedule(player) end
   return
  end
@@ -196,6 +187,11 @@ action.OnServerEvent:Connect(function(player: Player,request: any)
   push(player,message);return
  end
  if s.working then push(player,"Freight shift active."); return end
+ if name=="DismissCustomer" then
+  local c=matchingCustomer(s,request)
+  if c then leave(player,"Customer dismissed.") else push(player,"No customer to dismiss.") end
+  return
+ end
  if name=="StageOffer" or name=="UnstageOffer" or name=="StageStock" or name=="UnstageStock" then
   if not Rules.integer(request.moveId,1,1000000000) then push(player,"Invalid drag request.");return end
   local c=matchingCustomer(s,request)

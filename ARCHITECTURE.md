@@ -69,7 +69,7 @@ The cash terminal is wall-mounted in the desktop scene. The camera never resizes
 
 ## Editable shop
 
-The native place exposes Workspace/ShopTemplate. Startup retains that model in ServerStorage instead of deleting it. Scene.spawn clones it for each player and offsets descendant BasePart CFrames by the booth slot, preserving relative transforms and nested decorations. Scene.build is only the fallback when no template exists. Client bindings search recursively by unique part names. ViewTarget centers the camera; VisitorStand and VisitorEntry locate customer movement. Camera code does not rewrite authored cash-display transforms. SHOP_CUSTOMIZATION.md covers Studio editing and source rebuild limitations.
+The native place exposes Workspace/ShopTemplate. Startup retains that model in ServerStorage instead of deleting it. Scene.spawn clones it for each player and offsets descendant BasePart CFrames by the booth slot, preserving relative transforms and nested decorations. Scene.build is only the fallback when no template exists. Client bindings search recursively by unique part names. CameraMount sets camera position and orientation; VisitorStand, VisitorEntry and VisitorExit locate movement. Camera code does not rewrite authored cash-display transforms. SHOP_CUSTOMIZATION.md covers Studio editing and source rebuild limitations.
 
 ## Persistence
 
@@ -91,3 +91,7 @@ python3 tools/build.py --luau /path/to/luau --rojo /path/to/rojo
 The Luau tool folder must also contain luau-compile and luau-analyze. Build tools used here: Luau 0.745 and Rojo 7.7.1. The supplied default.project.json supports Rojo source syncing. This workspace is not connected to a shared repository or the user's local Studio.
 
 Actual Studio input/rendering, physical SurfaceGui readability, private cloud saving, rapid rejoins, shutdowns and multiplayer/device performance remain unverified. Local checks use API/input doubles.
+
+## Studio-authored presentation
+
+The camera uses the editable CameraMount part CFrame. The three clickable controls live in ShopTemplate/InteractionControls. Runtime lighting overrides and the Rojo project Lighting property block are absent. Dialogue has no service timeout; DismissCustomer moves the visitor to VisitorExit on the right and does not schedule a replacement. The NextCustomer control still explicitly calls another visitor.

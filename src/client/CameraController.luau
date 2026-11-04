@@ -11,6 +11,12 @@ local function apply()
  local viewHeight=math.max(34,56/aspect)
  local distance=viewHeight/(2*math.tan(math.rad(14)))
  local stage=if stageName then workspace:FindFirstChild(stageName) else nil
+ local mount=if stage then stage:FindFirstChild("CameraMount",true) else nil
+ if mount and mount:IsA("BasePart") then
+  camera.CameraType=Enum.CameraType.Scriptable
+  camera.CFrame=mount.CFrame;camera.Focus=CFrame.new(mount.Position+mount.CFrame.LookVector*20)
+  return
+ end
  local marker=if stage then stage:FindFirstChild("ViewTarget",true) else nil
  local target=if marker and marker:IsA("BasePart") then marker.Position else origin+Vector3.new(0,4.5,0)
  camera.CameraType=Enum.CameraType.Scriptable

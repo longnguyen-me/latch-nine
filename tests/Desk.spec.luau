@@ -86,7 +86,8 @@ local boards={
  BuyBoard={Name="BuyBoard",Parent=true,rect={x=800,y=290,w=310,h=150}},
  InventoryBoard={Name="InventoryBoard",Parent=true,rect={x=300,y=510,w=750,h=260}},
  RegisterBox={Name="RegisterBox",Parent=true,rect={x=40,y=320,w=160,h=100}},
- NextCustomerButton={Name="NextCustomerButton",Parent=true,rect={x=40,y=440,w=160,h=40}}}
+ NextCustomerButton={Name="NextCustomerButton",Parent=true,rect={x=40,y=440,w=160,h=40}},
+ DismissCustomerButton={Name="DismissCustomerButton",Parent=true,rect={x=40,y=480,w=160,h=40}}}
 for _,part in pairs(boards) do
  local r=part.rect;part.Size={X=r.w,Y=r.h,Z=0.35};part.CFrame={}
  function part.CFrame:PointToObjectSpace(p) return {X=p.X-r.x-r.w/2,Y=p.Y+r.y+r.h/2,Z=p.Z} end
@@ -145,6 +146,8 @@ desk.render(snapshot())
 check(widget("offers").Parent.Parent.Adornee==boards.VisitorBoard and widget("basket").Parent.Parent.Adornee==boards.BuyBoard and widget("inventory").Parent.Parent.Adornee==boards.InventoryBoard,"three grids bind to their physical surfaces")
 check(named("GridBoard",widget("inventory")).AbsolutePosition.X~=named("GridBoard",widget("inventory")).Position.X.Offset,"test supplies non-canvas absolute positions to surface objects")
 check(named("CallCustomerButton").Parent==named("nextSurface").children[1] and named("nextSurface").Adornee==boards.NextCustomerButton,"Next Customer is mounted on the physical button")
+check(named("DismissCustomerButton").Parent==named("dismissSurface").children[1] and named("dismissSurface").Adornee==boards.DismissCustomerButton,"Dismiss is mounted on its own physical button")
+named("DismissCustomerButton").Activated:Fire();check(requests[#requests].action=="DismissCustomer" and requests[#requests].customerId==c.id,"dismiss requests departure without calling next")
 check(not named("Receipt").Visible,"receipt starts hidden")
 check(named("BuyBulkButton").Visible and named("BuyBulkButton").Text:find("121") and named("BuyBulkButton").Text:find("108"),"bulk receipt shows original and whole-batch discounted prices")
 named("BuyBulkButton").Activated:Fire();check(requests[#requests].action=="BuyBulk","bulk receipt requests server-priced whole-batch checkout")

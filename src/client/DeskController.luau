@@ -164,19 +164,28 @@ function Desk.new(send: (any)->())
  local nextOutline=make("Highlight",{Name="NextCustomerOutline",Enabled=false,FillTransparency=1,OutlineTransparency=0,OutlineColor=P.teal,DepthMode=Enum.HighlightDepthMode.Occluded},workspace)
  nextButton.MouseEnter:Connect(function() nextOutline.Enabled=true end)
  nextButton.MouseLeave:Connect(function() nextOutline.Enabled=false end)
+ local dismissSurface=surface("dismiss",320,100)
+ local dismissButton=button(dismissSurface.root,"",UDim2.new(),UDim2.fromScale(1,1),function()
+  local c=self.state and self.state.customer
+  if c and c.state=="Interact" then cancel();request("DismissCustomer",{customerId=c.id}) end
+ end)
+ dismissButton.Name="DismissCustomerButton";dismissButton.BackgroundTransparency=1
+ local dismissOutline=make("Highlight",{Name="DismissCustomerOutline",Enabled=false,FillTransparency=1,OutlineTransparency=0,OutlineColor=P.red,DepthMode=Enum.HighlightDepthMode.Occluded},workspace)
+ dismissButton.MouseEnter:Connect(function() dismissOutline.Enabled=true end)
+ dismissButton.MouseLeave:Connect(function() dismissOutline.Enabled=false end)
  local function bindStage(name: string?)
   if mountedStage==name then return end
   mountedStage=name;mountEpoch+=1;local epoch=mountEpoch
   for _,layer in pairs(surfaces) do layer.part=nil;layer.gui.Adornee=nil;layer.gui.Enabled=false end
-  outline.Enabled=false;outline.Adornee=nil;nextOutline.Enabled=false;nextOutline.Adornee=nil
+  outline.Enabled=false;outline.Adornee=nil;nextOutline.Enabled=false;nextOutline.Adornee=nil;dismissOutline.Enabled=false;dismissOutline.Adornee=nil
   local function attempt()
    if epoch~=mountEpoch then return end
    local stage=if name then workspace:FindFirstChild(name) else nil
    local complete=true
-   for key,partName in pairs({inventory="InventoryBoard",basket="BuyBoard",offers="VisitorBoard",register="RegisterBox",next="NextCustomerButton"}) do
+   for key,partName in pairs({inventory="InventoryBoard",basket="BuyBoard",offers="VisitorBoard",register="RegisterBox",next="NextCustomerButton",dismiss="DismissCustomerButton"}) do
     local part=if stage then stage:FindFirstChild(partName,true) else nil
     local layer=surfaces[key];layer.part=part;layer.gui.Adornee=part;layer.gui.Enabled=part~=nil
-    if key=="register" then outline.Adornee=part elseif key=="next" then nextOutline.Adornee=part end
+    if key=="register" then outline.Adornee=part elseif key=="next" then nextOutline.Adornee=part elseif key=="dismiss" then dismissOutline.Adornee=part end
     if not part then complete=false end
    end
    if not complete then task.delay(0.25,attempt) end

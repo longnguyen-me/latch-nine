@@ -91,14 +91,18 @@ function Scene.build(parent: Instance, origin: Vector3, name: string): Model
  board("InventoryBoard",0,-1.8,9.3,23,10)
  board("BuyBoard",12,4.9,9.1,13,5.9,-22)
  board("VisitorBoard",12,11.1,2,13,5.9)
- board("RegisterBox",-14,4.9,7.4,4.6,2.8)
- board("NextCustomerButton",-14,2.8,9.2,4.6,1.1)
+ local controls=Instance.new("Model");controls.Name="InteractionControls";controls.Parent=m
+ board("RegisterBox",-14,4.9,7.4,4.6,2.8).Parent=controls
+ board("NextCustomerButton",-14,2.8,9.2,4.6,1.1).Parent=controls
+ board("DismissCustomerButton",-14,1.5,9.2,4.6,1.1).Parent=controls
  local function marker(name: string,x: number,y: number,z: number)
   local value=p(name,x,y,z,0.2,0.2,0.2,C(113,209,182));value.Transparency=1
  end
  marker("ViewTarget",0,4.5,0)
+ marker("CameraMount",0,4.5,70)
  marker("VisitorStand",-2,5.2,-1.8)
  marker("VisitorEntry",-14,5.2,-1.8)
+ marker("VisitorExit",14,5.2,-1.8)
  p("Status terminal",-17,15.5,0.8,8,2.8,0.6,C(35,42,49))
  p("Status glow",-17,15.5,1.15,7.3,2.1,0.12,C(72,169,146),true)
  local money=p("MoneyDisplay",-17,12.4,0.9,8,3.1,0.6,C(18,36,39))

@@ -14,9 +14,6 @@
         }
       }
     },
-    "Lighting": {
-      "$properties": {"ClockTime": 0, "Brightness": 2, "GlobalShadows": false, "Ambient": [0.53, 0.57, 0.63], "OutdoorAmbient": [0.53, 0.57, 0.63]}
-    },
     "ReplicatedStorage": {"Shared": {"$path": "src/shared"}},
     "ServerScriptService": {"LatchNine": {"$path": "src/server"}},
     "StarterPlayer": {

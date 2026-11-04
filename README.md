@@ -10,6 +10,8 @@ The active catalog is mixed ore, cobalt, titanium, lapis, volcanic rock, amethys
 
 Rare bulk sellers offer 5–15% off the whole remaining haul. The receipt shows both original and bulk prices. The physical register and next-customer controls have no text and outline on hover.
 
+CameraMount in ShopTemplate controls the seller camera position and rotation. Move or rotate it in Studio Edit mode. Lighting is authored in Studio. InteractionControls groups the physical register, next-customer and dismiss buttons so they can be edited independently. Dialogue remains until a trade or explicit dismissal; Dismiss Customer sends the visitor right and leaves the counter empty.
+
 In Studio Edit mode, move or decorate `Workspace → ShopTemplate` and save the place. Runtime clones preserve those changes. `SHOP_CUSTOMIZATION.md` describes the named interactive parts and source rebuild limits.
 
 ## Live source sync
@@ -18,4 +20,4 @@ The project root is the folder containing `default.project.json`. From that fold
 
 After this project is pushed to GitHub, use `git pull` in this folder to receive future commits. Keep your Studio place saved separately when changing physical shop furniture.
 
-Studio uses session-only data by default; published servers use the cloud save code. Existing version 5 stock and legacy migrations remain supported. The receipt uses separate item rows and a fixed checkout area; item hover cards show a title, divider, price and tags. The project includes editable Luau sources, tests, build tools and the native `.rbxlx` place. All 17 scripts compile and 238 local checks pass. Actual Studio input, rendering, cloud saves and device performance still need a live playtest.
+Studio uses session-only data by default; published servers use the cloud save code. Existing version 5 stock and legacy migrations remain supported. The receipt uses separate item rows and a fixed checkout area; item hover cards show a title, divider, price and tags. The project includes editable Luau sources, tests, build tools and the native `.rbxlx` place. All 17 scripts compile and 242 local checks pass. Actual Studio input, rendering, cloud saves and device performance still need a live playtest.

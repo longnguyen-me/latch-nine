@@ -109,7 +109,7 @@ foreign=request(b,"PlaceItem",{id=owned.id,x=0,y=0,rotation=0,revision=snapshots
 check(not foreign.moveOk and profiles[1].inventory[1].gridX==5,"players cannot rearrange another player's stock")
 s=request(a,"PlaceItem",{id=owned.id,x=0/0,y=0,rotation=0,revision=s.gridRevision,moveId=5})
 check(not s.moveOk and rules.validate(profiles[1]),"NaN placement coordinates are rejected without corrupting the profile")
-advance(6.1);visitor=snapshots[1].customer
+advance(1.6);request(a,"NextCustomer");advance(4.1);visitor=snapshots[1].customer
 check(visitor.state=="Interact" and visitor.itemId==owned.id,"the next visitor may buy an actual owned unit")
 local patience=visitor.patience
 s=request(a,"Counter",{customerId=visitor.id,price=0/0})
@@ -139,12 +139,14 @@ local cash=profiles[3].cash
 request(tagged,"SaveLabel",{kind="bargain",text="old",labelRevision=0})
 request(tagged,"Upgrade")
 check(profiles[3].cash==cash and profiles[3].upgrade==0 and profiles[3].labels==nil,"removed booth-label and expansion actions remain unavailable")
-advance(6.1);visitor=snapshots[3].customer
+advance(1.6);request(tagged,"NextCustomer");advance(4.1);visitor=snapshots[3].customer
 local previous=visitor.offer
 s=request(tagged,"SetItemTag",{id=taggedId,qualityTag="low"})
 check(s.customer.offer<previous,"retagging updates the current buyer's real offer")
 local timeout=player(4);players.PlayerAdded:Fire(timeout);advance(4.1);advance(modules.Config.ServiceSeconds)
-check(snapshots[4].customer.state=="Leave","a visitor leaves after the service deadline")
+check(snapshots[4].customer.state=="Interact","customer dialogue remains until dismissed")
+local dismissedId=snapshots[4].customer.id;request(timeout,"DismissCustomer",{customerId=dismissedId});advance(1.6)
+check(snapshots[4].customer==nil and not snapshots[4].pendingArrival,"dismissal does not call the next customer")
 local broke=player(5);players.PlayerAdded:Fire(broke);profiles[5].cash=0;profiles[5].aidDay=1
 request(broke,"Work");advance(9)
 check(profiles[5].cash==0 and snapshots[5].working,"recovery work cannot pay before its server timer")

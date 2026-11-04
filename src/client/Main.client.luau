@@ -43,7 +43,7 @@ state.OnClientEvent:Connect(function(snapshot: any)
    elseif c.state=="Interact" then
     visual:PivotTo(CFrame.new(markerPosition(snapshot,"VisitorStand",Vector3.new(-2,5.2,-1.8))))
    elseif c.state=="Leave" then
-    stopMove=Scene.move(visual,markerPosition(snapshot,"VisitorEntry",Vector3.new(-14,5.2,-1.8)),Config.WalkSeconds)
+    stopMove=Scene.move(visual,markerPosition(snapshot,"VisitorExit",Vector3.new(14,5.2,-1.8)),Config.WalkSeconds)
    end
   end
  end

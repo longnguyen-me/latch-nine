@@ -2,7 +2,7 @@
 
 1. Open LatchNine.rbxlx. Stop Play if it is running.
 2. In Explorer, expand Workspace → ShopTemplate.
-3. Select parts and use Move, Scale or Rotate. Add decorations or group them into folders/models inside ShopTemplate. The runtime clones the saved model instead of rebuilding it.
+3. Select parts and use Move, Scale or Rotate. The three clickable controls are grouped under ShopTemplate → InteractionControls. Add decorations or group them into folders/models inside ShopTemplate. The runtime clones the saved model instead of rebuilding it.
 4. Save the place. Use Play to check the layout and input.
 
 Make permanent changes in Edit mode. During Play, the template lives in ServerStorage and each player gets a separate Shop_<UserId> clone. Play-mode movement is temporary.
@@ -14,6 +14,9 @@ Make permanent changes in Edit mode. During Play, the template lives in ServerSt
 | VisitorBoard | Seller ore haul above the tray |
 | RegisterBox | Click to open the receipt; outlines on hover |
 | NextCustomerButton | Physical clickable next-customer button |
+| DismissCustomerButton | Physical dismissal button; customer exits right without a replacement |
+| CameraMount | Invisible camera position and rotation marker |
+| VisitorExit | Invisible right-side customer exit marker |
 | MoneyDisplay | Cash display; camera code leaves its saved position and size alone |
 | ViewTarget | Invisible marker controlling the center of the seller camera |
 | VisitorStand | Invisible marker where customers stop |
@@ -21,7 +24,7 @@ Make permanent changes in Edit mode. During Play, the template lives in ServerSt
 
 These parts can be moved into nested folders/models, but keep their names unique. Keep the interactive boards anchored, with CanQuery enabled and their Back faces toward the camera. Their contents fit a fixed canvas; resizing the physical parts changes how large the grids appear in the world. Rotating or moving them changes their input projection automatically.
 
-Select invisible markers through Explorer to move them. Keep ShopTemplate near the original origin; move ViewTarget to reframe your arrangement. Camera framing adjusts for viewport aspect ratio without moving your furniture or money terminal.
+Select invisible markers through Explorer to move them. Keep ShopTemplate near the original origin; move ViewTarget to reframe your arrangement. Move and rotate CameraMount to set your own seller view. Lighting is saved in Studio; no runtime script sets it.
 
 Ore category requests are configured by BuyerCategories in src/shared/ItemTags.luau. Buyers can request a category without any matching stock. Sellers alternate with buyers and bring randomized ore hauls.
 
