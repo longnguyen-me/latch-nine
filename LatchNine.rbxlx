@@ -159,6 +159,8 @@ local Tags = {
  QualityOrder = {"low", "standard", "high"},
  Categories = {
   unknown={name="Unidentified stock",badge="?"},
+  wallet={name="Wallet",badge="W"},
+  currency={name="Eddie note",badge="E"},
   household = {name="Household good", badge="HG"},
   gun = {name="Gun", badge="GUN"},
   medicine = {name="Medicine", badge="MED"},
