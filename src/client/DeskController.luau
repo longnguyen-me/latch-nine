@@ -16,7 +16,7 @@ local Widget=require(script.Parent.GridWidget)
 local Surface=require(script.Parent.SurfaceInput)
 local Desk={}
 local C=Color3.fromRGB
-local P={bg=C(14,21,31),panel=C(28,39,52),raised=C(35,49,63),line=C(71,93,108),ink=C(236,242,239),muted=C(164,187,191),teal=C(111,218,196),gold=C(241,194,116),red=C(242,127,120)}
+local P={bg=C(20,20,24),panel=C(30,30,36),raised=C(39,39,48),line=C(58,58,69),ink=C(244,244,248),muted=C(177,177,191),teal=C(100,232,255),gold=C(255,181,94),red=C(255,100,124)}
 local function make(class: string,props: any,parent: Instance): any
  local obj=Instance.new(class);for k,v in pairs(props) do (obj :: any)[k]=v end;obj.Parent=parent;return obj
 end
@@ -47,6 +47,8 @@ function Desk.new(send: (any)->())
  local gui=playerGui:FindFirstChild("ShopDeskUI")
  if not gui then gui=game:GetService("StarterGui"):WaitForChild("ShopDeskUI"):Clone();gui.Parent=playerGui end
  local root=get(gui,"DeskRoot")
+ local mainMenu=root:FindFirstChild("MainMenu")
+ if mainMenu then mainMenu.Visible=false end
  -- Mouse button InputObjects keep their initial position. Always sample the live cursor.
  local function pointer(input: InputObject): Vector2
   if input.UserInputType~=Enum.UserInputType.Touch then return Input:GetMouseLocation() end
@@ -76,7 +78,7 @@ function Desk.new(send: (any)->())
  local selectedOrigin="inventory"
  local render: ()->();local preview: ()->();local startDrag: (string,any,any)->();local emitMove: (any)->()
  local function notice(value: string,color: Color3?) status.Text=value;status.TextColor3=color or P.gold end
- local function request(name: string,extra: any?) local r=extra or {};r.action=name;send(r) end
+ local function request(name: string,extra: any?) if mainMenu and mainMenu.Visible and name~="Sync" then return end;local r=extra or {};r.action=name;send(r) end
  local function cancel()
   drag=nil;receiptDrag=nil;ghost.Visible=false;clear(ghost);tooltip.Visible=false
   if phantom then phantom:Destroy();phantom=nil;phantomWidget=nil end
@@ -84,6 +86,7 @@ function Desk.new(send: (any)->())
   for _,widget in pairs(widgets) do widget.scroll.ScrollingEnabled=true end
  end
  local function covered(point: Vector2): boolean
+  if mainMenu and mainMenu.Visible then return true end
   local p,b=receipt.AbsolutePosition,receipt.AbsoluteSize
   return receipt.Visible and point.X>=p.X and point.Y>=p.Y and point.X<p.X+b.X and point.Y<p.Y+b.Y
  end
@@ -148,7 +151,7 @@ function Desk.new(send: (any)->())
  end
  local register=surface("register")
  local registerButton=get(register.root,"RegisterButton");registerButton.Activated:Connect(function()
-  if drag then return end
+  if drag or (mainMenu and mainMenu.Visible) then return end
   receipt.Visible=true;tooltip.Visible=false;render()
  end)
  local outline=make("Highlight",{Name="RegisterOutline",Enabled=false,FillTransparency=1,OutlineTransparency=0,OutlineColor=P.teal,DepthMode=Enum.HighlightDepthMode.Occluded},workspace)
@@ -229,7 +232,7 @@ function Desk.new(send: (any)->())
   local c=self.state and self.state.customer
   if c and c.mode=="Seller" and c.state=="Interact" then
    local surfacePoint=Surface.project(surfaces.offers.part,surfaces.offers.canvas,screenPoint)
-   if surfacePoint and widgets.offers.contains(surfacePoint) then request("StagePayment",{customerId=c.id,denomination=denomination});receipt.Visible=true;return end
+   if surfacePoint and widgets.offers.contains(surfacePoint) then request("StagePayment",{customerId=c.id,denomination=denomination});return end
   end
   local stockPoint=Surface.project(surfaces.inventory.part,surfaces.inventory.canvas,screenPoint)
   if stockPoint and widgets.inventory.contains(stockPoint) then
@@ -543,7 +546,7 @@ function Desk.new(send: (any)->())
  end
  render=function()
   local s=self.state;if not s then return end;bindStage(s.stageName);layout()
-  shopLabel.Text=if s.pendingArrival then "CUSTOMER EN ROUTE" elseif s.shopOpen then "SHOP OPEN" else "SHOP CLOSED / CLICK SWITCH OR CALL BUTTON"
+  shopLabel.Text=if s.pendingArrival then "CUSTOMER EN ROUTE" elseif s.shopOpen then "SHOP OPEN" else "SHOP CLOSED"
   if walletPanel.Visible then drawWallet(s) end
   renderMachine(s)
   local suspicion=s.suspicion or 0
@@ -670,12 +673,10 @@ for _,item in ipairs(c.basket) do staged[item.id]=true;table.insert(basket,item)
    if d.x==d.item.gridX and d.y==d.item.gridY and d.rotation==d.item.rotation then return end
    emitMove({action="PlaceItem",id=d.item.id,x=d.x,y=d.y,rotation=d.rotation,revision=d.gridRevision})
   elseif d.origin=="inventory" and d.target=="offers" then
-   receipt.Visible=true
    local amount=Items.Definitions[d.item.kind].denomination
    if amount then request("StagePayment",{customerId=d.customerId,id=d.item.id,denomination=amount})
    else emitMove({action="StageStock",customerId=d.customerId,id=d.item.id,x=d.x,y=d.y,rotation=d.rotation,revision=d.basketRevision}) end
   elseif d.origin=="offers" and d.target=="inventory" then
-   receipt.Visible=true
    if self.state.customer.mode=="Buyer" then
     emitMove({action="UnstageStock",customerId=d.customerId,id=d.item.id,x=d.x,y=d.y,rotation=d.rotation,revision=d.basketRevision})
    else
@@ -702,6 +703,25 @@ for _,item in ipairs(c.basket) do staged[item.id]=true;table.insert(basket,item)
   end
   render()
 
+ end
+ if mainMenu then
+  local menuButton=get(root,"MenuButton")
+  local highContrast=false
+  local authoredTransparency: any={}
+  for _,panel in ipairs({receipt,walletPanel,get(root,"MachineMenu"),dialoguePanel,mainMenu}) do
+   authoredTransparency[panel]=panel.BackgroundTransparency
+  end
+  menuButton.Activated:Connect(function()
+   cancel();walletDrag=nil;receipt.Visible=false;walletPanel.Visible=false
+   get(root,"MachineMenu").Visible=false
+   mainMenu.Visible=true
+  end)
+  get(mainMenu,"Continue").Activated:Connect(function() mainMenu.Visible=false end)
+  get(mainMenu,"Contrast").Activated:Connect(function()
+   highContrast=not highContrast
+   for panel,transparency in pairs(authoredTransparency) do panel.BackgroundTransparency=if highContrast then 0 else transparency end
+   get(mainMenu,"Contrast").Text="Higher contrast: "..(if highContrast then "on" else "off")
+  end)
  end
  return self
 end

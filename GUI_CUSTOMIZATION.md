@@ -75,3 +75,9 @@ python tools/import_studio.py "C:\path\to\MyShop.rbxlx"
 That imports all three roots into the same model files. Then run the build command and commit the models and rebuilt place.
 
 Keep the named functional objects and their hierarchy. Add decoration freely, but keep GridScroll → GridBoard, item Hit/Glyph/QualityTag, receipt Title/Price/Index, title handles, and named buttons. Those names connect the interface to gameplay. Make permanent edits with Play stopped; PlayerGui and Shop_<UserId> are temporary runtime copies.
+
+## Minimalist theme update
+
+The authored models now use charcoal panels, cyan actions, amber warnings, 8px corners and Builder Sans. Receipt rows are 72px with reserved price columns and separate checkout controls. Stock/trade backplanes remain transparent. The Menu button opens the saved MainMenu frame; Continue and Higher contrast are connected by DeskController. Contrast is a session preference. All new GUI objects can be edited in Studio with Play stopped. The receipt opens through the physical register, rather than interrupting a drag.
+
+If you have customized the shop in Studio, export/import those edits before syncing changes from Git; Rojo does not automatically copy Studio edits back to source.

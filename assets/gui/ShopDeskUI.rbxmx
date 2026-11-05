@@ -44,15 +44,15 @@
             <YS>0</YS>
             <YO>34</YO>
           </UDim2>
-          <int name="BorderSizePixel">0</int>
           <int name="ZIndex">1</int>
           <bool name="Visible">true</bool>
-          <float name="BackgroundTransparency">0.02</float>
           <Color3 name="BackgroundColor3">
-            <R>0.054901960784313725</R>
-            <G>0.08235294117647059</G>
-            <B>0.12156862745098039</B>
+            <R>0.11764705882352941</R>
+            <G>0.11764705882352941</G>
+            <B>0.1411764705882353</B>
           </Color3>
+          <int name="BorderSizePixel">0</int>
+          <float name="BackgroundTransparency">0.15</float>
         </Properties>
         <Item class="UICorner" referent="UI26">
           <Properties>
@@ -67,9 +67,9 @@
           <Properties>
             <string name="Name">Border</string>
             <Color3 name="Color">
-              <R>0.2784313725490196</R>
-              <G>0.36470588235294116</G>
-              <B>0.4235294117647059</B>
+              <R>0.22745098039215686</R>
+              <G>0.22745098039215686</G>
+              <B>0.27058823529411763</B>
             </Color3>
             <float name="Thickness">1</float>
           </Properties>
@@ -91,24 +91,24 @@
               <YO>-12</YO>
             </UDim2>
             <float name="BackgroundTransparency">1</float>
-            <int name="BorderSizePixel">0</int>
-            <Font name="FontFace">
-              <Family>
-                <url>rbxasset://fonts/families/GothamSSm.json</url>
-              </Family>
-              <Weight>400</Weight>
-              <Style>Normal</Style>
-            </Font>
-            <float name="TextSize">16</float>
-            <Color3 name="TextColor3">
-              <R>0.9254901960784314</R>
-              <G>0.9490196078431372</G>
-              <B>0.9372549019607843</B>
-            </Color3>
             <bool name="TextWrapped">true</bool>
             <token name="TextXAlignment">0</token>
             <token name="TextYAlignment">0</token>
             <bool name="Active">false</bool>
+            <int name="BorderSizePixel">0</int>
+            <Color3 name="TextColor3">
+              <R>0.9568627450980393</R>
+              <G>0.9568627450980393</G>
+              <B>0.9725490196078431</B>
+            </Color3>
+            <Font name="FontFace">
+              <Family>
+                <url>rbxasset://fonts/families/BuilderSans.json</url>
+              </Family>
+              <Weight>700</Weight>
+              <Style>Normal</Style>
+            </Font>
+            <float name="TextSize">20</float>
           </Properties>
         </Item>
       </Item>
@@ -127,15 +127,15 @@
             <YS>0</YS>
             <YO>72</YO>
           </UDim2>
-          <int name="BorderSizePixel">0</int>
           <int name="ZIndex">1</int>
           <bool name="Visible">false</bool>
-          <float name="BackgroundTransparency">0.02</float>
           <Color3 name="BackgroundColor3">
-            <R>0.054901960784313725</R>
-            <G>0.08235294117647059</G>
-            <B>0.12156862745098039</B>
+            <R>0.11764705882352941</R>
+            <G>0.11764705882352941</G>
+            <B>0.1411764705882353</B>
           </Color3>
+          <int name="BorderSizePixel">0</int>
+          <float name="BackgroundTransparency">0.15</float>
         </Properties>
         <Item class="UICorner" referent="UI30">
           <Properties>
@@ -150,9 +150,9 @@
           <Properties>
             <string name="Name">Border</string>
             <Color3 name="Color">
-              <R>0.2784313725490196</R>
-              <G>0.36470588235294116</G>
-              <B>0.4235294117647059</B>
+              <R>0.22745098039215686</R>
+              <G>0.22745098039215686</G>
+              <B>0.27058823529411763</B>
             </Color3>
             <float name="Thickness">1</float>
           </Properties>
@@ -174,24 +174,24 @@
               <YO>-16</YO>
             </UDim2>
             <float name="BackgroundTransparency">1</float>
-            <int name="BorderSizePixel">0</int>
-            <Font name="FontFace">
-              <Family>
-                <url>rbxasset://fonts/families/GothamSSm.json</url>
-              </Family>
-              <Weight>400</Weight>
-              <Style>Normal</Style>
-            </Font>
-            <float name="TextSize">15</float>
-            <Color3 name="TextColor3">
-              <R>0.9254901960784314</R>
-              <G>0.9490196078431372</G>
-              <B>0.9372549019607843</B>
-            </Color3>
             <bool name="TextWrapped">true</bool>
             <token name="TextXAlignment">0</token>
             <token name="TextYAlignment">0</token>
             <bool name="Active">false</bool>
+            <int name="BorderSizePixel">0</int>
+            <Color3 name="TextColor3">
+              <R>0.9568627450980393</R>
+              <G>0.9568627450980393</G>
+              <B>0.9725490196078431</B>
+            </Color3>
+            <float name="TextSize">16</float>
+            <Font name="FontFace">
+              <Family>
+                <url>rbxasset://fonts/families/BuilderSans.json</url>
+              </Family>
+              <Weight>400</Weight>
+              <Style>Normal</Style>
+            </Font>
           </Properties>
         </Item>
       </Item>
@@ -204,21 +204,21 @@
             <YS>0.24</YS>
             <YO>0</YO>
           </UDim2>
-          <UDim2 name="Size">
-            <XS>0</XS>
-            <XO>340</XO>
-            <YS>0</YS>
-            <YO>440</YO>
-          </UDim2>
-          <int name="BorderSizePixel">0</int>
           <int name="ZIndex">20</int>
           <bool name="Visible">false</bool>
-          <float name="BackgroundTransparency">0.02</float>
           <Color3 name="BackgroundColor3">
-            <R>0.054901960784313725</R>
-            <G>0.08235294117647059</G>
-            <B>0.12156862745098039</B>
+            <R>0.11764705882352941</R>
+            <G>0.11764705882352941</G>
+            <B>0.1411764705882353</B>
           </Color3>
+          <int name="BorderSizePixel">0</int>
+          <float name="BackgroundTransparency">0.15</float>
+          <UDim2 name="Size">
+            <XS>0</XS>
+            <XO>390</XO>
+            <YS>0</YS>
+            <YO>520</YO>
+          </UDim2>
         </Properties>
         <Item class="UICorner" referent="UI34">
           <Properties>
@@ -233,9 +233,9 @@
           <Properties>
             <string name="Name">Border</string>
             <Color3 name="Color">
-              <R>0.2784313725490196</R>
-              <G>0.36470588235294116</G>
-              <B>0.4235294117647059</B>
+              <R>0.22745098039215686</R>
+              <G>0.22745098039215686</G>
+              <B>0.27058823529411763</B>
             </Color3>
             <float name="Thickness">1</float>
           </Properties>
@@ -256,36 +256,36 @@
               <YS>0</YS>
               <YO>42</YO>
             </UDim2>
+            <bool name="TextWrapped">true</bool>
+            <bool name="AutoButtonColor">true</bool>
+            <bool name="Active">true</bool>
+            <token name="TextXAlignment">0</token>
             <Color3 name="BackgroundColor3">
-              <R>0.10980392156862745</R>
+              <R>0.15294117647058825</R>
               <G>0.15294117647058825</G>
-              <B>0.20392156862745098</B>
+              <B>0.18823529411764706</B>
             </Color3>
+            <int name="BorderSizePixel">0</int>
             <Color3 name="TextColor3">
-              <R>0.9254901960784314</R>
-              <G>0.9490196078431372</G>
-              <B>0.9372549019607843</B>
+              <R>0.9568627450980393</R>
+              <G>0.9568627450980393</G>
+              <B>0.9725490196078431</B>
             </Color3>
             <Font name="FontFace">
               <Family>
-                <url>rbxasset://fonts/families/GothamSSm.json</url>
+                <url>rbxasset://fonts/families/BuilderSans.json</url>
               </Family>
               <Weight>700</Weight>
               <Style>Normal</Style>
             </Font>
-            <float name="TextSize">13</float>
-            <bool name="TextWrapped">true</bool>
-            <int name="BorderSizePixel">0</int>
-            <bool name="AutoButtonColor">true</bool>
-            <bool name="Active">true</bool>
-            <token name="TextXAlignment">0</token>
+            <float name="TextSize">20</float>
           </Properties>
           <Item class="UICorner" referent="UI37">
             <Properties>
               <string name="Name">Corner</string>
               <UDim name="CornerRadius">
                 <S>0</S>
-                <O>5</O>
+                <O>8</O>
               </UDim>
             </Properties>
           </Item>
@@ -315,35 +315,35 @@
               <YS>0</YS>
               <YO>32</YO>
             </UDim2>
-            <Color3 name="BackgroundColor3">
-              <R>0.13725490196078433</R>
-              <G>0.19215686274509805</G>
-              <B>0.24705882352941178</B>
-            </Color3>
-            <Color3 name="TextColor3">
-              <R>0.9254901960784314</R>
-              <G>0.9490196078431372</G>
-              <B>0.9372549019607843</B>
-            </Color3>
-            <Font name="FontFace">
-              <Family>
-                <url>rbxasset://fonts/families/GothamSSm.json</url>
-              </Family>
-              <Weight>700</Weight>
-              <Style>Normal</Style>
-            </Font>
-            <float name="TextSize">13</float>
             <bool name="TextWrapped">true</bool>
-            <int name="BorderSizePixel">0</int>
             <bool name="AutoButtonColor">true</bool>
             <bool name="Active">true</bool>
+            <int name="BorderSizePixel">0</int>
+            <Color3 name="TextColor3">
+              <R>0.9568627450980393</R>
+              <G>0.9568627450980393</G>
+              <B>0.9725490196078431</B>
+            </Color3>
+            <float name="TextSize">16</float>
+            <Font name="FontFace">
+              <Family>
+                <url>rbxasset://fonts/families/BuilderSans.json</url>
+              </Family>
+              <Weight>400</Weight>
+              <Style>Normal</Style>
+            </Font>
+            <Color3 name="BackgroundColor3">
+              <R>0.15294117647058825</R>
+              <G>0.15294117647058825</G>
+              <B>0.18823529411764706</B>
+            </Color3>
           </Properties>
           <Item class="UICorner" referent="UI40">
             <Properties>
               <string name="Name">Corner</string>
               <UDim name="CornerRadius">
                 <S>0</S>
-                <O>5</O>
+                <O>8</O>
               </UDim>
             </Properties>
           </Item>
@@ -351,21 +351,7 @@
         <Item class="ScrollingFrame" referent="UI41">
           <Properties>
             <string name="Name">ReceiptLines</string>
-            <UDim2 name="Position">
-              <XS>0</XS>
-              <XO>0</XO>
-              <YS>0</YS>
-              <YO>48</YO>
-            </UDim2>
-            <UDim2 name="Size">
-              <XS>1</XS>
-              <XO>0</XO>
-              <YS>1</YS>
-              <YO>-209</YO>
-            </UDim2>
             <float name="BackgroundTransparency">1</float>
-            <int name="BorderSizePixel">0</int>
-            <int name="ScrollBarThickness">4</int>
             <UDim2 name="CanvasSize">
               <XS>0</XS>
               <XO>0</XO>
@@ -373,6 +359,25 @@
               <YO>0</YO>
             </UDim2>
             <token name="AutomaticCanvasSize">2</token>
+            <int name="BorderSizePixel">0</int>
+            <Color3 name="ScrollBarImageColor3">
+              <R>0.45098039215686275</R>
+              <G>0.45098039215686275</G>
+              <B>0.5058823529411764</B>
+            </Color3>
+            <int name="ScrollBarThickness">3</int>
+            <UDim2 name="Position">
+              <XS>0</XS>
+              <XO>16</XO>
+              <YS>0</YS>
+              <YO>64</YO>
+            </UDim2>
+            <UDim2 name="Size">
+              <XS>1</XS>
+              <XO>-32</XO>
+              <YS>1</YS>
+              <YO>-270</YO>
+            </UDim2>
           </Properties>
           <Item class="UIPadding" referent="UI42">
             <Properties>
@@ -409,37 +414,31 @@
         <Item class="Frame" referent="UI44">
           <Properties>
             <string name="Name">ReceiptDivider</string>
-            <UDim2 name="Position">
-              <XS>0</XS>
-              <XO>10</XO>
-              <YS>1</YS>
-              <YO>-153</YO>
-            </UDim2>
             <UDim2 name="Size">
               <XS>1</XS>
               <XO>-20</XO>
               <YS>0</YS>
               <YO>1</YO>
             </UDim2>
-            <int name="BorderSizePixel">0</int>
             <float name="BackgroundTransparency">0</float>
+            <int name="BorderSizePixel">0</int>
             <Color3 name="BackgroundColor3">
-              <R>0.2784313725490196</R>
-              <G>0.36470588235294116</G>
-              <B>0.4235294117647059</B>
+              <R>0.22745098039215686</R>
+              <G>0.22745098039215686</G>
+              <B>0.27058823529411763</B>
             </Color3>
+            <UDim2 name="Position">
+              <XS>0</XS>
+              <XO>20</XO>
+              <YS>1</YS>
+              <YO>-194</YO>
+            </UDim2>
           </Properties>
         </Item>
         <Item class="TextLabel" referent="UI45">
           <Properties>
             <string name="Name">Total</string>
             <string name="Text">TOTAL 0 E</string>
-            <UDim2 name="Position">
-              <XS>0</XS>
-              <XO>14</XO>
-              <YS>1</YS>
-              <YO>-145</YO>
-            </UDim2>
             <UDim2 name="Size">
               <XS>1</XS>
               <XO>-28</XO>
@@ -447,71 +446,77 @@
               <YO>28</YO>
             </UDim2>
             <float name="BackgroundTransparency">1</float>
-            <int name="BorderSizePixel">0</int>
-            <Font name="FontFace">
-              <Family>
-                <url>rbxasset://fonts/families/GothamSSm.json</url>
-              </Family>
-              <Weight>400</Weight>
-              <Style>Normal</Style>
-            </Font>
-            <float name="TextSize">18</float>
-            <Color3 name="TextColor3">
-              <R>0.9254901960784314</R>
-              <G>0.9490196078431372</G>
-              <B>0.9372549019607843</B>
-            </Color3>
             <bool name="TextWrapped">true</bool>
             <token name="TextYAlignment">0</token>
             <bool name="Active">false</bool>
             <token name="TextXAlignment">2</token>
+            <int name="BorderSizePixel">0</int>
+            <Font name="FontFace">
+              <Family>
+                <url>rbxasset://fonts/families/BuilderSans.json</url>
+              </Family>
+              <Weight>400</Weight>
+              <Style>Normal</Style>
+            </Font>
+            <Color3 name="TextColor3">
+              <R>0.39215686274509803</R>
+              <G>0.9098039215686274</G>
+              <B>1.0</B>
+            </Color3>
+            <float name="TextSize">22</float>
+            <UDim2 name="Position">
+              <XS>0</XS>
+              <XO>20</XO>
+              <YS>1</YS>
+              <YO>-183</YO>
+            </UDim2>
           </Properties>
         </Item>
         <Item class="TextButton" referent="UI46">
           <Properties>
             <string name="Name">BuyButton</string>
             <string name="Text">BUY</string>
+            <bool name="TextWrapped">true</bool>
+            <bool name="AutoButtonColor">true</bool>
+            <bool name="Active">true</bool>
+            <int name="BorderSizePixel">0</int>
+            <float name="TextSize">16</float>
+            <Font name="FontFace">
+              <Family>
+                <url>rbxasset://fonts/families/BuilderSans.json</url>
+              </Family>
+              <Weight>400</Weight>
+              <Style>Normal</Style>
+            </Font>
+            <Color3 name="BackgroundColor3">
+              <R>0.39215686274509803</R>
+              <G>0.9098039215686274</G>
+              <B>1.0</B>
+            </Color3>
+            <Color3 name="TextColor3">
+              <R>0.0784313725490196</R>
+              <G>0.0784313725490196</G>
+              <B>0.09411764705882353</B>
+            </Color3>
             <UDim2 name="Position">
               <XS>0</XS>
-              <XO>12</XO>
+              <XO>20</XO>
               <YS>1</YS>
-              <YO>-74</YO>
+              <YO>-144</YO>
             </UDim2>
             <UDim2 name="Size">
               <XS>1</XS>
-              <XO>-24</XO>
+              <XO>-40</XO>
               <YS>0</YS>
-              <YO>34</YO>
+              <YO>44</YO>
             </UDim2>
-            <Color3 name="BackgroundColor3">
-              <R>0.43529411764705883</R>
-              <G>0.8549019607843137</G>
-              <B>0.7686274509803922</B>
-            </Color3>
-            <Color3 name="TextColor3">
-              <R>0.054901960784313725</R>
-              <G>0.08235294117647059</G>
-              <B>0.12156862745098039</B>
-            </Color3>
-            <Font name="FontFace">
-              <Family>
-                <url>rbxasset://fonts/families/GothamSSm.json</url>
-              </Family>
-              <Weight>700</Weight>
-              <Style>Normal</Style>
-            </Font>
-            <float name="TextSize">13</float>
-            <bool name="TextWrapped">true</bool>
-            <int name="BorderSizePixel">0</int>
-            <bool name="AutoButtonColor">true</bool>
-            <bool name="Active">true</bool>
           </Properties>
           <Item class="UICorner" referent="UI47">
             <Properties>
               <string name="Name">Corner</string>
               <UDim name="CornerRadius">
                 <S>0</S>
-                <O>5</O>
+                <O>8</O>
               </UDim>
             </Properties>
           </Item>
@@ -520,48 +525,48 @@
           <Properties>
             <string name="Name">BuyBulkButton</string>
             <string name="Text">BUY BULK</string>
-            <UDim2 name="Position">
-              <XS>0</XS>
-              <XO>12</XO>
-              <YS>1</YS>
-              <YO>-112</YO>
-            </UDim2>
-            <UDim2 name="Size">
-              <XS>1</XS>
-              <XO>-24</XO>
-              <YS>0</YS>
-              <YO>34</YO>
-            </UDim2>
-            <Color3 name="BackgroundColor3">
-              <R>0.9450980392156862</R>
-              <G>0.7607843137254902</G>
-              <B>0.4549019607843137</B>
-            </Color3>
-            <Color3 name="TextColor3">
-              <R>0.054901960784313725</R>
-              <G>0.08235294117647059</G>
-              <B>0.12156862745098039</B>
-            </Color3>
-            <Font name="FontFace">
-              <Family>
-                <url>rbxasset://fonts/families/GothamSSm.json</url>
-              </Family>
-              <Weight>700</Weight>
-              <Style>Normal</Style>
-            </Font>
-            <float name="TextSize">13</float>
             <bool name="TextWrapped">true</bool>
-            <int name="BorderSizePixel">0</int>
             <bool name="AutoButtonColor">true</bool>
             <bool name="Active">true</bool>
             <bool name="Visible">false</bool>
+            <int name="BorderSizePixel">0</int>
+            <Color3 name="TextColor3">
+              <R>0.9568627450980393</R>
+              <G>0.9568627450980393</G>
+              <B>0.9725490196078431</B>
+            </Color3>
+            <float name="TextSize">16</float>
+            <Font name="FontFace">
+              <Family>
+                <url>rbxasset://fonts/families/BuilderSans.json</url>
+              </Family>
+              <Weight>400</Weight>
+              <Style>Normal</Style>
+            </Font>
+            <Color3 name="BackgroundColor3">
+              <R>0.15294117647058825</R>
+              <G>0.15294117647058825</G>
+              <B>0.18823529411764706</B>
+            </Color3>
+            <UDim2 name="Position">
+              <XS>0</XS>
+              <XO>20</XO>
+              <YS>1</YS>
+              <YO>-94</YO>
+            </UDim2>
+            <UDim2 name="Size">
+              <XS>1</XS>
+              <XO>-40</XO>
+              <YS>0</YS>
+              <YO>44</YO>
+            </UDim2>
           </Properties>
           <Item class="UICorner" referent="UI49">
             <Properties>
               <string name="Name">Corner</string>
               <UDim name="CornerRadius">
                 <S>0</S>
-                <O>5</O>
+                <O>8</O>
               </UDim>
             </Properties>
           </Item>
@@ -570,47 +575,47 @@
           <Properties>
             <string name="Name">ClearButton</string>
             <string name="Text">CLEAR</string>
+            <bool name="TextWrapped">true</bool>
+            <bool name="AutoButtonColor">true</bool>
+            <bool name="Active">true</bool>
+            <int name="BorderSizePixel">0</int>
+            <Color3 name="TextColor3">
+              <R>0.9568627450980393</R>
+              <G>0.9568627450980393</G>
+              <B>0.9725490196078431</B>
+            </Color3>
+            <float name="TextSize">16</float>
+            <Font name="FontFace">
+              <Family>
+                <url>rbxasset://fonts/families/BuilderSans.json</url>
+              </Family>
+              <Weight>400</Weight>
+              <Style>Normal</Style>
+            </Font>
+            <Color3 name="BackgroundColor3">
+              <R>0.15294117647058825</R>
+              <G>0.15294117647058825</G>
+              <B>0.18823529411764706</B>
+            </Color3>
             <UDim2 name="Position">
               <XS>0</XS>
-              <XO>12</XO>
+              <XO>20</XO>
               <YS>1</YS>
-              <YO>-36</YO>
+              <YO>-44</YO>
             </UDim2>
             <UDim2 name="Size">
               <XS>1</XS>
-              <XO>-24</XO>
+              <XO>-40</XO>
               <YS>0</YS>
-              <YO>26</YO>
+              <YO>40</YO>
             </UDim2>
-            <Color3 name="BackgroundColor3">
-              <R>0.13725490196078433</R>
-              <G>0.19215686274509805</G>
-              <B>0.24705882352941178</B>
-            </Color3>
-            <Color3 name="TextColor3">
-              <R>0.6431372549019608</R>
-              <G>0.7333333333333333</G>
-              <B>0.7490196078431373</B>
-            </Color3>
-            <Font name="FontFace">
-              <Family>
-                <url>rbxasset://fonts/families/GothamSSm.json</url>
-              </Family>
-              <Weight>700</Weight>
-              <Style>Normal</Style>
-            </Font>
-            <float name="TextSize">13</float>
-            <bool name="TextWrapped">true</bool>
-            <int name="BorderSizePixel">0</int>
-            <bool name="AutoButtonColor">true</bool>
-            <bool name="Active">true</bool>
           </Properties>
           <Item class="UICorner" referent="UI51">
             <Properties>
               <string name="Name">Corner</string>
               <UDim name="CornerRadius">
                 <S>0</S>
-                <O>5</O>
+                <O>8</O>
               </UDim>
             </Properties>
           </Item>
@@ -620,37 +625,37 @@
         <Properties>
           <string name="Name">Status</string>
           <string name="Text" />
+          <float name="BackgroundTransparency">1</float>
+          <bool name="TextWrapped">true</bool>
+          <token name="TextXAlignment">0</token>
+          <token name="TextYAlignment">0</token>
+          <bool name="Active">false</bool>
+          <int name="BorderSizePixel">0</int>
+          <Color3 name="TextColor3">
+            <R>0.9568627450980393</R>
+            <G>0.9568627450980393</G>
+            <B>0.9725490196078431</B>
+          </Color3>
+          <float name="TextSize">16</float>
+          <Font name="FontFace">
+            <Family>
+              <url>rbxasset://fonts/families/BuilderSans.json</url>
+            </Family>
+            <Weight>400</Weight>
+            <Style>Normal</Style>
+          </Font>
           <UDim2 name="Position">
             <XS>0.25</XS>
             <XO>0</XO>
             <YS>1</YS>
-            <YO>-24</YO>
+            <YO>-42</YO>
           </UDim2>
           <UDim2 name="Size">
             <XS>0.73</XS>
             <XO>0</XO>
             <YS>0</YS>
-            <YO>22</YO>
+            <YO>36</YO>
           </UDim2>
-          <float name="BackgroundTransparency">1</float>
-          <int name="BorderSizePixel">0</int>
-          <Font name="FontFace">
-            <Family>
-              <url>rbxasset://fonts/families/GothamSSm.json</url>
-            </Family>
-            <Weight>400</Weight>
-            <Style>Normal</Style>
-          </Font>
-          <float name="TextSize">12</float>
-          <Color3 name="TextColor3">
-            <R>0.9450980392156862</R>
-            <G>0.7607843137254902</G>
-            <B>0.4549019607843137</B>
-          </Color3>
-          <bool name="TextWrapped">true</bool>
-          <token name="TextXAlignment">0</token>
-          <token name="TextYAlignment">0</token>
-          <bool name="Active">false</bool>
         </Properties>
       </Item>
       <Item class="Frame" referent="UI53">
@@ -668,15 +673,15 @@
             <YS>0</YS>
             <YO>158</YO>
           </UDim2>
-          <int name="BorderSizePixel">0</int>
           <int name="ZIndex">60</int>
           <bool name="Visible">false</bool>
-          <float name="BackgroundTransparency">0.02</float>
           <Color3 name="BackgroundColor3">
-            <R>0.054901960784313725</R>
-            <G>0.08235294117647059</G>
-            <B>0.12156862745098039</B>
+            <R>0.11764705882352941</R>
+            <G>0.11764705882352941</G>
+            <B>0.1411764705882353</B>
           </Color3>
+          <int name="BorderSizePixel">0</int>
+          <float name="BackgroundTransparency">0.05</float>
         </Properties>
         <Item class="UICorner" referent="UI54">
           <Properties>
@@ -691,9 +696,9 @@
           <Properties>
             <string name="Name">Border</string>
             <Color3 name="Color">
-              <R>0.2784313725490196</R>
-              <G>0.36470588235294116</G>
-              <B>0.4235294117647059</B>
+              <R>0.22745098039215686</R>
+              <G>0.22745098039215686</G>
+              <B>0.27058823529411763</B>
             </Color3>
             <float name="Thickness">1</float>
           </Properties>
@@ -713,14 +718,15 @@
               <YS>1</YS>
               <YO>0</YO>
             </UDim2>
-            <int name="BorderSizePixel">0</int>
             <int name="ZIndex">61</int>
             <float name="BackgroundTransparency">0</float>
             <Color3 name="BackgroundColor3">
-              <R>0.43529411764705883</R>
-              <G>0.8549019607843137</G>
-              <B>0.7686274509803922</B>
+              <R>0.11764705882352941</R>
+              <G>0.11764705882352941</G>
+              <B>0.1411764705882353</B>
             </Color3>
+            <int name="BorderSizePixel">0</int>
+            <bool name="Visible">false</bool>
           </Properties>
         </Item>
         <Item class="TextLabel" referent="UI57">
@@ -740,25 +746,25 @@
               <YO>24</YO>
             </UDim2>
             <float name="BackgroundTransparency">1</float>
-            <int name="BorderSizePixel">0</int>
-            <Font name="FontFace">
-              <Family>
-                <url>rbxasset://fonts/families/GothamSSm.json</url>
-              </Family>
-              <Weight>400</Weight>
-              <Style>Normal</Style>
-            </Font>
-            <float name="TextSize">17</float>
-            <Color3 name="TextColor3">
-              <R>0.9254901960784314</R>
-              <G>0.9490196078431372</G>
-              <B>0.9372549019607843</B>
-            </Color3>
             <bool name="TextWrapped">true</bool>
             <token name="TextXAlignment">0</token>
             <token name="TextYAlignment">0</token>
             <bool name="Active">false</bool>
             <int name="ZIndex">61</int>
+            <int name="BorderSizePixel">0</int>
+            <Color3 name="TextColor3">
+              <R>0.9568627450980393</R>
+              <G>0.9568627450980393</G>
+              <B>0.9725490196078431</B>
+            </Color3>
+            <Font name="FontFace">
+              <Family>
+                <url>rbxasset://fonts/families/BuilderSans.json</url>
+              </Family>
+              <Weight>700</Weight>
+              <Style>Normal</Style>
+            </Font>
+            <float name="TextSize">20</float>
           </Properties>
         </Item>
         <Item class="Frame" referent="UI58">
@@ -776,13 +782,13 @@
               <YS>0</YS>
               <YO>1</YO>
             </UDim2>
-            <int name="BorderSizePixel">0</int>
             <int name="ZIndex">61</int>
             <float name="BackgroundTransparency">0</float>
+            <int name="BorderSizePixel">0</int>
             <Color3 name="BackgroundColor3">
-              <R>0.2784313725490196</R>
-              <G>0.36470588235294116</G>
-              <B>0.4235294117647059</B>
+              <R>0.22745098039215686</R>
+              <G>0.22745098039215686</G>
+              <B>0.27058823529411763</B>
             </Color3>
           </Properties>
         </Item>
@@ -803,25 +809,25 @@
               <YO>26</YO>
             </UDim2>
             <float name="BackgroundTransparency">1</float>
-            <int name="BorderSizePixel">0</int>
-            <Font name="FontFace">
-              <Family>
-                <url>rbxasset://fonts/families/GothamSSm.json</url>
-              </Family>
-              <Weight>400</Weight>
-              <Style>Normal</Style>
-            </Font>
-            <float name="TextSize">18</float>
-            <Color3 name="TextColor3">
-              <R>0.9450980392156862</R>
-              <G>0.7607843137254902</G>
-              <B>0.4549019607843137</B>
-            </Color3>
             <bool name="TextWrapped">true</bool>
             <token name="TextXAlignment">0</token>
             <token name="TextYAlignment">0</token>
             <bool name="Active">false</bool>
             <int name="ZIndex">61</int>
+            <int name="BorderSizePixel">0</int>
+            <Font name="FontFace">
+              <Family>
+                <url>rbxasset://fonts/families/BuilderSans.json</url>
+              </Family>
+              <Weight>400</Weight>
+              <Style>Normal</Style>
+            </Font>
+            <Color3 name="TextColor3">
+              <R>0.39215686274509803</R>
+              <G>0.9098039215686274</G>
+              <B>1.0</B>
+            </Color3>
+            <float name="TextSize">22</float>
           </Properties>
         </Item>
         <Item class="TextLabel" referent="UI60">
@@ -841,25 +847,25 @@
               <YO>62</YO>
             </UDim2>
             <float name="BackgroundTransparency">1</float>
-            <int name="BorderSizePixel">0</int>
-            <Font name="FontFace">
-              <Family>
-                <url>rbxasset://fonts/families/GothamSSm.json</url>
-              </Family>
-              <Weight>400</Weight>
-              <Style>Normal</Style>
-            </Font>
-            <float name="TextSize">13</float>
-            <Color3 name="TextColor3">
-              <R>0.6431372549019608</R>
-              <G>0.7333333333333333</G>
-              <B>0.7490196078431373</B>
-            </Color3>
             <bool name="TextWrapped">true</bool>
             <token name="TextXAlignment">0</token>
             <token name="TextYAlignment">0</token>
             <bool name="Active">false</bool>
             <int name="ZIndex">61</int>
+            <int name="BorderSizePixel">0</int>
+            <Font name="FontFace">
+              <Family>
+                <url>rbxasset://fonts/families/BuilderSans.json</url>
+              </Family>
+              <Weight>400</Weight>
+              <Style>Normal</Style>
+            </Font>
+            <Color3 name="TextColor3">
+              <R>0.6941176470588235</R>
+              <G>0.6941176470588235</G>
+              <B>0.7490196078431373</B>
+            </Color3>
+            <float name="TextSize">14</float>
           </Properties>
         </Item>
       </Item>
@@ -879,108 +885,108 @@
             <YO>1</YO>
           </UDim2>
           <float name="BackgroundTransparency">1</float>
-          <int name="BorderSizePixel">0</int>
           <bool name="Visible">false</bool>
           <bool name="Active">false</bool>
           <int name="ZIndex">90</int>
+          <int name="BorderSizePixel">0</int>
         </Properties>
       </Item>
       <Item class="TextLabel" referent="UI62">
         <Properties>
           <string name="Name">ShopStatus</string>
           <string name="Text">SHOP CLOSED</string>
-          <UDim2 name="Position">
-            <XS>0</XS>
-            <XO>16</XO>
-            <YS>0</YS>
-            <YO>14</YO>
-          </UDim2>
-          <UDim2 name="Size">
-            <XS>0</XS>
-            <XO>400</XO>
-            <YS>0</YS>
-            <YO>28</YO>
-          </UDim2>
           <float name="BackgroundTransparency">1</float>
-          <int name="BorderSizePixel">0</int>
-          <Font name="FontFace">
-            <Family>
-              <url>rbxasset://fonts/families/GothamSSm.json</url>
-            </Family>
-            <Weight>400</Weight>
-            <Style>Normal</Style>
-          </Font>
-          <float name="TextSize">14</float>
-          <Color3 name="TextColor3">
-            <R>0.43529411764705883</R>
-            <G>0.8549019607843137</G>
-            <B>0.7686274509803922</B>
-          </Color3>
           <bool name="TextWrapped">true</bool>
           <token name="TextXAlignment">0</token>
           <token name="TextYAlignment">0</token>
           <bool name="Active">false</bool>
+          <int name="BorderSizePixel">0</int>
+          <Font name="FontFace">
+            <Family>
+              <url>rbxasset://fonts/families/BuilderSans.json</url>
+            </Family>
+            <Weight>400</Weight>
+            <Style>Normal</Style>
+          </Font>
+          <Color3 name="TextColor3">
+            <R>0.6941176470588235</R>
+            <G>0.6941176470588235</G>
+            <B>0.7490196078431373</B>
+          </Color3>
+          <float name="TextSize">14</float>
+          <UDim2 name="Position">
+            <XS>0</XS>
+            <XO>80</XO>
+            <YS>0</YS>
+            <YO>20</YO>
+          </UDim2>
+          <UDim2 name="Size">
+            <XS>0</XS>
+            <XO>250</XO>
+            <YS>0</YS>
+            <YO>28</YO>
+          </UDim2>
         </Properties>
       </Item>
       <Item class="TextLabel" referent="UI63">
         <Properties>
           <string name="Name">SuspicionLabel</string>
           <string name="Text">SUSPICION 0/100</string>
-          <UDim2 name="Position">
-            <XS>1</XS>
-            <XO>-235</XO>
-            <YS>0</YS>
-            <YO>16</YO>
-          </UDim2>
-          <UDim2 name="Size">
-            <XS>0</XS>
-            <XO>210</XO>
-            <YS>0</YS>
-            <YO>24</YO>
-          </UDim2>
           <float name="BackgroundTransparency">1</float>
-          <int name="BorderSizePixel">0</int>
-          <Font name="FontFace">
-            <Family>
-              <url>rbxasset://fonts/families/GothamSSm.json</url>
-            </Family>
-            <Weight>400</Weight>
-            <Style>Normal</Style>
-          </Font>
-          <float name="TextSize">14</float>
-          <Color3 name="TextColor3">
-            <R>0.6431372549019608</R>
-            <G>0.7333333333333333</G>
-            <B>0.7490196078431373</B>
-          </Color3>
           <bool name="TextWrapped">true</bool>
           <token name="TextXAlignment">0</token>
           <token name="TextYAlignment">0</token>
           <bool name="Active">false</bool>
+          <int name="BorderSizePixel">0</int>
+          <Font name="FontFace">
+            <Family>
+              <url>rbxasset://fonts/families/BuilderSans.json</url>
+            </Family>
+            <Weight>400</Weight>
+            <Style>Normal</Style>
+          </Font>
+          <Color3 name="TextColor3">
+            <R>0.6941176470588235</R>
+            <G>0.6941176470588235</G>
+            <B>0.7490196078431373</B>
+          </Color3>
+          <float name="TextSize">14</float>
+          <UDim2 name="Size">
+            <XS>0</XS>
+            <XO>300</XO>
+            <YS>0</YS>
+            <YO>28</YO>
+          </UDim2>
+          <UDim2 name="Position">
+            <XS>1</XS>
+            <XO>-324</XO>
+            <YS>0</YS>
+            <YO>20</YO>
+          </UDim2>
         </Properties>
       </Item>
       <Item class="Frame" referent="UI64">
         <Properties>
           <string name="Name">SuspicionTrack</string>
+          <float name="BackgroundTransparency">0</float>
+          <Color3 name="BackgroundColor3">
+            <R>0.11764705882352941</R>
+            <G>0.11764705882352941</G>
+            <B>0.1411764705882353</B>
+          </Color3>
+          <int name="BorderSizePixel">0</int>
           <UDim2 name="Position">
             <XS>1</XS>
-            <XO>-235</XO>
+            <XO>-324</XO>
             <YS>0</YS>
-            <YO>40</YO>
+            <YO>54</YO>
           </UDim2>
           <UDim2 name="Size">
             <XS>0</XS>
-            <XO>210</XO>
+            <XO>300</XO>
             <YS>0</YS>
-            <YO>8</YO>
+            <YO>4</YO>
           </UDim2>
-          <int name="BorderSizePixel">0</int>
-          <float name="BackgroundTransparency">0</float>
-          <Color3 name="BackgroundColor3">
-            <R>0.13725490196078433</R>
-            <G>0.19215686274509805</G>
-            <B>0.24705882352941178</B>
-          </Color3>
         </Properties>
         <Item class="Frame" referent="UI65">
           <Properties>
@@ -997,13 +1003,13 @@
               <YS>1</YS>
               <YO>0</YO>
             </UDim2>
-            <int name="BorderSizePixel">0</int>
             <float name="BackgroundTransparency">0</float>
             <Color3 name="BackgroundColor3">
-              <R>0.43529411764705883</R>
-              <G>0.8549019607843137</G>
-              <B>0.7686274509803922</B>
+              <R>0.11764705882352941</R>
+              <G>0.11764705882352941</G>
+              <B>0.1411764705882353</B>
             </Color3>
+            <int name="BorderSizePixel">0</int>
           </Properties>
         </Item>
       </Item>
@@ -1022,15 +1028,15 @@
             <YS>0</YS>
             <YO>380</YO>
           </UDim2>
-          <int name="BorderSizePixel">0</int>
           <int name="ZIndex">70</int>
           <bool name="Visible">false</bool>
-          <float name="BackgroundTransparency">0.02</float>
           <Color3 name="BackgroundColor3">
-            <R>0.054901960784313725</R>
-            <G>0.08235294117647059</G>
-            <B>0.12156862745098039</B>
+            <R>0.11764705882352941</R>
+            <G>0.11764705882352941</G>
+            <B>0.1411764705882353</B>
           </Color3>
+          <int name="BorderSizePixel">0</int>
+          <float name="BackgroundTransparency">0.15</float>
         </Properties>
         <Item class="UICorner" referent="UI67">
           <Properties>
@@ -1045,9 +1051,9 @@
           <Properties>
             <string name="Name">Border</string>
             <Color3 name="Color">
-              <R>0.2784313725490196</R>
-              <G>0.36470588235294116</G>
-              <B>0.4235294117647059</B>
+              <R>0.22745098039215686</R>
+              <G>0.22745098039215686</G>
+              <B>0.27058823529411763</B>
             </Color3>
             <float name="Thickness">1</float>
           </Properties>
@@ -1069,24 +1075,24 @@
               <YO>30</YO>
             </UDim2>
             <float name="BackgroundTransparency">1</float>
-            <int name="BorderSizePixel">0</int>
-            <Font name="FontFace">
-              <Family>
-                <url>rbxasset://fonts/families/GothamSSm.json</url>
-              </Family>
-              <Weight>400</Weight>
-              <Style>Normal</Style>
-            </Font>
-            <float name="TextSize">17</float>
-            <Color3 name="TextColor3">
-              <R>0.9450980392156862</R>
-              <G>0.7607843137254902</G>
-              <B>0.4549019607843137</B>
-            </Color3>
             <bool name="TextWrapped">true</bool>
             <token name="TextXAlignment">0</token>
             <token name="TextYAlignment">0</token>
             <bool name="Active">true</bool>
+            <int name="BorderSizePixel">0</int>
+            <Color3 name="TextColor3">
+              <R>0.9568627450980393</R>
+              <G>0.9568627450980393</G>
+              <B>0.9725490196078431</B>
+            </Color3>
+            <Font name="FontFace">
+              <Family>
+                <url>rbxasset://fonts/families/BuilderSans.json</url>
+              </Family>
+              <Weight>700</Weight>
+              <Style>Normal</Style>
+            </Font>
+            <float name="TextSize">20</float>
           </Properties>
         </Item>
         <Item class="TextButton" referent="UI70">
@@ -1105,35 +1111,35 @@
               <YS>0</YS>
               <YO>30</YO>
             </UDim2>
-            <Color3 name="BackgroundColor3">
-              <R>0.43529411764705883</R>
-              <G>0.8549019607843137</G>
-              <B>0.7686274509803922</B>
-            </Color3>
-            <Color3 name="TextColor3">
-              <R>0.054901960784313725</R>
-              <G>0.08235294117647059</G>
-              <B>0.12156862745098039</B>
-            </Color3>
-            <Font name="FontFace">
-              <Family>
-                <url>rbxasset://fonts/families/GothamSSm.json</url>
-              </Family>
-              <Weight>700</Weight>
-              <Style>Normal</Style>
-            </Font>
-            <float name="TextSize">13</float>
             <bool name="TextWrapped">true</bool>
-            <int name="BorderSizePixel">0</int>
             <bool name="AutoButtonColor">true</bool>
             <bool name="Active">true</bool>
+            <int name="BorderSizePixel">0</int>
+            <Color3 name="TextColor3">
+              <R>0.9568627450980393</R>
+              <G>0.9568627450980393</G>
+              <B>0.9725490196078431</B>
+            </Color3>
+            <float name="TextSize">16</float>
+            <Font name="FontFace">
+              <Family>
+                <url>rbxasset://fonts/families/BuilderSans.json</url>
+              </Family>
+              <Weight>400</Weight>
+              <Style>Normal</Style>
+            </Font>
+            <Color3 name="BackgroundColor3">
+              <R>0.15294117647058825</R>
+              <G>0.15294117647058825</G>
+              <B>0.18823529411764706</B>
+            </Color3>
           </Properties>
           <Item class="UICorner" referent="UI71">
             <Properties>
               <string name="Name">Corner</string>
               <UDim name="CornerRadius">
                 <S>0</S>
-                <O>5</O>
+                <O>8</O>
               </UDim>
             </Properties>
           </Item>
@@ -1172,8 +1178,8 @@
                 <YO>0</YO>
               </UDim2>
               <float name="BackgroundTransparency">1</float>
-              <int name="BorderSizePixel">0</int>
               <bool name="ClipsDescendants">true</bool>
+              <int name="BorderSizePixel">0</int>
             </Properties>
             <Item class="TextLabel" referent="UI74">
               <Properties>
@@ -1192,25 +1198,25 @@
                   <YO>28</YO>
                 </UDim2>
                 <float name="BackgroundTransparency">1</float>
-                <int name="BorderSizePixel">0</int>
-                <Font name="FontFace">
-                  <Family>
-                    <url>rbxasset://fonts/families/GothamSSm.json</url>
-                  </Family>
-                  <Weight>400</Weight>
-                  <Style>Normal</Style>
-                </Font>
-                <float name="TextSize">14</float>
-                <Color3 name="TextColor3">
-                  <R>0.9254901960784314</R>
-                  <G>0.9490196078431372</G>
-                  <B>0.9372549019607843</B>
-                </Color3>
                 <bool name="TextWrapped">true</bool>
                 <token name="TextXAlignment">0</token>
                 <token name="TextYAlignment">0</token>
                 <bool name="Active">false</bool>
                 <bool name="Visible">false</bool>
+                <int name="BorderSizePixel">0</int>
+                <Color3 name="TextColor3">
+                  <R>0.9568627450980393</R>
+                  <G>0.9568627450980393</G>
+                  <B>0.9725490196078431</B>
+                </Color3>
+                <float name="TextSize">16</float>
+                <Font name="FontFace">
+                  <Family>
+                    <url>rbxasset://fonts/families/BuilderSans.json</url>
+                  </Family>
+                  <Weight>400</Weight>
+                  <Style>Normal</Style>
+                </Font>
               </Properties>
             </Item>
             <Item class="ScrollingFrame" referent="UI75">
@@ -1229,8 +1235,6 @@
                   <YO>0</YO>
                 </UDim2>
                 <float name="BackgroundTransparency">1</float>
-                <int name="BorderSizePixel">0</int>
-                <int name="ScrollBarThickness">4</int>
                 <UDim2 name="CanvasSize">
                   <XS>0</XS>
                   <XO>0</XO>
@@ -1242,6 +1246,13 @@
                   <Y>0</Y>
                 </Vector2>
                 <token name="ScrollingDirection">2</token>
+                <int name="BorderSizePixel">0</int>
+                <Color3 name="ScrollBarImageColor3">
+                  <R>0.45098039215686275</R>
+                  <G>0.45098039215686275</G>
+                  <B>0.5058823529411764</B>
+                </Color3>
+                <int name="ScrollBarThickness">3</int>
               </Properties>
               <Item class="Frame" referent="UI76">
                 <Properties>
@@ -1277,18 +1288,18 @@
                       <YO>82</YO>
                     </UDim2>
                     <float name="BackgroundTransparency">1</float>
-                    <int name="BorderSizePixel">0</int>
                     <bool name="Active">false</bool>
+                    <int name="BorderSizePixel">0</int>
                   </Properties>
                   <Item class="UIStroke" referent="UI78">
                     <Properties>
                       <string name="Name">GridLine</string>
-                      <Color3 name="Color">
-                        <R>0.3686274509803922</R>
-                        <G>0.5686274509803921</G>
-                        <B>0.6078431372549019</B>
-                      </Color3>
                       <float name="Transparency">0.28</float>
+                      <Color3 name="Color">
+                        <R>0.22745098039215686</R>
+                        <G>0.22745098039215686</G>
+                        <B>0.27058823529411763</B>
+                      </Color3>
                       <float name="Thickness">1</float>
                     </Properties>
                   </Item>
@@ -1309,18 +1320,18 @@
                       <YO>82</YO>
                     </UDim2>
                     <float name="BackgroundTransparency">1</float>
-                    <int name="BorderSizePixel">0</int>
                     <bool name="Active">false</bool>
+                    <int name="BorderSizePixel">0</int>
                   </Properties>
                   <Item class="UIStroke" referent="UI80">
                     <Properties>
                       <string name="Name">GridLine</string>
-                      <Color3 name="Color">
-                        <R>0.3686274509803922</R>
-                        <G>0.5686274509803921</G>
-                        <B>0.6078431372549019</B>
-                      </Color3>
                       <float name="Transparency">0.28</float>
+                      <Color3 name="Color">
+                        <R>0.22745098039215686</R>
+                        <G>0.22745098039215686</G>
+                        <B>0.27058823529411763</B>
+                      </Color3>
                       <float name="Thickness">1</float>
                     </Properties>
                   </Item>
@@ -1341,18 +1352,18 @@
                       <YO>82</YO>
                     </UDim2>
                     <float name="BackgroundTransparency">1</float>
-                    <int name="BorderSizePixel">0</int>
                     <bool name="Active">false</bool>
+                    <int name="BorderSizePixel">0</int>
                   </Properties>
                   <Item class="UIStroke" referent="UI82">
                     <Properties>
                       <string name="Name">GridLine</string>
-                      <Color3 name="Color">
-                        <R>0.3686274509803922</R>
-                        <G>0.5686274509803921</G>
-                        <B>0.6078431372549019</B>
-                      </Color3>
                       <float name="Transparency">0.28</float>
+                      <Color3 name="Color">
+                        <R>0.22745098039215686</R>
+                        <G>0.22745098039215686</G>
+                        <B>0.27058823529411763</B>
+                      </Color3>
                       <float name="Thickness">1</float>
                     </Properties>
                   </Item>
@@ -1373,18 +1384,18 @@
                       <YO>82</YO>
                     </UDim2>
                     <float name="BackgroundTransparency">1</float>
-                    <int name="BorderSizePixel">0</int>
                     <bool name="Active">false</bool>
+                    <int name="BorderSizePixel">0</int>
                   </Properties>
                   <Item class="UIStroke" referent="UI84">
                     <Properties>
                       <string name="Name">GridLine</string>
-                      <Color3 name="Color">
-                        <R>0.3686274509803922</R>
-                        <G>0.5686274509803921</G>
-                        <B>0.6078431372549019</B>
-                      </Color3>
                       <float name="Transparency">0.28</float>
+                      <Color3 name="Color">
+                        <R>0.22745098039215686</R>
+                        <G>0.22745098039215686</G>
+                        <B>0.27058823529411763</B>
+                      </Color3>
                       <float name="Thickness">1</float>
                     </Properties>
                   </Item>
@@ -1405,18 +1416,18 @@
                       <YO>82</YO>
                     </UDim2>
                     <float name="BackgroundTransparency">1</float>
-                    <int name="BorderSizePixel">0</int>
                     <bool name="Active">false</bool>
+                    <int name="BorderSizePixel">0</int>
                   </Properties>
                   <Item class="UIStroke" referent="UI86">
                     <Properties>
                       <string name="Name">GridLine</string>
-                      <Color3 name="Color">
-                        <R>0.3686274509803922</R>
-                        <G>0.5686274509803921</G>
-                        <B>0.6078431372549019</B>
-                      </Color3>
                       <float name="Transparency">0.28</float>
+                      <Color3 name="Color">
+                        <R>0.22745098039215686</R>
+                        <G>0.22745098039215686</G>
+                        <B>0.27058823529411763</B>
+                      </Color3>
                       <float name="Thickness">1</float>
                     </Properties>
                   </Item>
@@ -1437,18 +1448,18 @@
                       <YO>82</YO>
                     </UDim2>
                     <float name="BackgroundTransparency">1</float>
-                    <int name="BorderSizePixel">0</int>
                     <bool name="Active">false</bool>
+                    <int name="BorderSizePixel">0</int>
                   </Properties>
                   <Item class="UIStroke" referent="UI88">
                     <Properties>
                       <string name="Name">GridLine</string>
-                      <Color3 name="Color">
-                        <R>0.3686274509803922</R>
-                        <G>0.5686274509803921</G>
-                        <B>0.6078431372549019</B>
-                      </Color3>
                       <float name="Transparency">0.28</float>
+                      <Color3 name="Color">
+                        <R>0.22745098039215686</R>
+                        <G>0.22745098039215686</G>
+                        <B>0.27058823529411763</B>
+                      </Color3>
                       <float name="Thickness">1</float>
                     </Properties>
                   </Item>
@@ -1471,16 +1482,16 @@
                 <YS>0</YS>
                 <YO>1</YO>
               </UDim2>
-              <int name="BorderSizePixel">0</int>
               <bool name="Visible">false</bool>
               <bool name="Active">false</bool>
               <int name="ZIndex">30</int>
-              <float name="BackgroundTransparency">0.48</float>
+              <int name="BorderSizePixel">0</int>
               <Color3 name="BackgroundColor3">
-                <R>0.43529411764705883</R>
-                <G>0.8549019607843137</G>
-                <B>0.7686274509803922</B>
+                <R>0.39215686274509803</R>
+                <G>0.9098039215686274</G>
+                <B>1.0</B>
               </Color3>
+              <float name="BackgroundTransparency">0.78</float>
             </Properties>
           </Item>
         </Item>
@@ -1501,24 +1512,24 @@
               <YO>36</YO>
             </UDim2>
             <float name="BackgroundTransparency">1</float>
-            <int name="BorderSizePixel">0</int>
-            <Font name="FontFace">
-              <Family>
-                <url>rbxasset://fonts/families/GothamSSm.json</url>
-              </Family>
-              <Weight>400</Weight>
-              <Style>Normal</Style>
-            </Font>
-            <float name="TextSize">13</float>
-            <Color3 name="TextColor3">
-              <R>0.6431372549019608</R>
-              <G>0.7333333333333333</G>
-              <B>0.7490196078431373</B>
-            </Color3>
             <bool name="TextWrapped">true</bool>
             <token name="TextXAlignment">0</token>
             <token name="TextYAlignment">0</token>
             <bool name="Active">false</bool>
+            <int name="BorderSizePixel">0</int>
+            <Font name="FontFace">
+              <Family>
+                <url>rbxasset://fonts/families/BuilderSans.json</url>
+              </Family>
+              <Weight>400</Weight>
+              <Style>Normal</Style>
+            </Font>
+            <Color3 name="TextColor3">
+              <R>0.6941176470588235</R>
+              <G>0.6941176470588235</G>
+              <B>0.7490196078431373</B>
+            </Color3>
+            <float name="TextSize">14</float>
           </Properties>
         </Item>
       </Item>
@@ -1538,9 +1549,9 @@
             <YO>1</YO>
           </UDim2>
           <float name="BackgroundTransparency">1</float>
-          <int name="BorderSizePixel">0</int>
           <bool name="Visible">false</bool>
           <int name="ZIndex">90</int>
+          <int name="BorderSizePixel">0</int>
         </Properties>
       </Item>
       <Item class="Frame" referent="UI92">
@@ -1558,15 +1569,15 @@
             <YS>0</YS>
             <YO>430</YO>
           </UDim2>
-          <int name="BorderSizePixel">0</int>
           <int name="ZIndex">65</int>
           <bool name="Visible">false</bool>
-          <float name="BackgroundTransparency">0.02</float>
           <Color3 name="BackgroundColor3">
-            <R>0.054901960784313725</R>
-            <G>0.08235294117647059</G>
-            <B>0.12156862745098039</B>
+            <R>0.11764705882352941</R>
+            <G>0.11764705882352941</G>
+            <B>0.1411764705882353</B>
           </Color3>
+          <int name="BorderSizePixel">0</int>
+          <float name="BackgroundTransparency">0.15</float>
         </Properties>
         <Item class="UICorner" referent="UI93">
           <Properties>
@@ -1581,9 +1592,9 @@
           <Properties>
             <string name="Name">Border</string>
             <Color3 name="Color">
-              <R>0.2784313725490196</R>
-              <G>0.36470588235294116</G>
-              <B>0.4235294117647059</B>
+              <R>0.22745098039215686</R>
+              <G>0.22745098039215686</G>
+              <B>0.27058823529411763</B>
             </Color3>
             <float name="Thickness">1</float>
           </Properties>
@@ -1605,24 +1616,24 @@
               <YO>26</YO>
             </UDim2>
             <float name="BackgroundTransparency">1</float>
-            <int name="BorderSizePixel">0</int>
-            <Font name="FontFace">
-              <Family>
-                <url>rbxasset://fonts/families/GothamSSm.json</url>
-              </Family>
-              <Weight>400</Weight>
-              <Style>Normal</Style>
-            </Font>
-            <float name="TextSize">17</float>
-            <Color3 name="TextColor3">
-              <R>0.9450980392156862</R>
-              <G>0.7607843137254902</G>
-              <B>0.4549019607843137</B>
-            </Color3>
             <bool name="TextWrapped">true</bool>
             <token name="TextXAlignment">0</token>
             <token name="TextYAlignment">0</token>
             <bool name="Active">true</bool>
+            <int name="BorderSizePixel">0</int>
+            <Color3 name="TextColor3">
+              <R>0.9568627450980393</R>
+              <G>0.9568627450980393</G>
+              <B>0.9725490196078431</B>
+            </Color3>
+            <Font name="FontFace">
+              <Family>
+                <url>rbxasset://fonts/families/BuilderSans.json</url>
+              </Family>
+              <Weight>700</Weight>
+              <Style>Normal</Style>
+            </Font>
+            <float name="TextSize">20</float>
           </Properties>
         </Item>
         <Item class="TextButton" referent="UI96">
@@ -1641,35 +1652,35 @@
               <YS>0</YS>
               <YO>30</YO>
             </UDim2>
-            <Color3 name="BackgroundColor3">
-              <R>0.43529411764705883</R>
-              <G>0.8549019607843137</G>
-              <B>0.7686274509803922</B>
-            </Color3>
-            <Color3 name="TextColor3">
-              <R>0.054901960784313725</R>
-              <G>0.08235294117647059</G>
-              <B>0.12156862745098039</B>
-            </Color3>
-            <Font name="FontFace">
-              <Family>
-                <url>rbxasset://fonts/families/GothamSSm.json</url>
-              </Family>
-              <Weight>700</Weight>
-              <Style>Normal</Style>
-            </Font>
-            <float name="TextSize">13</float>
             <bool name="TextWrapped">true</bool>
-            <int name="BorderSizePixel">0</int>
             <bool name="AutoButtonColor">true</bool>
             <bool name="Active">true</bool>
+            <int name="BorderSizePixel">0</int>
+            <Color3 name="TextColor3">
+              <R>0.9568627450980393</R>
+              <G>0.9568627450980393</G>
+              <B>0.9725490196078431</B>
+            </Color3>
+            <float name="TextSize">16</float>
+            <Font name="FontFace">
+              <Family>
+                <url>rbxasset://fonts/families/BuilderSans.json</url>
+              </Family>
+              <Weight>400</Weight>
+              <Style>Normal</Style>
+            </Font>
+            <Color3 name="BackgroundColor3">
+              <R>0.15294117647058825</R>
+              <G>0.15294117647058825</G>
+              <B>0.18823529411764706</B>
+            </Color3>
           </Properties>
           <Item class="UICorner" referent="UI97">
             <Properties>
               <string name="Name">Corner</string>
               <UDim name="CornerRadius">
                 <S>0</S>
-                <O>5</O>
+                <O>8</O>
               </UDim>
             </Properties>
           </Item>
@@ -1691,24 +1702,24 @@
               <YO>24</YO>
             </UDim2>
             <float name="BackgroundTransparency">1</float>
-            <int name="BorderSizePixel">0</int>
-            <Font name="FontFace">
-              <Family>
-                <url>rbxasset://fonts/families/GothamSSm.json</url>
-              </Family>
-              <Weight>400</Weight>
-              <Style>Normal</Style>
-            </Font>
-            <float name="TextSize">13</float>
-            <Color3 name="TextColor3">
-              <R>0.6431372549019608</R>
-              <G>0.7333333333333333</G>
-              <B>0.7490196078431373</B>
-            </Color3>
             <bool name="TextWrapped">true</bool>
             <token name="TextXAlignment">0</token>
             <token name="TextYAlignment">0</token>
             <bool name="Active">false</bool>
+            <int name="BorderSizePixel">0</int>
+            <Font name="FontFace">
+              <Family>
+                <url>rbxasset://fonts/families/BuilderSans.json</url>
+              </Family>
+              <Weight>400</Weight>
+              <Style>Normal</Style>
+            </Font>
+            <Color3 name="TextColor3">
+              <R>0.6941176470588235</R>
+              <G>0.6941176470588235</G>
+              <B>0.7490196078431373</B>
+            </Color3>
+            <float name="TextSize">14</float>
           </Properties>
         </Item>
         <Item class="TextLabel" referent="UI99">
@@ -1728,24 +1739,24 @@
               <YO>20</YO>
             </UDim2>
             <float name="BackgroundTransparency">1</float>
-            <int name="BorderSizePixel">0</int>
-            <Font name="FontFace">
-              <Family>
-                <url>rbxasset://fonts/families/GothamSSm.json</url>
-              </Family>
-              <Weight>400</Weight>
-              <Style>Normal</Style>
-            </Font>
-            <float name="TextSize">12</float>
-            <Color3 name="TextColor3">
-              <R>0.6431372549019608</R>
-              <G>0.7333333333333333</G>
-              <B>0.7490196078431373</B>
-            </Color3>
             <bool name="TextWrapped">true</bool>
             <token name="TextXAlignment">0</token>
             <token name="TextYAlignment">0</token>
             <bool name="Active">false</bool>
+            <int name="BorderSizePixel">0</int>
+            <Font name="FontFace">
+              <Family>
+                <url>rbxasset://fonts/families/BuilderSans.json</url>
+              </Family>
+              <Weight>400</Weight>
+              <Style>Normal</Style>
+            </Font>
+            <Color3 name="TextColor3">
+              <R>0.6941176470588235</R>
+              <G>0.6941176470588235</G>
+              <B>0.7490196078431373</B>
+            </Color3>
+            <float name="TextSize">14</float>
           </Properties>
         </Item>
         <Item class="Frame" referent="UI100">
@@ -1782,8 +1793,8 @@
                 <YO>0</YO>
               </UDim2>
               <float name="BackgroundTransparency">1</float>
-              <int name="BorderSizePixel">0</int>
               <bool name="ClipsDescendants">true</bool>
+              <int name="BorderSizePixel">0</int>
             </Properties>
             <Item class="TextLabel" referent="UI102">
               <Properties>
@@ -1802,25 +1813,25 @@
                   <YO>28</YO>
                 </UDim2>
                 <float name="BackgroundTransparency">1</float>
-                <int name="BorderSizePixel">0</int>
-                <Font name="FontFace">
-                  <Family>
-                    <url>rbxasset://fonts/families/GothamSSm.json</url>
-                  </Family>
-                  <Weight>400</Weight>
-                  <Style>Normal</Style>
-                </Font>
-                <float name="TextSize">14</float>
-                <Color3 name="TextColor3">
-                  <R>0.9254901960784314</R>
-                  <G>0.9490196078431372</G>
-                  <B>0.9372549019607843</B>
-                </Color3>
                 <bool name="TextWrapped">true</bool>
                 <token name="TextXAlignment">0</token>
                 <token name="TextYAlignment">0</token>
                 <bool name="Active">false</bool>
                 <bool name="Visible">false</bool>
+                <int name="BorderSizePixel">0</int>
+                <Color3 name="TextColor3">
+                  <R>0.9568627450980393</R>
+                  <G>0.9568627450980393</G>
+                  <B>0.9725490196078431</B>
+                </Color3>
+                <float name="TextSize">16</float>
+                <Font name="FontFace">
+                  <Family>
+                    <url>rbxasset://fonts/families/BuilderSans.json</url>
+                  </Family>
+                  <Weight>400</Weight>
+                  <Style>Normal</Style>
+                </Font>
               </Properties>
             </Item>
             <Item class="ScrollingFrame" referent="UI103">
@@ -1839,8 +1850,6 @@
                   <YO>0</YO>
                 </UDim2>
                 <float name="BackgroundTransparency">1</float>
-                <int name="BorderSizePixel">0</int>
-                <int name="ScrollBarThickness">4</int>
                 <UDim2 name="CanvasSize">
                   <XS>0</XS>
                   <XO>0</XO>
@@ -1852,6 +1861,13 @@
                   <Y>0</Y>
                 </Vector2>
                 <token name="ScrollingDirection">2</token>
+                <int name="BorderSizePixel">0</int>
+                <Color3 name="ScrollBarImageColor3">
+                  <R>0.45098039215686275</R>
+                  <G>0.45098039215686275</G>
+                  <B>0.5058823529411764</B>
+                </Color3>
+                <int name="ScrollBarThickness">3</int>
               </Properties>
               <Item class="Frame" referent="UI104">
                 <Properties>
@@ -1887,18 +1903,18 @@
                       <YO>84</YO>
                     </UDim2>
                     <float name="BackgroundTransparency">1</float>
-                    <int name="BorderSizePixel">0</int>
                     <bool name="Active">false</bool>
+                    <int name="BorderSizePixel">0</int>
                   </Properties>
                   <Item class="UIStroke" referent="UI106">
                     <Properties>
                       <string name="Name">GridLine</string>
-                      <Color3 name="Color">
-                        <R>0.3686274509803922</R>
-                        <G>0.5686274509803921</G>
-                        <B>0.6078431372549019</B>
-                      </Color3>
                       <float name="Transparency">0.28</float>
+                      <Color3 name="Color">
+                        <R>0.22745098039215686</R>
+                        <G>0.22745098039215686</G>
+                        <B>0.27058823529411763</B>
+                      </Color3>
                       <float name="Thickness">1</float>
                     </Properties>
                   </Item>
@@ -1919,18 +1935,18 @@
                       <YO>84</YO>
                     </UDim2>
                     <float name="BackgroundTransparency">1</float>
-                    <int name="BorderSizePixel">0</int>
                     <bool name="Active">false</bool>
+                    <int name="BorderSizePixel">0</int>
                   </Properties>
                   <Item class="UIStroke" referent="UI108">
                     <Properties>
                       <string name="Name">GridLine</string>
-                      <Color3 name="Color">
-                        <R>0.3686274509803922</R>
-                        <G>0.5686274509803921</G>
-                        <B>0.6078431372549019</B>
-                      </Color3>
                       <float name="Transparency">0.28</float>
+                      <Color3 name="Color">
+                        <R>0.22745098039215686</R>
+                        <G>0.22745098039215686</G>
+                        <B>0.27058823529411763</B>
+                      </Color3>
                       <float name="Thickness">1</float>
                     </Properties>
                   </Item>
@@ -1951,18 +1967,18 @@
                       <YO>84</YO>
                     </UDim2>
                     <float name="BackgroundTransparency">1</float>
-                    <int name="BorderSizePixel">0</int>
                     <bool name="Active">false</bool>
+                    <int name="BorderSizePixel">0</int>
                   </Properties>
                   <Item class="UIStroke" referent="UI110">
                     <Properties>
                       <string name="Name">GridLine</string>
-                      <Color3 name="Color">
-                        <R>0.3686274509803922</R>
-                        <G>0.5686274509803921</G>
-                        <B>0.6078431372549019</B>
-                      </Color3>
                       <float name="Transparency">0.28</float>
+                      <Color3 name="Color">
+                        <R>0.22745098039215686</R>
+                        <G>0.22745098039215686</G>
+                        <B>0.27058823529411763</B>
+                      </Color3>
                       <float name="Thickness">1</float>
                     </Properties>
                   </Item>
@@ -1988,24 +2004,24 @@
               <YO>20</YO>
             </UDim2>
             <float name="BackgroundTransparency">1</float>
-            <int name="BorderSizePixel">0</int>
-            <Font name="FontFace">
-              <Family>
-                <url>rbxasset://fonts/families/GothamSSm.json</url>
-              </Family>
-              <Weight>400</Weight>
-              <Style>Normal</Style>
-            </Font>
-            <float name="TextSize">12</float>
-            <Color3 name="TextColor3">
-              <R>0.6431372549019608</R>
-              <G>0.7333333333333333</G>
-              <B>0.7490196078431373</B>
-            </Color3>
             <bool name="TextWrapped">true</bool>
             <token name="TextXAlignment">0</token>
             <token name="TextYAlignment">0</token>
             <bool name="Active">false</bool>
+            <int name="BorderSizePixel">0</int>
+            <Font name="FontFace">
+              <Family>
+                <url>rbxasset://fonts/families/BuilderSans.json</url>
+              </Family>
+              <Weight>400</Weight>
+              <Style>Normal</Style>
+            </Font>
+            <Color3 name="TextColor3">
+              <R>0.6941176470588235</R>
+              <G>0.6941176470588235</G>
+              <B>0.7490196078431373</B>
+            </Color3>
+            <float name="TextSize">14</float>
           </Properties>
         </Item>
         <Item class="Frame" referent="UI112">
@@ -2042,8 +2058,8 @@
                 <YO>0</YO>
               </UDim2>
               <float name="BackgroundTransparency">1</float>
-              <int name="BorderSizePixel">0</int>
               <bool name="ClipsDescendants">true</bool>
+              <int name="BorderSizePixel">0</int>
             </Properties>
             <Item class="TextLabel" referent="UI114">
               <Properties>
@@ -2062,25 +2078,25 @@
                   <YO>28</YO>
                 </UDim2>
                 <float name="BackgroundTransparency">1</float>
-                <int name="BorderSizePixel">0</int>
-                <Font name="FontFace">
-                  <Family>
-                    <url>rbxasset://fonts/families/GothamSSm.json</url>
-                  </Family>
-                  <Weight>400</Weight>
-                  <Style>Normal</Style>
-                </Font>
-                <float name="TextSize">14</float>
-                <Color3 name="TextColor3">
-                  <R>0.9254901960784314</R>
-                  <G>0.9490196078431372</G>
-                  <B>0.9372549019607843</B>
-                </Color3>
                 <bool name="TextWrapped">true</bool>
                 <token name="TextXAlignment">0</token>
                 <token name="TextYAlignment">0</token>
                 <bool name="Active">false</bool>
                 <bool name="Visible">false</bool>
+                <int name="BorderSizePixel">0</int>
+                <Color3 name="TextColor3">
+                  <R>0.9568627450980393</R>
+                  <G>0.9568627450980393</G>
+                  <B>0.9725490196078431</B>
+                </Color3>
+                <float name="TextSize">16</float>
+                <Font name="FontFace">
+                  <Family>
+                    <url>rbxasset://fonts/families/BuilderSans.json</url>
+                  </Family>
+                  <Weight>400</Weight>
+                  <Style>Normal</Style>
+                </Font>
               </Properties>
             </Item>
             <Item class="ScrollingFrame" referent="UI115">
@@ -2099,8 +2115,6 @@
                   <YO>0</YO>
                 </UDim2>
                 <float name="BackgroundTransparency">1</float>
-                <int name="BorderSizePixel">0</int>
-                <int name="ScrollBarThickness">4</int>
                 <UDim2 name="CanvasSize">
                   <XS>0</XS>
                   <XO>0</XO>
@@ -2112,6 +2126,13 @@
                   <Y>0</Y>
                 </Vector2>
                 <token name="ScrollingDirection">2</token>
+                <int name="BorderSizePixel">0</int>
+                <Color3 name="ScrollBarImageColor3">
+                  <R>0.45098039215686275</R>
+                  <G>0.45098039215686275</G>
+                  <B>0.5058823529411764</B>
+                </Color3>
+                <int name="ScrollBarThickness">3</int>
               </Properties>
               <Item class="Frame" referent="UI116">
                 <Properties>
@@ -2147,18 +2168,18 @@
                       <YO>82</YO>
                     </UDim2>
                     <float name="BackgroundTransparency">1</float>
-                    <int name="BorderSizePixel">0</int>
                     <bool name="Active">false</bool>
+                    <int name="BorderSizePixel">0</int>
                   </Properties>
                   <Item class="UIStroke" referent="UI118">
                     <Properties>
                       <string name="Name">GridLine</string>
-                      <Color3 name="Color">
-                        <R>0.3686274509803922</R>
-                        <G>0.5686274509803921</G>
-                        <B>0.6078431372549019</B>
-                      </Color3>
                       <float name="Transparency">0.28</float>
+                      <Color3 name="Color">
+                        <R>0.22745098039215686</R>
+                        <G>0.22745098039215686</G>
+                        <B>0.27058823529411763</B>
+                      </Color3>
                       <float name="Thickness">1</float>
                     </Properties>
                   </Item>
@@ -2184,24 +2205,24 @@
               <YO>20</YO>
             </UDim2>
             <float name="BackgroundTransparency">1</float>
-            <int name="BorderSizePixel">0</int>
-            <Font name="FontFace">
-              <Family>
-                <url>rbxasset://fonts/families/GothamSSm.json</url>
-              </Family>
-              <Weight>400</Weight>
-              <Style>Normal</Style>
-            </Font>
-            <float name="TextSize">12</float>
-            <Color3 name="TextColor3">
-              <R>0.6431372549019608</R>
-              <G>0.7333333333333333</G>
-              <B>0.7490196078431373</B>
-            </Color3>
             <bool name="TextWrapped">true</bool>
             <token name="TextXAlignment">0</token>
             <token name="TextYAlignment">0</token>
             <bool name="Active">false</bool>
+            <int name="BorderSizePixel">0</int>
+            <Font name="FontFace">
+              <Family>
+                <url>rbxasset://fonts/families/BuilderSans.json</url>
+              </Family>
+              <Weight>400</Weight>
+              <Style>Normal</Style>
+            </Font>
+            <Color3 name="TextColor3">
+              <R>0.6941176470588235</R>
+              <G>0.6941176470588235</G>
+              <B>0.7490196078431373</B>
+            </Color3>
+            <float name="TextSize">14</float>
           </Properties>
         </Item>
         <Item class="Frame" referent="UI120">
@@ -2238,8 +2259,8 @@
                 <YO>0</YO>
               </UDim2>
               <float name="BackgroundTransparency">1</float>
-              <int name="BorderSizePixel">0</int>
               <bool name="ClipsDescendants">true</bool>
+              <int name="BorderSizePixel">0</int>
             </Properties>
             <Item class="TextLabel" referent="UI122">
               <Properties>
@@ -2258,25 +2279,25 @@
                   <YO>28</YO>
                 </UDim2>
                 <float name="BackgroundTransparency">1</float>
-                <int name="BorderSizePixel">0</int>
-                <Font name="FontFace">
-                  <Family>
-                    <url>rbxasset://fonts/families/GothamSSm.json</url>
-                  </Family>
-                  <Weight>400</Weight>
-                  <Style>Normal</Style>
-                </Font>
-                <float name="TextSize">14</float>
-                <Color3 name="TextColor3">
-                  <R>0.9254901960784314</R>
-                  <G>0.9490196078431372</G>
-                  <B>0.9372549019607843</B>
-                </Color3>
                 <bool name="TextWrapped">true</bool>
                 <token name="TextXAlignment">0</token>
                 <token name="TextYAlignment">0</token>
                 <bool name="Active">false</bool>
                 <bool name="Visible">false</bool>
+                <int name="BorderSizePixel">0</int>
+                <Color3 name="TextColor3">
+                  <R>0.9568627450980393</R>
+                  <G>0.9568627450980393</G>
+                  <B>0.9725490196078431</B>
+                </Color3>
+                <float name="TextSize">16</float>
+                <Font name="FontFace">
+                  <Family>
+                    <url>rbxasset://fonts/families/BuilderSans.json</url>
+                  </Family>
+                  <Weight>400</Weight>
+                  <Style>Normal</Style>
+                </Font>
               </Properties>
             </Item>
             <Item class="ScrollingFrame" referent="UI123">
@@ -2295,8 +2316,6 @@
                   <YO>0</YO>
                 </UDim2>
                 <float name="BackgroundTransparency">1</float>
-                <int name="BorderSizePixel">0</int>
-                <int name="ScrollBarThickness">4</int>
                 <UDim2 name="CanvasSize">
                   <XS>0</XS>
                   <XO>0</XO>
@@ -2308,6 +2327,13 @@
                   <Y>0</Y>
                 </Vector2>
                 <token name="ScrollingDirection">2</token>
+                <int name="BorderSizePixel">0</int>
+                <Color3 name="ScrollBarImageColor3">
+                  <R>0.45098039215686275</R>
+                  <G>0.45098039215686275</G>
+                  <B>0.5058823529411764</B>
+                </Color3>
+                <int name="ScrollBarThickness">3</int>
               </Properties>
               <Item class="Frame" referent="UI124">
                 <Properties>
@@ -2343,18 +2369,18 @@
                       <YO>147</YO>
                     </UDim2>
                     <float name="BackgroundTransparency">1</float>
-                    <int name="BorderSizePixel">0</int>
                     <bool name="Active">false</bool>
+                    <int name="BorderSizePixel">0</int>
                   </Properties>
                   <Item class="UIStroke" referent="UI126">
                     <Properties>
                       <string name="Name">GridLine</string>
-                      <Color3 name="Color">
-                        <R>0.3686274509803922</R>
-                        <G>0.5686274509803921</G>
-                        <B>0.6078431372549019</B>
-                      </Color3>
                       <float name="Transparency">0.28</float>
+                      <Color3 name="Color">
+                        <R>0.22745098039215686</R>
+                        <G>0.22745098039215686</G>
+                        <B>0.27058823529411763</B>
+                      </Color3>
                       <float name="Thickness">1</float>
                     </Properties>
                   </Item>
@@ -2378,16 +2404,16 @@
               <YS>0</YS>
               <YO>1</YO>
             </UDim2>
-            <int name="BorderSizePixel">0</int>
             <bool name="Visible">false</bool>
             <bool name="Active">false</bool>
             <int name="ZIndex">30</int>
-            <float name="BackgroundTransparency">0.48</float>
+            <int name="BorderSizePixel">0</int>
             <Color3 name="BackgroundColor3">
-              <R>0.43529411764705883</R>
-              <G>0.8549019607843137</G>
-              <B>0.7686274509803922</B>
+              <R>0.39215686274509803</R>
+              <G>0.9098039215686274</G>
+              <B>1.0</B>
             </Color3>
+            <float name="BackgroundTransparency">0.78</float>
           </Properties>
         </Item>
       </Item>
@@ -2407,33 +2433,224 @@
             <YS>0</YS>
             <YO>34</YO>
           </UDim2>
-          <int name="BorderSizePixel">0</int>
-          <Font name="FontFace">
-            <Family>
-              <url>rbxasset://fonts/families/GothamSSm.json</url>
-            </Family>
-            <Weight>400</Weight>
-            <Style>Normal</Style>
-          </Font>
-          <float name="TextSize">14</float>
-          <Color3 name="TextColor3">
-            <R>0.9450980392156862</R>
-            <G>0.7607843137254902</G>
-            <B>0.4549019607843137</B>
-          </Color3>
           <bool name="TextWrapped">true</bool>
           <token name="TextXAlignment">0</token>
           <token name="TextYAlignment">0</token>
           <bool name="Active">false</bool>
           <int name="ZIndex">90</int>
           <bool name="Visible">false</bool>
-          <Color3 name="BackgroundColor3">
-            <R>0.10980392156862745</R>
-            <G>0.15294117647058825</G>
-            <B>0.20392156862745098</B>
-          </Color3>
           <float name="BackgroundTransparency">0.1</float>
+          <Color3 name="BackgroundColor3">
+            <R>0.15294117647058825</R>
+            <G>0.15294117647058825</G>
+            <B>0.18823529411764706</B>
+          </Color3>
+          <int name="BorderSizePixel">0</int>
+          <Color3 name="TextColor3">
+            <R>0.9568627450980393</R>
+            <G>0.9568627450980393</G>
+            <B>0.9725490196078431</B>
+          </Color3>
+          <float name="TextSize">16</float>
+          <Font name="FontFace">
+            <Family>
+              <url>rbxasset://fonts/families/BuilderSans.json</url>
+            </Family>
+            <Weight>400</Weight>
+            <Style>Normal</Style>
+          </Font>
         </Properties>
+      </Item>
+      <Item class="TextButton">
+        <Properties>
+          <string name="Name">MenuButton</string>
+          <UDim2 name="Position">
+            <XS>0</XS>
+            <XO>20</XO>
+            <YS>0</YS>
+            <YO>16</YO>
+          </UDim2>
+          <UDim2 name="Size">
+            <XS>0</XS>
+            <XO>48</XO>
+            <YS>0</YS>
+            <YO>36</YO>
+          </UDim2>
+          <string name="Text">Menu</string>
+          <float name="TextSize">14</float>
+          <Color3 name="BackgroundColor3">
+            <R>0.15294117647058825</R>
+            <G>0.15294117647058825</G>
+            <B>0.18823529411764706</B>
+          </Color3>
+          <Color3 name="TextColor3">
+            <R>0.9568627450980393</R>
+            <G>0.9568627450980393</G>
+            <B>0.9725490196078431</B>
+          </Color3>
+          <int name="ZIndex">100</int>
+          <Font name="FontFace">
+            <Family>
+              <url>rbxasset://fonts/families/BuilderSans.json</url>
+            </Family>
+            <Weight>700</Weight>
+            <Style>Normal</Style>
+          </Font>
+        </Properties>
+      </Item>
+      <Item class="Frame">
+        <Properties>
+          <string name="Name">MainMenu</string>
+          <UDim2 name="Size">
+            <XS>1</XS>
+            <XO>0</XO>
+            <YS>1</YS>
+            <YO>0</YO>
+          </UDim2>
+          <Color3 name="BackgroundColor3">
+            <R>0.11764705882352941</R>
+            <G>0.11764705882352941</G>
+            <B>0.1411764705882353</B>
+          </Color3>
+          <float name="BackgroundTransparency">0.08</float>
+          <bool name="Visible">false</bool>
+          <bool name="Active">true</bool>
+          <int name="ZIndex">110</int>
+        </Properties>
+        <Item class="TextLabel">
+          <Properties>
+            <string name="Name">Wordmark</string>
+            <UDim2 name="Position">
+              <XS>0.08</XS>
+              <XO>0</XO>
+              <YS>0.27</YS>
+              <YO>0</YO>
+            </UDim2>
+            <UDim2 name="Size">
+              <XS>0.65</XS>
+              <XO>0</XO>
+              <YS>0</YS>
+              <YO>64</YO>
+            </UDim2>
+            <string name="Text">LATCH NINE</string>
+            <float name="TextSize">36</float>
+            <int name="ZIndex">111</int>
+            <int name="BorderSizePixel">0</int>
+            <Color3 name="BackgroundColor3">
+              <R>0.15294117647058825</R>
+              <G>0.15294117647058825</G>
+              <B>0.18823529411764706</B>
+            </Color3>
+            <Color3 name="TextColor3">
+              <R>0.9568627450980393</R>
+              <G>0.9568627450980393</G>
+              <B>0.9725490196078431</B>
+            </Color3>
+            <float name="BackgroundTransparency">1</float>
+            <token name="TextXAlignment">0</token>
+            <Font name="FontFace">
+              <Family>
+                <url>rbxasset://fonts/families/BuilderSans.json</url>
+              </Family>
+              <Weight>700</Weight>
+              <Style>Normal</Style>
+            </Font>
+          </Properties>
+        </Item>
+        <Item class="TextButton">
+          <Properties>
+            <string name="Name">Continue</string>
+            <UDim2 name="Position">
+              <XS>0.08</XS>
+              <XO>0</XO>
+              <YS>0.46</YS>
+              <YO>0</YO>
+            </UDim2>
+            <UDim2 name="Size">
+              <XS>0.65</XS>
+              <XO>0</XO>
+              <YS>0</YS>
+              <YO>48</YO>
+            </UDim2>
+            <string name="Text">Enter shop</string>
+            <float name="TextSize">18</float>
+            <int name="ZIndex">111</int>
+            <int name="BorderSizePixel">0</int>
+            <Color3 name="BackgroundColor3">
+              <R>0.39215686274509803</R>
+              <G>0.9098039215686274</G>
+              <B>1.0</B>
+            </Color3>
+            <Color3 name="TextColor3">
+              <R>0.0784313725490196</R>
+              <G>0.0784313725490196</G>
+              <B>0.09411764705882353</B>
+            </Color3>
+            <Font name="FontFace">
+              <Family>
+                <url>rbxasset://fonts/families/BuilderSans.json</url>
+              </Family>
+              <Weight>700</Weight>
+              <Style>Normal</Style>
+            </Font>
+          </Properties>
+          <Item class="UICorner">
+            <Properties>
+              <string name="Name">Corner</string>
+              <UDim name="CornerRadius">
+                <S>0</S>
+                <O>8</O>
+              </UDim>
+            </Properties>
+          </Item>
+        </Item>
+        <Item class="TextButton">
+          <Properties>
+            <string name="Name">Contrast</string>
+            <UDim2 name="Position">
+              <XS>0.08</XS>
+              <XO>0</XO>
+              <YS>0.56</YS>
+              <YO>0</YO>
+            </UDim2>
+            <UDim2 name="Size">
+              <XS>0.65</XS>
+              <XO>0</XO>
+              <YS>0</YS>
+              <YO>48</YO>
+            </UDim2>
+            <string name="Text">Higher contrast: off</string>
+            <float name="TextSize">18</float>
+            <int name="ZIndex">111</int>
+            <int name="BorderSizePixel">0</int>
+            <Color3 name="BackgroundColor3">
+              <R>0.15294117647058825</R>
+              <G>0.15294117647058825</G>
+              <B>0.18823529411764706</B>
+            </Color3>
+            <Color3 name="TextColor3">
+              <R>0.9568627450980393</R>
+              <G>0.9568627450980393</G>
+              <B>0.9725490196078431</B>
+            </Color3>
+            <Font name="FontFace">
+              <Family>
+                <url>rbxasset://fonts/families/BuilderSans.json</url>
+              </Family>
+              <Weight>700</Weight>
+              <Style>Normal</Style>
+            </Font>
+          </Properties>
+          <Item class="UICorner">
+            <Properties>
+              <string name="Name">Corner</string>
+              <UDim name="CornerRadius">
+                <S>0</S>
+                <O>8</O>
+              </UDim>
+            </Properties>
+          </Item>
+        </Item>
       </Item>
     </Item>
   </Item>

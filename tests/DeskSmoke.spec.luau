@@ -281,3 +281,19 @@ local quoted=table.clone(arrival);quoted.customer=table.clone(arrival.customer);
 local receiptRow=find("ReceiptItem_1",receiptMenu);assert(receiptRow and find("Title",receiptRow).Text=="Blank item","receipt did not use its authored row")
 assert(find("Rows",receiptMenu),"itemized receipt lost its list layout")
 print("Authored GUI layouts, custom styles, resized slots, machine transfers, and wallet deposits passed")
+
+if GuiModels then
+ local main=find("MainMenu",playerGui)
+ find("MenuButton",playerGui).Activated:Fire()
+ assert(main.Visible,"menu did not open")
+ local before=#requests
+ find("CallCustomerButton",playerGui).Activated:Fire()
+ assert(#requests==before,"menu allowed a background transaction")
+ find("Contrast",main).Activated:Fire()
+ assert(main.BackgroundTransparency==0,"higher contrast did not apply")
+ find("Contrast",main).Activated:Fire()
+ assert(main.BackgroundTransparency==.08,"contrast did not restore authored opacity")
+ find("Continue",main).Activated:Fire()
+ assert(not main.Visible,"continue did not return to shop")
+ print("Main menu, contrast and blocked background actions passed")
+end

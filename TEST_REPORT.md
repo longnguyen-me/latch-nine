@@ -22,3 +22,9 @@ python tools/check_gui.py --luau /path/to/luau
 ```
 
 The interface check executes the real controller and widget code with saved model fixtures and API/input doubles. It does not certify Roblox engine rendering, networking, touch behavior, or cloud persistence. Older broad test fixtures contain superseded catalog/gameplay assumptions; the old aggregate pass count is not a current result.
+
+## Minimalist authored UI update — 2026-11-05
+
+Restyled all three native GUI models and rebuilt LatchNine.rbxlx. Added a menu/continue screen and session higher-contrast toggle, guarded background requests while it is open, and kept receipt opening on the register. Authored GUI smoke tests, new menu interaction checks, Machines, WalletTrade, and seven Snap checks pass. All 20 scripts compile. Rojo build verifies exact embedded sources and GUI instances.
+
+The legacy tools/check.py runner still stops on pre-existing type errors in unchanged Rules/TradeService sources and obsolete test expectations (including endDay). It is not reported as passing. Actual Roblox Studio rendering, touch/device input, and cloud-save integration have not been run in this environment.
