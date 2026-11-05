@@ -124,6 +124,9 @@ function Desk.new(send: (any)->())
     if quote then for _,line in ipairs(quote.lines) do if line.id==item.id then price=line.price;break end end end
    end
   end
+  if not current and origin=="inventory" and self.state.customer then
+   for _,entry in ipairs(self.state.customer.goods) do if entry.item.id==item.id then current=entry.item;price=entry.price;break end end
+  end
   if not current then return end
   local def=Items.Definitions[current.kind];local q=Tags.Qualities[current.qualityTag or Tags.DefaultQuality]
   local crime=Tags.Criminality[current.criminality or "none"].name
@@ -187,7 +190,10 @@ function Desk.new(send: (any)->())
  sleepButton.MouseEnter:Connect(function() sleepOutline.Adornee=sleepSurface.part;sleepOutline.Enabled=true end)
  sleepButton.MouseLeave:Connect(function() sleepOutline.Enabled=false end)
  local toggleSurface=surface("toggle",240,100)
- button(toggleSurface.root,"",UDim2.new(),UDim2.fromScale(1,1),function() request("ToggleShop") end).BackgroundTransparency=1
+ local toggleButton=button(toggleSurface.root,"",UDim2.new(),UDim2.fromScale(1,1),function() request("ToggleShop") end);toggleButton.BackgroundTransparency=1
+ local toggleOutline=make("Highlight",{Name="ShopToggleOutline",Enabled=false,FillTransparency=1,OutlineColor=P.teal,DepthMode=Enum.HighlightDepthMode.Occluded},workspace)
+ toggleButton.MouseEnter:Connect(function() toggleOutline.Adornee=toggleSurface.part;toggleOutline.Enabled=true end)
+ toggleButton.MouseLeave:Connect(function() toggleOutline.Enabled=false end)
  local walletPanel=panel(root,"WalletGrid");walletPanel.Position=UDim2.new(0.5,-180,0.5,-190);walletPanel.Size=UDim2.fromOffset(360,380);walletPanel.Visible=false;walletPanel.ZIndex=70
  text(walletPanel,"WALLET / EDDIES",UDim2.fromOffset(12,12),UDim2.fromOffset(265,24),17,P.gold)
  button(walletPanel,"X",UDim2.fromOffset(318,8),UDim2.fromOffset(32,30),function() walletPanel.Visible=false end)
@@ -200,39 +206,42 @@ function Desk.new(send: (any)->())
    local point=pointer(input);moneyGhost.Position=UDim2.fromOffset(point.X-39,point.Y-19)
   end
  end)
+ local walletWidget=Widget.new(walletBody,"WalletCells",function(item: any,input: InputObject)
+  if item.walletCount<=0 then return end
+  walletDrag=item.denomination;moneyGhost.Text=item.denomination.." E";moneyGhost.Visible=true
+  local point=pointer(input);moneyGhost.Position=UDim2.fromOffset(point.X-39,point.Y-19)
+ end)
+ walletWidget.frame.Size=UDim2.fromScale(1,1)
+ local walletPhantom=make("Frame",{Name="WalletPhantom",BackgroundColor3=P.teal,BackgroundTransparency=0.55,BorderSizePixel=0,Visible=false,Active=false,ZIndex=20},walletBody)
+ Input.InputChanged:Connect(function(input: InputObject)
+  if not walletDrag or not walletPanel.Visible then walletPhantom.Visible=false;return end
+  if input.UserInputType~=Enum.UserInputType.MouseMovement and input.UserInputType~=Enum.UserInputType.Touch then return end
+  local point=pointer(input)-walletBody.AbsolutePosition;local origin=walletWidget.origin()
+  local x=math.floor((point.X-origin.X)/walletWidget.cellSize);local y=math.floor((point.Y-origin.Y)/walletWidget.cellSize)
+  walletPhantom.Visible=x>=0 and x<walletWidget.columns and y>=0 and y<walletWidget.rows
+  walletPhantom.Position=UDim2.fromOffset(origin.X+x*walletWidget.cellSize,origin.Y+y*walletWidget.cellSize)
+  walletPhantom.Size=UDim2.fromOffset(walletWidget.cellSize,walletWidget.cellSize)
+ end)
  local function drawWallet(s: any)
-  clear(walletBody)
   local tier=s.walletTier or 0;local dims=Wallet.Sizes[tier+1];local cols,rows=dims[1],dims[2]
-  local slotWidth=math.floor(336/cols);local slotHeight=math.floor(255/rows)
-  local occupied={}
+  local items={}
   for index,stack in ipairs(s.walletStacks or {}) do
    local slot=(s.walletSlots or {})[tostring(stack.denomination)] or index
-   occupied[slot]=stack
+   table.insert(items,{id="wallet-"..stack.denomination,kind="cash"..stack.denomination,denomination=stack.denomination,walletCount=stack.count,
+    gridX=(slot-1)%cols,gridY=math.floor((slot-1)/cols),rotation=0,qualityTag="standard"})
   end
-  for index=1,cols*rows do
-   local stack=occupied[index]
-   local x=((index-1)%cols)*slotWidth;local y=math.floor((index-1)/cols)*slotHeight
-   local cell=button(walletBody,if stack then stack.denomination.." E\n×"..stack.count else "",UDim2.fromOffset(x+2,y+2),UDim2.fromOffset(slotWidth-4,slotHeight-4),function() end)
-   cell.Name="WalletSlot"..index;cell.BackgroundColor3=P.raised;cell.TextColor3=P.gold;cell.ZIndex=71
-   cell.InputBegan:Connect(function(input: InputObject)
-    if stack and stack.count>0 and (input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch) then
-     walletDrag=stack.denomination;moneyGhost.Text=stack.denomination.." E";moneyGhost.Visible=true
-     local point=pointer(input);moneyGhost.Position=UDim2.fromOffset(point.X-39,point.Y-19)
-    end
-   end)
-  end
+  walletWidget.render(items,cols,rows,Grid,Vector2.new(336,255))
   walletUpgrade.Text=Wallet.Rarities[tier+1]:upper().." WALLET / "..cols.." × "..rows
  end
  Input.InputEnded:Connect(function(input: InputObject)
   if walletDrag and not walletPanel.Visible then walletDrag=nil;moneyGhost.Visible=false;return end
   if not walletDrag or not walletPanel.Visible or (input.UserInputType~=Enum.UserInputType.MouseButton1 and input.UserInputType~=Enum.UserInputType.Touch) then return end
-  local denomination=walletDrag;walletDrag=nil;moneyGhost.Visible=false
+  local denomination=walletDrag;walletDrag=nil;moneyGhost.Visible=false;walletPhantom.Visible=false
   local screenPoint=pointer(input)
   local point=screenPoint-walletBody.AbsolutePosition
-  if point.X>=0 and point.Y>=0 and point.X<walletBody.AbsoluteSize.X and point.Y<walletBody.AbsoluteSize.Y then
-   local dims=Wallet.Sizes[(self.state.walletTier or 0)+1];local cols,rows=dims[1],dims[2]
-   local col=math.floor(point.X/(336/cols));local row=math.floor(point.Y/(255/rows))
-   request("MoveMoney",{denomination=denomination,slot=row*cols+col+1});return
+  if walletWidget.contains(point) then
+   local origin=walletWidget.origin();local col=math.floor((point.X-origin.X)/walletWidget.cellSize);local row=math.floor((point.Y-origin.Y)/walletWidget.cellSize)
+   request("MoveMoney",{denomination=denomination,slot=row*walletWidget.columns+col+1});return
   end
   local c=self.state and self.state.customer
   if c and c.mode=="Seller" and c.state=="Interact" then
@@ -250,7 +259,7 @@ function Desk.new(send: (any)->())
   if mountedStage==name then return end
   mountedStage=name;mountEpoch+=1;local epoch=mountEpoch
   for _,layer in pairs(surfaces) do layer.part=nil;layer.gui.Adornee=nil;layer.gui.Enabled=false end
-  outline.Enabled=false;outline.Adornee=nil;nextOutline.Enabled=false;nextOutline.Adornee=nil;dismissOutline.Enabled=false;dismissOutline.Adornee=nil;sleepOutline.Enabled=false;sleepOutline.Adornee=nil
+  outline.Enabled=false;outline.Adornee=nil;nextOutline.Enabled=false;nextOutline.Adornee=nil;dismissOutline.Enabled=false;dismissOutline.Adornee=nil;sleepOutline.Enabled=false;sleepOutline.Adornee=nil;toggleOutline.Enabled=false;toggleOutline.Adornee=nil
   local function attempt()
    if epoch~=mountEpoch then return end
    local stage=if name then workspace:FindFirstChild(name) else nil
@@ -380,7 +389,7 @@ function Desk.new(send: (any)->())
   end;step()
  end
  startDrag=function(origin: string,item: any,input: any)
-  if item.payment then return end
+  if item.payment or item.pending then return end
   if drag or pending or receiptDrag or not self.state or covered(pointer(input)) then return end
   local c=self.state.customer
   if origin~="inventory" and (not c or c.state~="Interact") then return end
@@ -439,6 +448,14 @@ for _,item in ipairs(c.basket) do staged[item.id]=true;table.insert(basket,item)
   local paidIds={}
   if c then for _,payment in ipairs(c.payment or {}) do if payment.id then paidIds[payment.id]=true end end end
   for _,item in ipairs(s.inventory) do if not paidIds[item.id] and not (c and c.mode=="Buyer" and staged and staged[item.id]) then table.insert(owned,item) end end
+  if c and c.mode=="Seller" then
+   for _,item in ipairs(c.basket) do
+    if item.stockX~=nil then
+     local preview=table.clone(item);preview.gridX=item.stockX;preview.gridY=item.stockY;preview.rotation=item.stockRotation;preview.pending=true
+     table.insert(owned,preview)
+    end
+   end
+  end
   widgets.inventory.render(owned,s.gridColumns,s.gridRows,Grid,surfaces.inventory.canvas)
   widgets.basket.heading.Text=""
   clear(body)

@@ -61,7 +61,21 @@ return function(config: any, definitions: any, grid: any, tags: any)
 	end
 	function Rules.migrate(saved: any): any
 		if type(saved) ~= "table" then return nil end
-		if saved.version == 5 then return if Rules.validate(saved) then saved else nil end
+		if saved.version == 5 then
+			if Rules.validate(saved) then return saved end
+			-- Wallet footprints grew. Repack older stock without changing cash or ownership.
+			local p=clone(saved);p.inventory={};p.gridRevision=(p.gridRevision or 0)+1
+			for _,item in ipairs(saved.inventory or {}) do
+				if not definitions[item.kind] then return nil end
+				local x,y,rotation=item.gridX,item.gridY,item.rotation
+				local fits=grid.check(p,item.kind,x,y,rotation)
+				if not fits then x,y,rotation=grid.firstFit(p,item.kind) end
+				if x==nil then return nil end
+				local unit=clone(item);unit.gridX=x;unit.gridY=y;unit.rotation=rotation
+				table.insert(p.inventory,unit)
+			end
+			return if Rules.validate(p) then p else nil
+		end
 		if saved.version ~= 1 and saved.version ~= 2 and saved.version ~= 3 and saved.version ~= 4 then return nil end
 		if saved.version == 1 then
 			if not validateFields(saved, 1) or #saved.inventory > 24 then return nil end
@@ -167,12 +181,9 @@ return function(config: any, definitions: any, grid: any, tags: any)
 		return true, "Sold for " .. price .. " Eddies." .. (if fine > 0 then " Restricted tech: 25-credit Watch fine." else "")
 	end
 	function Rules.endDay(p: any): (boolean, string)
-		local bill = Rules.bill(p)
-		if p.cash < bill then return false, "Need " .. bill .. " Eddies required for expenses." end
-		p.cash -= bill; p.costs += bill; p.tradeProfit -= bill
-		Rules.log(p, "Rent + operations paid: " .. bill)
 		p.day += 1; p.visits = 0
-		return true, "Expenses paid. A new trading day begins."
+		Rules.log(p, "Slept and started day " .. p.day)
+		return true, "A new day begins. Open the shop when ready."
 	end
 	function Rules.aid(p: any): (boolean, string)
 		if p.cash > Rules.bill(p) + 24 or p.aidDay == p.day then return false, "Emergency credit is available once per day when funds are low." end

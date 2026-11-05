@@ -1564,6 +1564,47 @@
       "Properties": {}
     },
     {
+      "Children": [
+        {
+          "Children": [
+            {
+              "ClassName": "Frame",
+              "Name": "Border",
+              "Properties": {
+                "BackgroundTransparency": 1,
+                "BorderColor3": [
+                  0.6274509803921569,
+                  0.5607843137254902,
+                  0.8431372549019608
+                ],
+                "BorderSizePixel": 5,
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "ClassName": "SurfaceGui",
+          "Name": "EditOutline",
+          "Properties": {
+            "CanvasSize": [
+              320,
+              100
+            ],
+            "Face": "Top",
+            "LightInfluence": 0
+          }
+        }
+      ],
       "ClassName": "Part",
       "Name": "SleepingBag",
       "Properties": {
@@ -1602,15 +1643,56 @@
       }
     },
     {
+      "Children": [
+        {
+          "Children": [
+            {
+              "ClassName": "Frame",
+              "Name": "Border",
+              "Properties": {
+                "BackgroundTransparency": 1,
+                "BorderColor3": [
+                  0.43529411764705883,
+                  0.8549019607843137,
+                  0.7686274509803922
+                ],
+                "BorderSizePixel": 5,
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                }
+              }
+            }
+          ],
+          "ClassName": "SurfaceGui",
+          "Name": "EditOutline",
+          "Properties": {
+            "CanvasSize": [
+              320,
+              100
+            ],
+            "Face": "Back",
+            "LightInfluence": 0
+          }
+        }
+      ],
       "ClassName": "Part",
       "Name": "ShopToggle",
       "Properties": {
         "Anchored": true,
         "BottomSurface": "Smooth",
         "CFrame": [
-          -12,
-          5.8,
-          6,
+          -20,
+          8,
+          8,
           1,
           0,
           0,

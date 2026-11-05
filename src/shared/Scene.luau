@@ -92,7 +92,12 @@ function Scene.build(parent: Instance, origin: Vector3, name: string): Model
  board("VisitorBoard",12,11.1,2,13,5.9)
  local controls=Instance.new("Model");controls.Name="InteractionControls";controls.Parent=m
  local sleep=p("SleepingBag",-17,0.5,11,5,0.5,3,C(70,74,105));sleep.CanQuery=true
- local shutter=p("ShopToggle",-12,5.8,6,3,1.4,0.4,C(68,128,121));shutter.CanQuery=true
+ local shutter=p("ShopToggle",-20,8,8,3,1.4,0.4,C(68,128,121));shutter.CanQuery=true
+ for _,entry in ipairs({{sleep,Enum.NormalId.Top,C(160,143,215)},{shutter,Enum.NormalId.Back,C(111,218,196)}}) do
+  local face=Instance.new("SurfaceGui");face.Name="EditOutline";face.Face=entry[2];face.CanvasSize=Vector2.new(320,100);face.LightInfluence=0;face.Parent=entry[1]
+  local border=Instance.new("Frame");border.Name="Border";border.Size=UDim2.fromScale(1,1);border.BackgroundTransparency=1
+  border.BorderSizePixel=5;border.BorderColor3=entry[3];border.Parent=face
+ end
  local function control(name: string,y: number,z: number,h: number,color: Color3)
   local base=board(name,-14,y,z,4.6,h);base.Parent=controls
   local face=Instance.new("SurfaceGui");face.Name="EditOutline";face.Face=Enum.NormalId.Back

@@ -34,3 +34,5 @@ Buyer requests are configured by BuyerCategories in src/shared/ItemTags.luau. Bu
 When using the supplied source build command, Scene.luau regenerates the default template asset. Preserve a separately saved copy of your customized place before rebuilding the source project. Studio furniture edits are not automatically written back to the source asset by Rojo.
 
 SleepingBag and ShopToggle are named physical parts under ShopTemplate. The wallet is an inventory item; click it to open its screen grid. The sleep confirmation and day counter are screen UI.
+
+The shop switch and sleeping bag are separate, outlined physical parts. You can move them independently. The shop starts closed. Sleeping advances a day without deducting money.

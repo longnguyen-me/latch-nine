@@ -67,7 +67,9 @@ local function push(player: Player,message: string?, moveAck: number?, moveOk: b
    else
    for _,entry in ipairs(c.goods) do
     if entry.item.id==selection.id then
-     local item=publicItem(entry.item);item.gridX=selection.gridX;item.gridY=selection.gridY;item.rotation=selection.rotation;table.insert(basket,item);break
+     local item=publicItem(entry.item);item.gridX=selection.gridX;item.gridY=selection.gridY;item.rotation=selection.rotation
+     item.stockX=selection.stockX;item.stockY=selection.stockY;item.stockRotation=selection.stockRotation
+     table.insert(basket,item);break
     end
    end
    end
@@ -205,8 +207,9 @@ action.OnServerEvent:Connect(function(player: Player,request: any)
  end
  if name=="ToggleShop" then
   if s.shopOpen then
-   if s.customer then push(player,"Wait until the counter is clear before closing.");return end
-   s.shopOpen=false;s.epoch+=1;s.pendingArrival=false;push(player,"Shop closed.")
+   s.shopOpen=false;s.epoch+=1;s.pendingArrival=false
+   if s.customer and s.customer.state~="Leave" then leave(player,"Shop closed early.","The shop is closing. I'll return another time.")
+   else push(player,"Shop closed.") end
   else s.shopOpen=true;push(player,"Shop open.");schedule(player) end
   return
  end
@@ -342,9 +345,8 @@ local function join(player: Player)
  local stage=Scene.spawn(shopTemplate,workspace,origin,"Shop_"..player.UserId)
  sessions[player]={profile=profile,origin=origin,stage=stage,slot=slot,customer=nil,
   tokens=Config.RequestBurst,lastRequest=os.clock(),epoch=0,pendingArrival=false,
-  saveStatus=status,closed=false,removing=false,working=false,shopOpen=true}
+  saveStatus=status,closed=false,removing=false,working=false,shopOpen=false}
  push(player)
- schedule(player)
 end
 local function remove(player: Player)
  local s=sessions[player]

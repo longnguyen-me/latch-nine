@@ -13,12 +13,12 @@ function Widget.draw(parent: Instance,item: any,cells: {any},w: number,h: number
  local frame=make("Frame",{Name="Item_"..item.id,BackgroundTransparency=1,Size=UDim2.fromOffset(w*size,h*sy),Active=false},parent)
  for index,cell in ipairs(cells) do
   local piece=make("Frame",{Name="ItemCell",Position=UDim2.fromOffset(cell[1]*size+1,cell[2]*sy+1),Size=UDim2.fromOffset(size-2,sy-2),
-   BackgroundColor3=C(def.color[1],def.color[2],def.color[3]),BorderSizePixel=0,Active=false,ZIndex=if ghost then 41 else 2,BackgroundTransparency=if ghost then 0.3 else 0},frame)
+   BackgroundColor3=C(def.color[1],def.color[2],def.color[3]),BorderSizePixel=0,Active=false,ZIndex=if ghost then 41 else 2,BackgroundTransparency=if ghost then 0.3 elseif item.pending then 0.45 else 0},frame)
   if not ghost then
    if index==1 then
     make("TextLabel",{Name="Glyph",Text=def.glyph,Size=UDim2.fromScale(1,1),BackgroundTransparency=1,Font=Enum.Font.Code,TextSize=math.max(10,math.floor(size*0.3)),TextColor3=C(24,31,37),Active=false,ZIndex=3},piece)
     local q=Tags.Qualities[item.qualityTag or Tags.DefaultQuality]
-    make("TextLabel",{Name="QualityTag",Text=q.badge,Position=UDim2.new(0,2,0.73,0),Size=UDim2.new(1,-4,0.27,-1),BorderSizePixel=0,
+    make("TextLabel",{Name="QualityTag",Text=if item.walletCount~=nil then "×"..item.walletCount else q.badge,Position=UDim2.new(0,2,0.73,0),Size=UDim2.new(1,-4,0.27,-1),BorderSizePixel=0,
      BackgroundColor3=C(q.color[1],q.color[2],q.color[3]),Font=Enum.Font.Code,TextSize=8,TextColor3=C(24,31,37),Active=false,ZIndex=4},piece)
    end
    -- A transparent hit target sits above all text/badges; decorations never intercept the item.
@@ -48,7 +48,7 @@ function Widget.new(parent: Instance,title: string,onBegin: any,onHover: any?): 
   self.canvasWidth=bounds.X;self.canvasHeight=bounds.Y
   local size=math.max(4,math.floor(math.min((bounds.X-8)/cols,(bounds.Y-8)/rows)))
   local signature=cols..":"..rows..":"..size..":"..bounds.X..":"..bounds.Y
-  for _,i in ipairs(items) do signature..="|"..i.id..":"..i.gridX..":"..i.gridY..":"..i.rotation..":"..(i.qualityTag or "standard") end
+  for _,i in ipairs(items) do signature..="|"..i.id..":"..i.gridX..":"..i.gridY..":"..i.rotation..":"..(i.qualityTag or "standard")..":"..(i.walletCount or "") end
   self.items=items;self.columns=cols;self.rows=rows;self.geometry=geometry
   if self.signature==signature then return end
   self.signature=signature;self.cellSize=size;self.views={};clear(self.board)

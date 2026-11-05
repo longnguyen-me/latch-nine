@@ -2,7 +2,7 @@
 
 Open `LatchNine.rbxlx` in Roblox Studio and press Play/F5. This is a seller POV underground shop in a cyberpunk city. Sellers arrive with randomized hauls; alternating buyers request a Basic stock category, even when your shop has no matching stock. Customers speak their buying or selling intent.
 
-The bottom 15×7 SurfaceGui is your stock; the upper visitor board is the shared trade grid. Drag a seller's item into a free stock cell to prepare a purchase, or drag your stock onto the visitor board to prepare a sale. The register receipt opens on a drag and confirms the transfer; dropping a seller item retains the exact chosen stock position. Press **R** while dragging to rotate. Hover an item for price and visible tags.
+The bottom 15×7 SurfaceGui is your stock; the upper visitor board is the shared trade grid. Drag a seller's item into a free stock cell to preview it there and prepare a purchase, or drag your stock onto the visitor board to prepare a sale. The register receipt opens on a drag and confirms the transfer; dropping a seller item retains the exact chosen stock position. Press **R** while dragging to rotate. Hover an item for price and visible tags.
 
 Click the physical **REGISTER** box to open the movable receipt and confirm the itemized transaction. The receipt does not open when staging. Hovering the box outlines it. The physical **NEXT CUSTOMER** button calls another visitor. Credits appear on the wall terminal. Numbered grid title bars and the old guide, expansion and label editor are absent.
 
@@ -26,6 +26,6 @@ Studio uses session-only data by default; published servers use the cloud save c
 
 ## Days and wallet
 
-The screen HUD shows the day and visitors served. The visitor limit starts at three and gains one every two days (maximum twelve). Click the physical shop switch to close when the counter is clear. Click the sleeping bag while closed, confirm the next day, then click the switch to reopen.
+The screen HUD shows the day and visitors served. The shop starts closed; click the physical shop switch to open for visitors. The visitor limit starts at three and gains one every two days (maximum twelve). You can close early, even during a visit; the customer leaves. Click the separate sleeping bag while closed to advance a day without a fee, then use the switch to reopen.
 
-Your starter 2×3 wallet is a 1×1 item in stock. Click it to open its grid and drag denomination stacks to another wallet cell, into stock as individual 1×1 notes, or onto the visitor trade grid as payment. Drag a loose note back onto the open wallet to deposit it. The BUY button automatically takes Eddies from the wallet and, if needed, loose stock notes. Manual overpayment returns whole Eddie change to your wallet. Street (3×3), Courier (3×4), and Vault (4×4) wallets are uncommon, rare, and legendary seller offers; buying one replaces your current wallet.
+Your starter 2×3 wallet occupies 2×3 stock cells. Click it to open its grid and drag denomination stacks to another wallet cell, into stock as individual 1×1 notes, or onto the visitor trade grid as payment. Drag a loose note back onto the open wallet to deposit it. The BUY button automatically takes Eddies from the wallet and, if needed, loose stock notes. Manual overpayment returns whole Eddie change to your wallet. Street (3×3), Courier (3×4), and Vault (4×4) wallets are uncommon, rare, and legendary seller offers; buying one replaces your current wallet.
