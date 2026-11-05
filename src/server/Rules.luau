@@ -1,13 +1,13 @@
 --!strict
 -- Pure, synchronous domain rules. Inject definitions for CLI tests and Studio.
-return function(config: any, definitions: any, grid: any, tags: any)
+return function(config: any, definitions: any, grid: any, tags: any, machines: any?)
 	local Rules = {DefaultQuality=tags.DefaultQuality}
 	local function integer(n: any, low: number, high: number): boolean
 		return type(n) == "number" and n == n and n % 1 == 0 and n >= low and n <= high
 	end
 	Rules.integer = integer
 	function Rules.newProfile(): any
-		return {version = 5, legacyRows = 0, gridRevision = 0, cash = config.StartingCash, day = 1, walletTier = 0, inventory = {{id="starter-wallet",kind="wallet0",paid=0,condition=100,authentic=true,restricted=false,inspected=false,qualityTag=tags.DefaultQuality,gridX=0,gridY=0,rotation=0}}, reputation = 0,
+		return {version = 5, legacyRows = 0, gridRevision = 0, cash = config.StartingCash, suspicion=0,suspicionAt=os.time(),day = 1, walletTier = 0, inventory = {{id="starter-wallet",kind="wallet0",paid=0,condition=100,authentic=true,restricted=false,inspected=false,qualityTag=tags.DefaultQuality,gridX=0,gridY=0,rotation=0}}, reputation = 0,
 			upgrade = 0, revenue = 0, costs = 0, tradeProfit = 0, visits = 0, aidDay = 0, receipts = {}}
 	end
 	local function validateFields(p: any, version: number): boolean
@@ -39,7 +39,10 @@ return function(config: any, definitions: any, grid: any, tags: any)
 	end
 	function Rules.validate(p: any): boolean
 		if not validGrid(p, 5) then return false end
+		if p.suspicion~=nil and not integer(p.suspicion,0,100) then return false end
+		if p.suspicionAt~=nil and not integer(p.suspicionAt,0,100000000000) then return false end
 		for _, item in ipairs(p.inventory) do
+			if machines and definitions[item.kind].machine and not machines.validate(item) then return false end
 			if type((item :: any).qualityTag) ~= "string" or not tags.Qualities[(item :: any).qualityTag] then return false end
 			if item.marketCondition~=nil and not tags.LegacyMarketConditions[item.marketCondition] then return false end
 			if item.marketCondition=="bulk" and not integer(item.marketPercent,5,15) then return false end

@@ -97,7 +97,7 @@ function Desk.new(send: (any)->())
  local widgets: any={};local drag: any=nil;local pending: any=nil;local serial=0;local scrolling=false
  local phantom: any=nil;local phantomWidget: any=nil
  local selectedOrigin="inventory"
- local render: ()->();local preview: ()->();local startDrag: (string,any,any)->()
+ local render: ()->();local preview: ()->();local startDrag: (string,any,any)->();local emitMove: (any)->()
  local function notice(value: string,color: Color3?) status.Text=value;status.TextColor3=color or P.gold end
  local function request(name: string,extra: any?) local r=extra or {};r.action=name;send(r) end
  local function cancel()
@@ -182,6 +182,9 @@ function Desk.new(send: (any)->())
  local toggleOutline=make("Highlight",{Name="ShopToggleOutline",Enabled=false,FillTransparency=1,OutlineColor=P.teal,DepthMode=Enum.HighlightDepthMode.Occluded},workspace)
  toggleButton.MouseEnter:Connect(function() toggleOutline.Adornee=toggleSurface.part;toggleOutline.Enabled=true end)
  toggleButton.MouseLeave:Connect(function() toggleOutline.Enabled=false end)
+ local suspicionLabel=text(root,"SUSPICION 0/100",UDim2.new(1,-235,0,16),UDim2.fromOffset(210,24),14,P.muted)
+ local suspicionTrack=make("Frame",{Name="SuspicionTrack",Position=UDim2.new(1,-235,0,40),Size=UDim2.fromOffset(210,8),BackgroundColor3=P.raised,BorderSizePixel=0},root)
+ local suspicionFill=make("Frame",{Name="SuspicionFill",Size=UDim2.fromScale(0,1),BackgroundColor3=P.teal,BorderSizePixel=0},suspicionTrack)
  local walletPanel=panel(root,"WalletGrid");walletPanel.Position=UDim2.new(0.5,-180,0.5,-190);walletPanel.Size=UDim2.fromOffset(360,380);walletPanel.Visible=false;walletPanel.ZIndex=70
  text(walletPanel,"WALLET / EDDIES",UDim2.fromOffset(12,12),UDim2.fromOffset(265,24),17,P.gold)
  button(walletPanel,"X",UDim2.fromOffset(318,8),UDim2.fromOffset(32,30),function() walletPanel.Visible=false end)
@@ -243,6 +246,53 @@ function Desk.new(send: (any)->())
    request("WithdrawMoney",{denomination=denomination,x=x,y=y});return
   end
  end)
+ local machinePanel=panel(root,"MachineMenu");machinePanel.Size=UDim2.fromOffset(570,430);machinePanel.Position=UDim2.new(0.5,-285,0.5,-215);machinePanel.Visible=false;machinePanel.ZIndex=65
+ local machineTitle=text(machinePanel,"MACHINE",UDim2.fromOffset(14,10),UDim2.fromOffset(475,26),17,P.gold)
+ button(machinePanel,"X",UDim2.fromOffset(525,8),UDim2.fromOffset(32,30),function() machinePanel.Visible=false end)
+ local machineProgress=text(machinePanel,"",UDim2.fromOffset(14,40),UDim2.fromOffset(540,24),13,P.muted)
+ local machineWidgets: any={};local machineDrag: any=nil;local activeMachine: string?=nil;local lastMachineClick: any=nil
+ local machineGhost=text(root,"",UDim2.new(),UDim2.fromOffset(92,34),14,P.gold);machineGhost.Visible=false;machineGhost.ZIndex=90;machineGhost.BackgroundColor3=P.panel;machineGhost.BackgroundTransparency=0.1
+ local function machineSection(slot: string,x: number,y: number,w: number,h: number)
+  text(machinePanel,slot:upper(),UDim2.fromOffset(x,y-22),UDim2.fromOffset(w,20),12,P.muted)
+  local holder=make("Frame",{Name=slot.."Grid",Position=UDim2.fromOffset(x,y),Size=UDim2.fromOffset(w,h),BackgroundTransparency=1},machinePanel)
+  local widget=Widget.new(holder,slot,function(item: any,input: InputObject)
+   machineDrag={item=item,slot=slot,input=input};machineGhost.Text=Items.Definitions[item.kind].glyph;machineGhost.Visible=true
+  end)
+  widget.frame.Size=UDim2.fromScale(1,1);machineWidgets[slot]=widget
+ end
+ machineSection("input",16,102,260,260)
+ machineSection("press",293,102,90,90)
+ machineSection("output",400,102,155,260)
+ local function renderMachine(s: any)
+  if not machinePanel.Visible or not activeMachine then return end
+  local machine=locate(s.inventory,activeMachine)
+  if not machine then machinePanel.Visible=false;activeMachine=nil;return end
+  local def=Items.Definitions[machine.kind];if not def.machine then machinePanel.Visible=false;return end
+  local m=machine.machine or {input={},output={}}
+  machineTitle.Text=def.name:upper()
+  machineProgress.Text=if m.nextAt then "Next cycle: "..math.max(0,m.nextAt-os.time()).."s  •  Output "..#m.output.."/"..def.outputCapacity else "Idle / blocked  •  Output "..#m.output.."/"..def.outputCapacity
+  local inputs={};for _,entry in ipairs(m.input) do local item=table.clone(entry);item.gridX=entry.machineX;item.gridY=entry.machineY;item.rotation=0;table.insert(inputs,item) end
+  machineWidgets.input.render(inputs,def.inputColumns,def.inputRows,Grid,Vector2.new(260,260))
+  local presses={};if m.press then local item=table.clone(m.press);item.gridX=0;item.gridY=0;item.rotation=0;table.insert(presses,item) end
+  machineWidgets.press.render(presses,1,1,Grid,Vector2.new(90,90))
+  local outputs={};for index,entry in ipairs(m.output) do local item=table.clone(entry);item.gridX=0;item.gridY=index-1;item.rotation=0;table.insert(outputs,item) end
+  machineWidgets.output.render(outputs,1,def.outputCapacity,Grid,Vector2.new(155,260))
+  machineWidgets.press.frame.Visible=def.machine=="printer"
+ end
+ Input.InputChanged:Connect(function(input: InputObject)
+  if machineDrag and (input.UserInputType==Enum.UserInputType.MouseMovement or input.UserInputType==Enum.UserInputType.Touch) then
+   local point=pointer(input);machineGhost.Position=UDim2.fromOffset(point.X-46,point.Y-17)
+  end
+ end)
+ Input.InputEnded:Connect(function(input: InputObject)
+  if not machineDrag or (input.UserInputType~=Enum.UserInputType.MouseButton1 and input.UserInputType~=Enum.UserInputType.Touch) then return end
+  local d=machineDrag;machineDrag=nil;machineGhost.Visible=false
+  local point=Surface.project(surfaces.inventory.part,surfaces.inventory.canvas,pointer(input))
+  local widget=widgets.inventory
+  if not point or not widget.contains(point) or not activeMachine then return end
+  local origin=widget.origin();local x=math.floor((point.X-origin.X)/widget.cellSize);local y=math.floor((point.Y-origin.Y)/widget.cellSize)
+  emitMove({action="MachineExtract",machineId=activeMachine,id=d.item.id,slot=d.slot,x=x,y=y})
+ end)
  local function bindStage(name: string?)
   if mountedStage==name then return end
   mountedStage=name;mountEpoch+=1;local epoch=mountEpoch
@@ -294,7 +344,7 @@ function Desk.new(send: (any)->())
   end
  end
  -- Rotation remains bound to R without a screen button.
- local function emitMove(data: any)
+ emitMove=function(data: any)
   serial+=1;data.moveId=serial;pending=serial;send(data)
   task.delay(5,function() if pending==data.moveId then pending=nil;cancel();request("Sync");notice("Connection delayed.",P.red) end end)
  end
@@ -405,6 +455,12 @@ function Desk.new(send: (any)->())
   local s=self.state;if not s then return end;bindStage(s.stageName);layout()
   shopLabel.Text=if s.shopOpen then "SHOP OPEN" else "SHOP CLOSED"
   if walletPanel.Visible then drawWallet(s) end
+  renderMachine(s)
+  local suspicion=s.suspicion or 0
+  suspicionLabel.Text="SUSPICION "..suspicion.."/100"..(if suspicion>=90 then " / CRITICAL" elseif suspicion>=75 then " / WATCHED" elseif suspicion>=50 then " / FEWER VISITORS" else "")
+  suspicionLabel.TextColor3=if suspicion>=75 then P.red elseif suspicion>=50 then P.gold else P.muted
+  suspicionFill.Size=UDim2.fromScale(suspicion/100,1)
+  suspicionFill.BackgroundColor3=if suspicion>=75 then P.red elseif suspicion>=50 then P.gold else P.teal
   local c=s.customer
   visitorName.Text=if c then c.name.." / "..(if c.requestTag then "WANTS "..Tags.Categories[c.requestTag].name else c.faction) else "SERVICE WINDOW"
   dialoguePanel.Visible=c~=nil;dialogue.Text=if c then c.dialogue or "" else ""
@@ -505,8 +561,23 @@ for _,item in ipairs(c.basket) do staged[item.id]=true;table.insert(basket,item)
    if d.point.X>=p.X and d.point.Y>=p.Y and d.point.X<p.X+b.X and d.point.Y<p.Y+b.Y then request("DepositMoney",{id=d.item.id});return end
   end
   if not d.active then
+   if d.origin=="inventory" and Items.Definitions[d.item.kind].machine then
+    if lastMachineClick and lastMachineClick.id==d.item.id and os.clock()-lastMachineClick.at<0.45 then activeMachine=d.item.id;machinePanel.Visible=true;renderMachine(self.state);lastMachineClick=nil
+    else lastMachineClick={id=d.item.id,at=os.clock()} end
+   end
    if d.origin=="inventory" and Items.Definitions[d.item.kind].walletTier~=nil then walletPanel.Visible=true;drawWallet(self.state) end
    return
+  end
+  if d.origin=="inventory" and machinePanel.Visible and activeMachine then
+   local screenPoint=d.point
+   for _,slot in ipairs({"input","press"}) do
+    local widget=machineWidgets[slot];local holder=widget.frame.Parent
+    local localPoint=screenPoint-holder.AbsolutePosition
+    if widget.frame.Visible and widget.contains(localPoint) then
+     local origin=widget.origin();local x=math.floor((localPoint.X-origin.X)/widget.cellSize);local y=math.floor((localPoint.Y-origin.Y)/widget.cellSize)
+     emitMove({action="MachineInsert",machineId=activeMachine,id=d.item.id,slot=slot,x=x,y=y});return
+    end
+   end
   end
   if not d.valid then notice("Placement blocked.",P.red);return end
   if d.origin=="inventory" and d.target=="inventory" then

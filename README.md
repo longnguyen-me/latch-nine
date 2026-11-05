@@ -29,3 +29,7 @@ Studio uses session-only data by default; published servers use the cloud save c
 The shop runs continuously. Click the physical switch to open for customers or close early; there is no day limit or sleep action. Customers are called with the physical next-customer control.
 
 Your starter 2×3 wallet occupies 2×3 stock cells. Click it to open its grid and drag denomination stacks to another wallet cell, into stock as individual 1×1 notes, or onto the visitor trade grid as payment. Drag a loose note back onto the open wallet to deposit it. The BUY button automatically takes Eddies from the wallet and, if needed, loose stock notes. Manual overpayment returns whole Eddie change to your wallet. Street (3×3), Courier (3×4), and Vault (4×4) wallets are uncommon, rare, and legendary seller offers; buying one replaces your current wallet.
+
+## Machines and suspicion
+
+Double-click a printer or laundry item in stock to open its three-grid menu. Drag ingredients into input cells, install a Mint Press in a printer, and drag finished notes back to stock. Printed dirty notes can pay for purchases at the cost of suspicion. The suspicion bar falls over real time, including time offline. See `MACHINE_CONFIG.md` for capacities and rates.

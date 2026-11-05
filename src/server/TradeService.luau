@@ -121,9 +121,9 @@ return function(config: any, definitions: any, rules: any, inventoryGrid: any, t
  function Trade.buyBulk(profile: any,customer: any,quoteId: string): (boolean,string)
   local ok,message=Trade.reviewBulk(profile,customer,quoteId)
   if not ok then return false,message end
-  local bought,reason=Trade.confirm(profile,customer,quoteId)
+  local bought,reason,dirtySpent=Trade.confirm(profile,customer,quoteId)
   if not bought then customer.quote=nil end
-  return bought,reason
+  return bought,reason,dirtySpent
  end
  function Trade.confirm(profile: any,customer: any,quoteId: any): (boolean,string)
   if not customer or customer.mode=="Buyer" or customer.state~="Interact" then return false,"The visitor has left." end
@@ -178,13 +178,15 @@ return function(config: any, definitions: any, rules: any, inventoryGrid: any, t
   end
   local plan={inventory=committed,upgrade=profile.upgrade,legacyRows=profile.legacyRows}
   if not inventoryGrid.validate(plan) then customer.quote=nil;return false,"The purchase layout is no longer valid." end
+  local dirtySpent=0
+  for _,item in ipairs(profile.inventory) do if looseIds[item.id] and definitions[item.kind].dirty then dirtySpent+=1 end end
   local change=paid-q.total
   profile.cash=walletCash-walletUsed+change;profile.costs+=q.total;profile.inventory=committed;profile.walletTier=newWalletTier;profile.gridRevision+=1
   local remaining={}
   for _,entry in ipairs(customer.goods) do if not bought[(entry :: any).item.id] then table.insert(remaining,entry) end end
   customer.goods=remaining;customer.quote=nil;customer.basket={};customer.payment={};customer.paymentTotal=0;customer.basketRevision+=1
   rules.log(profile,"Bought "..q.count.." item(s) from "..customer.name.." for "..q.total)
-  return true,"Bought "..q.count.." item(s) for "..q.total.." Eddies."..(if change>0 then " Customer returned "..change.." E in change." else "")
+  return true,"Bought "..q.count.." item(s) for "..q.total.." Eddies."..(if change>0 then " Customer returned "..change.." E in change." else ""),dirtySpent
  end
  -- A buyer uses the same middle tray to hold stock from the shop.
  function Trade.stageStock(profile: any,customer: any,id: any,x: any,y: any,rotation: any,revision: any): (boolean,string)

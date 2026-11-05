@@ -9,7 +9,9 @@ local Scene = require(Shared.Scene)
 local Tags = require(Shared.ItemTags)
 local Wallet = require(Shared.Wallet)
 local Grid = require(Shared.Grid)(Config, Items.Definitions)
-local Rules = require(script.Parent.Rules)(Config, Items.Definitions, Grid, Tags)
+local Machine = require(script.Parent.MachineService)(Items.Definitions,Grid)
+local Suspicion = require(script.Parent.Suspicion)(Items.Definitions)
+local Rules = require(script.Parent.Rules)(Config, Items.Definitions, Grid, Tags,Machine)
 local trayConfig: any = table.clone(Config);trayConfig.GridColumns=Config.TradeColumns;trayConfig.GridBaseRows=Config.TradeRows;trayConfig.GridRowsPerUpgrade=0
 local TrayGrid = require(Shared.Grid)(trayConfig, Items.Definitions)
 local Trade = require(script.Parent.TradeService)(Config, Items.Definitions, Rules, Grid, TrayGrid, Wallet)
@@ -27,7 +29,14 @@ local slots: {[number]: boolean} = {}
 local closing = false
 local rng = Random.new()
 local function publicItem(item: any): any
- local out: any = {criminality=item.criminality or "none",id=item.id,kind=item.kind,inspected=item.inspected,paid=item.paid,gridX=item.gridX,gridY=item.gridY,rotation=item.rotation,qualityTag=item.qualityTag or Tags.DefaultQuality,categoryTag=Items.Definitions[item.kind].tagCategory,marketPrice=Rules.value(item)}
+ local out: any = {criminality=item.criminality or "none",id=item.id,kind=item.kind,inspected=item.inspected,paid=item.paid,gridX=item.gridX,gridY=item.gridY,rotation=item.rotation,machineX=item.machineX,machineY=item.machineY,qualityTag=item.qualityTag or Tags.DefaultQuality,categoryTag=Items.Definitions[item.kind].tagCategory,marketPrice=Rules.value(item)}
+ if Items.Definitions[item.kind].machine then
+  local m=item.machine or {input={},output={},press=nil}
+  out.machine={input={},output={},press=if m.press then publicItem(m.press) else nil,nextAt=m.nextAt}
+  for _,entry in ipairs(m.input) do table.insert(out.machine.input,publicItem(entry)) end
+  for _,entry in ipairs(m.output) do table.insert(out.machine.output,publicItem(entry)) end
+ end
+ out.paperQuality=item.paperQuality
  if item.inspected then
   out.condition=item.condition; out.authentic=item.authentic
   out.restricted=item.restricted; out.value=Rules.value(item)
@@ -92,7 +101,7 @@ local function push(player: Player,message: string?, moveAck: number?, moveOk: b
  end
  local p=s.profile
  local cols,rows=Grid.size(p)
- state:FireClient(player,{cash=p.cash,inventory=inventory,customer=customer,
+ state:FireClient(player,{cash=p.cash,suspicion=p.suspicion or 0,inventory=inventory,customer=customer,
   capacity=Rules.capacity(p),gridColumns=cols,gridRows=rows,gridUsed=Grid.used(p),gridRevision=p.gridRevision,moveAck=moveAck,moveOk=moveOk,bill=Rules.bill(p),rent=Config.Rent+p.upgrade*5,operating=Config.OperatingCost,
   reputation=p.reputation,upgrade=p.upgrade,legacyRows=p.legacyRows,revenue=p.revenue,costs=p.costs,profit=p.tradeProfit,
   walletTier=p.walletTier or 0,walletSlots=p.walletSlots or {},walletStacks=Wallet.stacks(p.cash,p.walletTier or 0),
@@ -114,7 +123,7 @@ schedule=function(player: Player)
  if not s or s.closed or not s.shopOpen or s.working or s.customer or s.pendingArrival
   then return end
  s.pendingArrival=true; local epoch=s.epoch; push(player)
- task.delay(Config.ArrivalSeconds,function()
+ task.delay(Config.ArrivalSeconds*(if (s.profile.suspicion or 0)>=50 then 4/3 else 1),function()
   if sessions[player]~=s or s.closed or s.epoch~=epoch then return end
   s.pendingArrival=false
   if s.customer then push(player); return end
@@ -195,7 +204,7 @@ action.OnServerEvent:Connect(function(player: Player,request: any)
  if name=="DepositMoney" then
   local item,index=Rules.find(s.profile,request.id)
   local denomination=item and Items.Definitions[item.kind].denomination
-  if not denomination or not index then push(player,"That is not a loose note.");return end
+  if not denomination or not index or Items.Definitions[item.kind].dirty then push(player,"Dirty notes must be laundered first.");return end
   table.remove(s.profile.inventory,index);s.profile.cash+=denomination;s.profile.gridRevision+=1
   push(player,"Deposited "..denomination.." E into your wallet.");return
  end
@@ -204,6 +213,14 @@ action.OnServerEvent:Connect(function(player: Player,request: any)
   if not c then push(player,"No active trade.");return end
   local ok,message=Trade.stagePayment(s.profile,c,request.denomination,request.id)
   push(player,message);return
+ end
+ if name=="MachineInsert" or name=="MachineExtract" then
+  if not Rules.integer(request.moveId,1,1000000000) then push(player,"Invalid machine move.");return end
+  Machine.tick(s.profile,os.time(),function() return Http:GenerateGUID(false) end,function(a: number,b: number) return rng:NextInteger(a,b) end)
+  local ok,message
+  if name=="MachineInsert" then ok,message=Machine.insert(s.profile,request.machineId,request.id,request.slot,request.x,request.y,os.time())
+  else ok,message=Machine.extract(s.profile,request.machineId,request.id,request.slot,request.x,request.y) end
+  push(player,message,request.moveId,ok);return
  end
  if name=="ToggleShop" then
   if s.shopOpen then
@@ -263,10 +280,15 @@ action.OnServerEvent:Connect(function(player: Player,request: any)
   local ok,message
   if name=="ClearBasket" then ok,message=Trade.clear(c)
   elseif name=="ReviewPurchase" then ok,message=Trade.review(s.profile,c,Http:GenerateGUID(false))
-  elseif name=="BuyBulk" then ok,message=Trade.buyBulk(s.profile,c,Http:GenerateGUID(false));if ok then leave(player,message,"The whole haul is yours.");return end
+  elseif name=="BuyBulk" then
+   local spent;ok,message,spent=Trade.buyBulk(s.profile,c,Http:GenerateGUID(false))
+   if ok then local incident=Suspicion.spend(s.profile,spent or 0,os.time(),function(a: number,b: number) return rng:NextInteger(a,b) end);leave(player,message..(if incident then " "..incident else ""),"The whole haul is yours.");return end
   elseif name=="ReviewSale" then ok,message=Trade.reviewSale(s.profile,c,Http:GenerateGUID(false))
   elseif name=="ConfirmSale" then ok,message=Trade.confirmSale(s.profile,c,request.quoteId);if ok then leave(player,message,"I'll take these. Pleasure trading.");return end
-  else ok,message=Trade.confirm(s.profile,c,request.quoteId);if ok then leave(player,message,"Deal. These goods are yours.");return end end
+  else
+   local spent;ok,message,spent=Trade.confirm(s.profile,c,request.quoteId)
+   if ok then local incident=Suspicion.spend(s.profile,spent or 0,os.time(),function(a: number,b: number) return rng:NextInteger(a,b) end);leave(player,message..(if incident then " "..incident else ""),"Deal. These goods are yours.");return end
+  end
   push(player,message);return
  elseif name=="InspectGoods" then
   local c=matchingCustomer(s,request)
@@ -322,6 +344,8 @@ local function join(player: Player)
  loading[player]=true
  local profile,status=Persistence.load(player.UserId,Rules)
  if not profile then loading[player]=nil;if player.Parent then player:Kick(status) end; return end
+ Suspicion.decay(profile,os.time())
+ Machine.tick(profile,os.time(),function() return Http:GenerateGUID(false) end,function(a: number,b: number) return rng:NextInteger(a,b) end)
  local hasWallet=false
  for _,item in ipairs(profile.inventory) do if Items.Definitions[item.kind].walletTier~=nil then hasWallet=true;break end end
  if not hasWallet then
@@ -351,6 +375,19 @@ end
 Players.PlayerAdded:Connect(join)
 Players.PlayerRemoving:Connect(remove)
 for _,player in ipairs(Players:GetPlayers()) do task.spawn(join,player) end
+task.spawn(function()
+ while not closing do
+  task.wait(5)
+  for player,s in pairs(sessions) do
+   if not s.closed then
+    local now=os.time()
+    local changed=Machine.tick(s.profile,now,function() return Http:GenerateGUID(false) end,function(a: number,b: number) return rng:NextInteger(a,b) end)
+    changed=Suspicion.decay(s.profile,now) or changed
+    if changed then push(player) end
+   end
+  end
+ end
+end)
 task.spawn(function()
  while not closing do
   task.wait(Config.SaveInterval)

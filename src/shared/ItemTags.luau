@@ -14,6 +14,7 @@ local Tags = {
   unknown={name="Unidentified stock",badge="?"},
   wallet={name="Wallet",badge="W"},
   currency={name="Eddie note",badge="E"},
+  machine={name="Machine",badge="MC"},hardware={name="Capital hardware",badge="HW"},material={name="Raw material",badge="RM"},
   household = {name="Household good", badge="HG"},
   gun = {name="Gun", badge="GUN"},
   medicine = {name="Medicine", badge="MED"},
