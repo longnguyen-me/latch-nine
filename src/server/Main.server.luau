@@ -7,6 +7,7 @@ local Config = require(Shared.Config)
 local Items = require(Shared.Items)
 local Scene = require(Shared.Scene)
 local Tags = require(Shared.ItemTags)
+local Wallet = require(Shared.Wallet)
 local Grid = require(Shared.Grid)(Config, Items.Definitions)
 local Rules = require(script.Parent.Rules)(Config, Items.Definitions, Grid, Tags)
 local trayConfig: any = table.clone(Config);trayConfig.GridColumns=Config.TradeColumns;trayConfig.GridBaseRows=Config.TradeRows;trayConfig.GridRowsPerUpgrade=0
@@ -89,7 +90,8 @@ local function push(player: Player,message: string?, moveAck: number?, moveOk: b
  state:FireClient(player,{cash=p.cash,day=p.day,inventory=inventory,customer=customer,
   capacity=Rules.capacity(p),gridColumns=cols,gridRows=rows,gridUsed=Grid.used(p),gridRevision=p.gridRevision,moveAck=moveAck,moveOk=moveOk,bill=Rules.bill(p),rent=Config.Rent+p.upgrade*5,operating=Config.OperatingCost,
   reputation=p.reputation,upgrade=p.upgrade,legacyRows=p.legacyRows,revenue=p.revenue,costs=p.costs,profit=p.tradeProfit,
-  visits=p.visits,maxVisits=Config.VisitsPerDay,aidDay=p.aidDay,origin=s.origin,stageName=s.stage.Name,
+  walletTier=p.walletTier or 0,walletSlots=p.walletSlots or {},walletStacks=Wallet.stacks(p.cash,p.walletTier or 0),
+  visits=p.visits,maxVisits=Config.DailyVisitors(p.day),shopOpen=s.shopOpen,aidDay=p.aidDay,origin=s.origin,stageName=s.stage.Name,
   saveStatus=s.saveStatus,message=message,receipts=p.receipts,pendingArrival=s.pendingArrival,working=s.working})
 end
 local schedule: (Player)->()
@@ -104,7 +106,7 @@ local function leave(player: Player,message: string,line: string?,callNext: bool
 end
 schedule=function(player: Player)
  local s=sessions[player]
- if not s or s.closed or s.working or s.customer or s.pendingArrival
+ if not s or s.closed or not s.shopOpen or s.profile.visits>=Config.DailyVisitors(s.profile.day) or s.working or s.customer or s.pendingArrival
   then return end
  s.pendingArrival=true; local epoch=s.epoch; push(player)
  task.delay(Config.ArrivalSeconds,function()
@@ -160,7 +162,43 @@ action.OnServerEvent:Connect(function(player: Player,request: any)
  end
  local name=request.action
  if name=="Sync" then push(player); return end
+ if name=="UpgradeWallet" then
+  local tier=s.profile.walletTier or 0
+  if tier>=3 then push(player,"Wallet is fully upgraded.");return end
+  local cost=Wallet.Prices[tier+2]
+  if s.profile.cash<cost then push(player,"Need "..cost.." Eddies for the next wallet.");return end
+  s.profile.cash-=cost;s.profile.costs+=cost;s.profile.walletTier=tier+1
+  push(player,"Wallet upgraded to "..Wallet.Rarities[tier+2]..".");return
+ end
+ if name=="MoveMoney" then
+  local tier=s.profile.walletTier or 0;local count=Wallet.Sizes[tier+1][1]*Wallet.Sizes[tier+1][2]
+  local denomination=request.denomination;local slot=request.slot
+  local valid=false
+  for i=1,count do if Wallet.Denominations[i]==denomination then valid=true end end
+  if not valid or not Rules.integer(slot,1,count) then push(player,"Invalid wallet position.");return end
+  local positions=s.profile.walletSlots or {};s.profile.walletSlots=positions
+  local current=positions[tostring(denomination)]
+  for i=1,count do
+   local other=Wallet.Denominations[i]
+   if other~=denomination and (positions[tostring(other)] or i)==slot then positions[tostring(other)]=current or (table.find(Wallet.Denominations,denomination) or 1);break end
+  end
+  positions[tostring(denomination)]=slot;push(player);return
+ end
+ if name=="ToggleShop" then
+  if s.shopOpen then
+   if s.customer then push(player,"Wait until the counter is clear before closing.");return end
+   s.shopOpen=false;s.epoch+=1;s.pendingArrival=false;push(player,"Shop closed.")
+  else s.shopOpen=true;push(player,"Shop open.");schedule(player) end
+  return
+ end
+ if name=="Sleep" then
+  if s.shopOpen or s.customer or s.pendingArrival then push(player,"Close the shop before sleeping.");return end
+  local ok,message=Rules.endDay(s.profile)
+  if ok then s.epoch+=1;s.pendingArrival=false end
+  push(player,message);return
+ end
  if name=="NextCustomer" then
+  if not s.shopOpen or s.profile.visits>=Config.DailyVisitors(s.profile.day) then push(player,"Close the shop when the day's customers are done.");return end
   if s.working then push(player,"Freight shift active.");return end
   if s.customer then
    if s.customer.state~="Leave" then leave(player,"",nil,true) end
@@ -197,7 +235,7 @@ action.OnServerEvent:Connect(function(player: Player,request: any)
   local c=matchingCustomer(s,request)
   if not c then push(player,"That visitor is no longer trading.",request.moveId,false);return end
   local ok,message
-  if name=="StageOffer" then ok,message=Trade.stage(c,request.id,request.x,request.y,request.rotation,request.revision)
+  if name=="StageOffer" then ok,message=Trade.stage(c,request.id,request.x,request.y,request.rotation,request.revision,s.profile,request.stockX,request.stockY,request.stockRotation)
   elseif name=="UnstageOffer" then ok,message=Trade.unstage(c,request.id,request.revision)
   elseif name=="StageStock" then ok,message=Trade.stageStock(s.profile,c,request.id,request.x,request.y,request.rotation,request.revision)
   else ok,message=Trade.unstageStock(s.profile,c,request.id,request.x,request.y,request.rotation,request.revision) end
@@ -246,14 +284,7 @@ action.OnServerEvent:Connect(function(player: Player,request: any)
   end
  elseif name=="Refuse" then
   if matchingCustomer(s,request) then leave(player,"You declined the deal."); return end
- elseif name=="EndDay" then
-  if s.customer then message="Finish serving the current customer first."
-  else
-   ok,message=Rules.endDay(s.profile)
-   if ok then
-    s.epoch+=1; s.pendingArrival=false
-   end
-  end
+ elseif name=="EndDay" then message="Use the sleeping bag after closing the shop."
  elseif name=="Work" then
   if s.customer or s.profile.cash>=Rules.bill(s.profile) then message="Freight work is available when bills are unaffordable and the counter is clear."
   else
@@ -263,7 +294,7 @@ action.OnServerEvent:Connect(function(player: Player,request: any)
     if sessions[player]~=s or s.closed then return end
     s.working=false; s.profile.cash+=18; s.profile.revenue+=18; s.profile.tradeProfit+=18
     Rules.log(s.profile,"Freight shift income +18")
-    push(player,"Freight shift complete. Earned 18 credits."); schedule(player)
+    push(player,"Freight shift complete. Earned 18 Eddies."); schedule(player)
    end)
    return
   end
@@ -286,7 +317,7 @@ local function join(player: Player)
  local stage=Scene.spawn(shopTemplate,workspace,origin,"Shop_"..player.UserId)
  sessions[player]={profile=profile,origin=origin,stage=stage,slot=slot,customer=nil,
   tokens=Config.RequestBurst,lastRequest=os.clock(),epoch=0,pendingArrival=false,
-  saveStatus=status,closed=false,removing=false,working=false}
+  saveStatus=status,closed=false,removing=false,working=false,shopOpen=true}
  push(player)
  schedule(player)
 end

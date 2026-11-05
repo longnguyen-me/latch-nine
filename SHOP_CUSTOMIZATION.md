@@ -33,3 +33,5 @@ Select invisible markers through Explorer to move them. Keep ShopTemplate near t
 Buyer requests are configured by BuyerCategories in src/shared/ItemTags.luau. Buyers can request a category without any matching stock. Sellers alternate with buyers and bring randomized placeholder batches.
 
 When using the supplied source build command, Scene.luau regenerates the default template asset. Preserve a separately saved copy of your customized place before rebuilding the source project. Studio furniture edits are not automatically written back to the source asset by Rojo.
+
+SleepingBag, ShopToggle and Wallet are named physical parts under ShopTemplate; move each individually in Studio. The sleep confirmation, day counter, and wallet grid are screen UI.

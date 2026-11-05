@@ -92,6 +92,9 @@ function Scene.build(parent: Instance, origin: Vector3, name: string): Model
  board("BuyBoard",12,4.9,9.1,13,5.9,-22)
  board("VisitorBoard",12,11.1,2,13,5.9)
  local controls=Instance.new("Model");controls.Name="InteractionControls";controls.Parent=m
+ local sleep=p("SleepingBag",-17,0.5,11,5,0.5,3,C(70,74,105));sleep.CanQuery=true
+ local shutter=p("ShopToggle",-12,5.8,6,3,1.4,0.4,C(68,128,121));shutter.CanQuery=true
+ local wallet=p("Wallet",-9,3.6,6,2,0.5,1.5,C(84,72,96));wallet.CanQuery=true
  local function control(name: string,y: number,z: number,h: number,color: Color3)
   local base=board(name,-14,y,z,4.6,h);base.Parent=controls
   local face=Instance.new("SurfaceGui");face.Name="EditOutline";face.Face=Enum.NormalId.Back
@@ -116,7 +119,7 @@ function Scene.build(parent: Instance, origin: Vector3, name: string): Model
  local display=Instance.new("SurfaceGui");display.Name="CashSurface";display.Face=Enum.NormalId.Back
  display.CanvasSize=Vector2.new(640,240);display.LightInfluence=0;display.Parent=money
  local balance=Instance.new("TextLabel");balance.Name="Balance";balance.Size=UDim2.fromScale(1,1)
- balance.BackgroundTransparency=1;balance.Text="--- CR";balance.Font=Enum.Font.Code
+ balance.BackgroundTransparency=1;balance.Text="--- EDDIES";balance.Font=Enum.Font.Code
  balance.TextScaled=true;balance.TextColor3=C(111,231,192);balance.Parent=display
  sign(m,"NIGHT MARKET",Vector3.new(6,1,0.3),origin+Vector3.new(-2,16.7,1.1),C(222,186,113))
  for i=1,4 do
@@ -156,7 +159,7 @@ function Scene.cash(stage: Model,amount: number)
  local surface=if part then part:FindFirstChild("CashSurface") else nil
  local label=if surface then surface:FindFirstChild("Balance") else nil
  if label and label:IsA("TextLabel") then
-  local value=tostring(amount).." CR"
+  local value=tostring(amount).." EDDIES"
   if label.Text~=value then label.Text=value end
  end
 end

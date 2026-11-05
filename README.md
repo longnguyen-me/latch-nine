@@ -2,7 +2,7 @@
 
 Open `LatchNine.rbxlx` in Roblox Studio and press Play/F5. This is a seller POV underground shop in a cyberpunk city. Sellers arrive with randomized hauls; alternating buyers request a Basic stock category, even when your shop has no matching stock. Customers speak their buying or selling intent.
 
-The bottom 15×7 physical SurfaceGui is your stock. A seller's items appear on the upper visitor board; drag them to the middle tray to buy. For a buyer, drag matching owned items from the bottom stock board to that same middle tray to sell. Rotated shapes snap with a phantom preview. Press **R** while holding an item to rotate it; there is no rotate button. Hover an item for price and visible tags. Rarity remains hidden.
+The bottom 15×7 SurfaceGui is your stock; the upper visitor board is the shared trade grid. Drag a seller's item into a free stock cell to prepare a purchase, or drag your stock onto the visitor board to prepare a sale. The register receipt opens on a drag and confirms the transfer; dropping a seller item retains the exact chosen stock position. Press **R** while dragging to rotate. Hover an item for price and visible tags.
 
 Click the physical **REGISTER** box to open the movable receipt and confirm the itemized transaction. The receipt does not open when staging. Hovering the box outlines it. The physical **NEXT CUSTOMER** button calls another visitor. Credits appear on the wall terminal. Numbered grid title bars and the old guide, expansion and label editor are absent.
 
@@ -23,3 +23,9 @@ The project root is the folder containing `default.project.json`. From that fold
 After this project is pushed to GitHub, use `git pull` in this folder to receive future commits. Keep your Studio place saved separately when changing physical shop furniture.
 
 Studio uses session-only data by default; published servers use the cloud save code. Existing version 5 stock and legacy migrations remain supported. The receipt uses separate item rows and a fixed checkout area; item hover cards show a title, divider, price and tags. The project includes editable Luau sources, tests, build tools and the native `.rbxlx` place. All 17 scripts compile and 242 local checks pass. Actual Studio input, rendering, cloud saves and device performance still need a live playtest.
+
+## Days and wallet
+
+The screen HUD shows the day and visitors served. The visitor limit starts at three and gains one every two days (maximum twelve). Click the physical shop switch to close when the counter is clear. Click the sleeping bag while closed, confirm the next day, then click the switch to reopen.
+
+The physical Eddie display shows your balance. Click the wallet on the counter to open its draggable denomination grid. A 2×3 wallet starts with 1, 5, 10, 25, 50, and 100 Eddie stacks. Each denomination stacks without a limit. Upgrades cost 150/350/700 Eddies for 3×3, 3×4, and 4×4 wallets and unlock 250/500/1000 denominations. Stacks are a breakdown of the saved balance, so purchasing and selling automatically update them.

@@ -7,6 +7,7 @@ local Shared=game:GetService("ReplicatedStorage"):WaitForChild("Shared")
 local Config=require(Shared.Config)
 local Items=require(Shared.Items)
 local Tags=require(Shared.ItemTags)
+local Wallet=require(Shared.Wallet)
 local Snap=require(Shared.GridSnap)
 local Grid=require(Shared.Grid)(Config,Items.Definitions)
 local trayConfig: any=table.clone(Config);trayConfig.GridBaseRows=Config.TradeRows;trayConfig.GridColumns=Config.TradeColumns;trayConfig.GridRowsPerUpgrade=0
@@ -51,7 +52,7 @@ local function receiptLine(parent: Instance,name: string,price: number,index: nu
  make("UICorner",{CornerRadius=UDim.new(0,5)},row)
  text(row,string.format("%02d",index),UDim2.fromOffset(10,15),UDim2.fromOffset(30,20),12,P.teal)
  local title=text(row,name,UDim2.fromOffset(43,7),UDim2.new(1,-140,0,38),14,P.ink);title.TextYAlignment=Enum.TextYAlignment.Center
- local amount=text(row,tostring(price).." CR",UDim2.new(1,-96,0,16),UDim2.fromOffset(86,22),14,P.gold);amount.TextXAlignment=Enum.TextXAlignment.Right
+ local amount=text(row,tostring(price).." E",UDim2.new(1,-96,0,16),UDim2.fromOffset(86,22),14,P.gold);amount.TextXAlignment=Enum.TextXAlignment.Right
  return row
 end
 local function locate(items: {any},id: string?): any for _,item in ipairs(items) do if item.id==id then return item end end;return nil end
@@ -82,7 +83,7 @@ function Desk.new(send: (any)->())
  end)
  local body=scroll(receipt);body.Name="ReceiptLines";body.Position=UDim2.fromOffset(0,48);body.Size=UDim2.new(1,0,1,-209)
  make("Frame",{Name="ReceiptDivider",Position=UDim2.new(0,10,1,-153),Size=UDim2.new(1,-20,0,1),BackgroundColor3=P.line,BorderSizePixel=0},receipt)
- local total=text(receipt,"TOTAL 0 CR",UDim2.new(0,14,1,-145),UDim2.new(1,-28,0,28),18,P.ink);total.TextXAlignment=Enum.TextXAlignment.Right
+ local total=text(receipt,"TOTAL 0 E",UDim2.new(0,14,1,-145),UDim2.new(1,-28,0,28),18,P.ink);total.TextXAlignment=Enum.TextXAlignment.Right
  local status=text(root,"",UDim2.new(0.25,0,1,-24),UDim2.new(0.73,0,0,22),12,P.gold)
  local tooltip=panel(root,"ItemTooltip");tooltip.Visible=false;tooltip.Active=false;tooltip.ZIndex=60;tooltip.Size=UDim2.fromOffset(276,158)
  make("Frame",{Name="TooltipAccent",Position=UDim2.fromOffset(0,0),Size=UDim2.new(0,4,1,0),BackgroundColor3=P.teal,BorderSizePixel=0,ZIndex=61},tooltip)
@@ -127,7 +128,7 @@ function Desk.new(send: (any)->())
   local def=Items.Definitions[current.kind];local q=Tags.Qualities[current.qualityTag or Tags.DefaultQuality]
   local crime=Tags.Criminality[current.criminality or "none"].name
   tipTitle.Text=def.name
-  tipPrice.Text=tostring(price or current.marketPrice or current.value or current.paid).." CR"
+  tipPrice.Text=tostring(price or current.marketPrice or current.value or current.paid).." E"
   tipText.Text=Tags.Categories[def.tagCategory].name.."  •  "..q.name.."\n"..crime
   local tx=math.clamp(x+16,0,math.max(0,root.AbsoluteSize.X-280))
   local ty=math.clamp(y+18,0,math.max(0,root.AbsoluteSize.Y-162))
@@ -173,16 +174,77 @@ function Desk.new(send: (any)->())
  local dismissOutline=make("Highlight",{Name="DismissCustomerOutline",Enabled=false,FillTransparency=1,OutlineTransparency=0,OutlineColor=P.red,DepthMode=Enum.HighlightDepthMode.Occluded},workspace)
  dismissButton.MouseEnter:Connect(function() dismissOutline.Enabled=true end)
  dismissButton.MouseLeave:Connect(function() dismissOutline.Enabled=false end)
+ local dayLabel=text(root,"",UDim2.fromOffset(16,14),UDim2.fromOffset(280,26),17,P.gold)
+ local shopLabel=text(root,"",UDim2.fromOffset(16,40),UDim2.fromOffset(280,22),12,P.teal)
+ local sleepPrompt=panel(root,"SleepConfirmation");sleepPrompt.Size=UDim2.fromOffset(310,150);sleepPrompt.Position=UDim2.new(0.5,-155,0.5,-75);sleepPrompt.Visible=false;sleepPrompt.ZIndex=80
+ text(sleepPrompt,"Sleep and advance to the next day?",UDim2.fromOffset(14,12),UDim2.fromOffset(282,60),17)
+ button(sleepPrompt,"CANCEL",UDim2.fromOffset(14,98),UDim2.fromOffset(130,36),function() sleepPrompt.Visible=false end)
+ button(sleepPrompt,"SLEEP",UDim2.fromOffset(160,98),UDim2.fromOffset(136,36),function() sleepPrompt.Visible=false;request("Sleep") end)
+ local sleepSurface=surface("sleep",240,100)
+ sleepSurface.gui.Face=Enum.NormalId.Top
+ local sleepButton=button(sleepSurface.root,"",UDim2.new(),UDim2.fromScale(1,1),function() if self.state and not self.state.shopOpen then sleepPrompt.Visible=true else notice("Close the shop first.",P.red) end end);sleepButton.BackgroundTransparency=1
+ local sleepOutline=make("Highlight",{Name="SleepOutline",Enabled=false,FillTransparency=1,OutlineColor=P.teal,DepthMode=Enum.HighlightDepthMode.Occluded},workspace)
+ sleepButton.MouseEnter:Connect(function() sleepOutline.Adornee=sleepSurface.part;sleepOutline.Enabled=true end)
+ sleepButton.MouseLeave:Connect(function() sleepOutline.Enabled=false end)
+ local toggleSurface=surface("toggle",240,100)
+ button(toggleSurface.root,"",UDim2.new(),UDim2.fromScale(1,1),function() request("ToggleShop") end).BackgroundTransparency=1
+ local walletPanel=panel(root,"WalletGrid");walletPanel.Position=UDim2.new(0.5,-180,0.5,-190);walletPanel.Size=UDim2.fromOffset(360,380);walletPanel.Visible=false;walletPanel.ZIndex=70
+ text(walletPanel,"WALLET / EDDIES",UDim2.fromOffset(12,12),UDim2.fromOffset(265,24),17,P.gold)
+ button(walletPanel,"X",UDim2.fromOffset(318,8),UDim2.fromOffset(32,30),function() walletPanel.Visible=false end)
+ local walletBody=make("Frame",{Name="Slots",Position=UDim2.fromOffset(12,55),Size=UDim2.fromOffset(336,255),BackgroundTransparency=1},walletPanel)
+ local walletUpgrade=button(walletPanel,"",UDim2.fromOffset(12,328),UDim2.fromOffset(336,36),function() request("UpgradeWallet") end)
+ local walletSurface=surface("wallet",240,100)
+ walletSurface.gui.Face=Enum.NormalId.Top
+ button(walletSurface.root,"",UDim2.new(),UDim2.fromScale(1,1),function() walletPanel.Visible=not walletPanel.Visible end).BackgroundTransparency=1
+ local walletDrag: number?=nil
+ local moneyGhost=text(root,"",UDim2.new(),UDim2.fromOffset(78,38),15,P.gold);moneyGhost.Visible=false;moneyGhost.ZIndex=90;moneyGhost.BackgroundColor3=P.panel;moneyGhost.BackgroundTransparency=0.12
+ Input.InputChanged:Connect(function(input: InputObject)
+  if walletDrag and (input.UserInputType==Enum.UserInputType.MouseMovement or input.UserInputType==Enum.UserInputType.Touch) then
+   local point=pointer(input);moneyGhost.Position=UDim2.fromOffset(point.X-39,point.Y-19)
+  end
+ end)
+ local function drawWallet(s: any)
+  clear(walletBody)
+  local tier=s.walletTier or 0;local dims=Wallet.Sizes[tier+1];local cols,rows=dims[1],dims[2]
+  local slotWidth=math.floor(336/cols);local slotHeight=math.floor(255/rows)
+  local occupied={}
+  for index,stack in ipairs(s.walletStacks or {}) do
+   local slot=(s.walletSlots or {})[tostring(stack.denomination)] or index
+   occupied[slot]=stack
+  end
+  for index=1,cols*rows do
+   local stack=occupied[index]
+   local x=((index-1)%cols)*slotWidth;local y=math.floor((index-1)/cols)*slotHeight
+   local cell=button(walletBody,if stack then stack.denomination.." E\n×"..stack.count else "",UDim2.fromOffset(x+2,y+2),UDim2.fromOffset(slotWidth-4,slotHeight-4),function() end)
+   cell.Name="WalletSlot"..index;cell.BackgroundColor3=P.raised;cell.TextColor3=P.gold;cell.ZIndex=71
+   cell.InputBegan:Connect(function(input: InputObject)
+    if stack and (input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch) then
+     walletDrag=stack.denomination;moneyGhost.Text=stack.denomination.." E";moneyGhost.Visible=true
+     local point=pointer(input);moneyGhost.Position=UDim2.fromOffset(point.X-39,point.Y-19)
+    end
+   end)
+  end
+  walletUpgrade.Text=if tier>=3 then "MAX WALLET / LEGENDARY" else "UPGRADE TO "..Wallet.Rarities[tier+2]:upper().." / "..Wallet.Prices[tier+2].." E"
+ end
+ Input.InputEnded:Connect(function(input: InputObject)
+  if not walletDrag or not walletPanel.Visible or (input.UserInputType~=Enum.UserInputType.MouseButton1 and input.UserInputType~=Enum.UserInputType.Touch) then return end
+  local denomination=walletDrag;walletDrag=nil;moneyGhost.Visible=false
+  local point=pointer(input)-walletBody.AbsolutePosition
+  if point.X<0 or point.Y<0 or point.X>=walletBody.AbsoluteSize.X or point.Y>=walletBody.AbsoluteSize.Y then return end
+  local dims=Wallet.Sizes[(self.state.walletTier or 0)+1];local cols,rows=dims[1],dims[2]
+  local col=math.floor(point.X/(336/cols));local row=math.floor(point.Y/(255/rows))
+  request("MoveMoney",{denomination=denomination,slot=row*cols+col+1})
+ end)
  local function bindStage(name: string?)
   if mountedStage==name then return end
   mountedStage=name;mountEpoch+=1;local epoch=mountEpoch
   for _,layer in pairs(surfaces) do layer.part=nil;layer.gui.Adornee=nil;layer.gui.Enabled=false end
-  outline.Enabled=false;outline.Adornee=nil;nextOutline.Enabled=false;nextOutline.Adornee=nil;dismissOutline.Enabled=false;dismissOutline.Adornee=nil
+  outline.Enabled=false;outline.Adornee=nil;nextOutline.Enabled=false;nextOutline.Adornee=nil;dismissOutline.Enabled=false;dismissOutline.Adornee=nil;sleepOutline.Enabled=false;sleepOutline.Adornee=nil
   local function attempt()
    if epoch~=mountEpoch then return end
    local stage=if name then workspace:FindFirstChild(name) else nil
    local complete=true
-   for key,partName in pairs({inventory="InventoryBoard",basket="BuyBoard",offers="VisitorBoard",register="RegisterBox",next="NextCustomerButton",dismiss="DismissCustomerButton"}) do
+   for key,partName in pairs({inventory="InventoryBoard",basket="BuyBoard",offers="VisitorBoard",register="RegisterBox",next="NextCustomerButton",dismiss="DismissCustomerButton",sleep="SleepingBag",toggle="ShopToggle",wallet="Wallet"}) do
     local part=if stage then stage:FindFirstChild(partName,true) else nil
     local layer=surfaces[key];layer.part=part;layer.gui.Adornee=part;layer.gui.Enabled=part~=nil
     if part and (key=="inventory" or key=="basket" or key=="offers") then
@@ -237,7 +299,7 @@ function Desk.new(send: (any)->())
   local s=self.state;local c=s.customer;local target: string?=nil
   local nearest=math.huge;local surfaceName: string?=nil;local projected: Vector2?=nil
   if not covered(drag.point) then
-   for _,name in ipairs({"inventory","basket","offers"}) do
+   for _,name in ipairs({"inventory","offers"}) do
     local layer=surfaces[name];local point,distance=Surface.project(layer.part,layer.canvas,drag.point)
     if point and point.X>=0 and point.Y>=0 and point.X<layer.canvas.X and point.Y<layer.canvas.Y and (distance or 0)<nearest then
      nearest=distance or 0;surfaceName=name;projected=point
@@ -249,15 +311,12 @@ function Desk.new(send: (any)->())
   local widget=if target then widgets[target] else nil
   if widget and target then local point=canvasPoint(target,drag.point);if point then x,y=positionOf(widget,point,drag.grabX,drag.grabY) end end
   if drag.origin=="inventory" and target=="inventory" then valid=Grid.check(s,drag.item.kind,x,y,drag.rotation,drag.item.id)
-  elseif drag.origin=="inventory" and target=="basket" and c and c.mode=="Buyer" and c.state=="Interact" and Items.Definitions[drag.item.kind].tagCategory==c.requestTag then
+  elseif drag.origin=="inventory" and target=="offers" and c and c.mode=="Buyer" and c.state=="Interact" and Items.Definitions[drag.item.kind].tagCategory==c.requestTag then
    valid=Tray.check({inventory=c.basket,upgrade=0,legacyRows=0},drag.item.kind,x,y,drag.rotation,drag.item.id)
-  elseif (drag.origin=="offers" or drag.origin=="basket") and target=="basket" and c and c.state=="Interact" then
+  elseif drag.origin=="offers" and target=="inventory" and c and c.state=="Interact" then
+   valid=Grid.check(s,drag.item.kind,x,y,drag.rotation,if c.mode=="Buyer" then drag.item.id else nil)
+  elseif drag.origin=="offers" and target=="offers" and c and c.mode=="Buyer" and c.state=="Interact" then
    valid=Tray.check({inventory=c.basket,upgrade=0,legacyRows=0},drag.item.kind,x,y,drag.rotation,drag.item.id)
-  elseif drag.origin=="basket" and target=="inventory" and c and c.mode=="Buyer" and c.state=="Interact" then
-   valid=Grid.check(s,drag.item.kind,x,y,drag.rotation,drag.item.id)
-  elseif drag.origin=="basket" and target=="offers" and c and c.state=="Interact" then
-   valid=true
-   for _,entry in ipairs(c.goods) do if entry.item.id==drag.item.id then x=entry.item.gridX;y=entry.item.gridY;break end end
   end
   drag.valid=valid;drag.target=target;drag.x=x;drag.y=y
   ghost.Position=UDim2.fromOffset(drag.point.X-drag.grabX*drag.sourceSize,drag.point.Y-drag.grabY*drag.sourceHeight);ghost.Visible=true
@@ -334,6 +393,9 @@ function Desk.new(send: (any)->())
  end
  render=function()
   local s=self.state;if not s then return end;bindStage(s.stageName);layout()
+  dayLabel.Text="DAY "..s.day.." / "..s.visits.." OF "..s.maxVisits.." VISITORS"
+  shopLabel.Text=if s.shopOpen then "SHOP OPEN" else "SHOP CLOSED"
+  if walletPanel.Visible then drawWallet(s) end
   local c=s.customer
   visitorName.Text=if c then c.name.." / "..(if c.requestTag then "WANTS "..Tags.Categories[c.requestTag].name else c.faction) else "SERVICE WINDOW"
   dialoguePanel.Visible=c~=nil;dialogue.Text=if c then c.dialogue or "" else ""
@@ -346,19 +408,20 @@ function Desk.new(send: (any)->())
 for _,item in ipairs(c.basket) do staged[item.id]=true;table.insert(basket,item) end
    for _,entry in ipairs(c.goods) do if not staged[entry.item.id] then local item=table.clone(entry.item);item.offerPrice=entry.price;table.insert(offered,item) end end
   end
-  widgets.offers.render(offered,Config.TradeColumns,Config.TradeRows,Tray,surfaces.offers.canvas)
-  widgets.basket.render(basket,Config.TradeColumns,Config.TradeRows,Tray,surfaces.basket.canvas)
+  widgets.offers.render(if c and c.mode=="Buyer" then basket else offered,Config.TradeColumns,Config.TradeRows,Tray,surfaces.offers.canvas)
+  widgets.basket.render({},Config.TradeColumns,Config.TradeRows,Tray,surfaces.basket.canvas)
+  surfaces.basket.gui.Enabled=false
   local owned={}
   for _,item in ipairs(s.inventory) do if not (c and c.mode=="Buyer" and staged and staged[item.id]) then table.insert(owned,item) end end
   widgets.inventory.render(owned,s.gridColumns,s.gridRows,Grid,surfaces.inventory.canvas)
   widgets.basket.heading.Text=""
   clear(body)
   local q=c and c.quote
-  total.Text=(if c and c.mode=="Buyer" then "RECEIVE " else "TOTAL ")..tostring(if q then q.total else 0).." CR"
-  buy.Text=(if c and c.mode=="Buyer" then "SELL" else "BUY")..(if q then " / "..q.total.." CR" else "")
+  total.Text=(if c and c.mode=="Buyer" then "RECEIVE " else "TOTAL ")..tostring(if q then q.total else 0).." E"
+  buy.Text=(if c and c.mode=="Buyer" then "SELL" else "BUY")..(if q then " / "..q.total.." E" else "")
   bulk.Visible=c~=nil and c.mode=="Seller" and c.bulkPercent~=nil and c.state=="Interact"
   if bulk.Visible then
-   bulk.Text="BUY BULK / "..c.bulkOriginal.." → "..c.bulkPrice.." CR (-"..c.bulkPercent.."%)"
+   bulk.Text="BUY BULK / "..c.bulkOriginal.." → "..c.bulkPrice.." E (-"..c.bulkPercent.."%)"
    if not q then rowText(body,"BULK OFFER / "..#c.goods.." ITEMS",P.gold) end
   end
   if q then
@@ -367,7 +430,7 @@ for _,item in ipairs(c.basket) do staged[item.id]=true;table.insert(basket,item)
   elseif c and c.state=="Interact" and (c.itemId or c.requestTag) then
    rowText(body,"WANTED: "..(if c.requestTag then Tags.Categories[c.requestTag].name else Items.Definitions[c.kind].name),P.gold)
    if c.itemId and c.mode~="Buyer" then
-   rowButton(body,"SELL / "..c.offer.." CR",function() request("Accept",{customerId=c.id}) end)
+   rowButton(body,"SELL / "..c.offer.." E",function() request("Accept",{customerId=c.id}) end)
    local ask=make("TextBox",{Name="AskPrice",Size=UDim2.new(1,0,0,32),Text="",PlaceholderText="Sale price",ClearTextOnFocus=false,TextSize=14},body)
    rowButton(body,"COUNTER",function() request("Counter",{customerId=c.id,price=tonumber(ask.Text)}) end)
   end
@@ -411,10 +474,19 @@ for _,item in ipairs(c.basket) do staged[item.id]=true;table.insert(basket,item)
   if d.origin=="inventory" and d.target=="inventory" then
    if d.x==d.item.gridX and d.y==d.item.gridY and d.rotation==d.item.rotation then return end
    emitMove({action="PlaceItem",id=d.item.id,x=d.x,y=d.y,rotation=d.rotation,revision=d.gridRevision})
-  elseif d.origin=="basket" and d.target=="inventory" then emitMove({action="UnstageStock",customerId=d.customerId,id=d.item.id,x=d.x,y=d.y,rotation=d.rotation,revision=d.basketRevision})
-  elseif d.origin=="inventory" and d.target=="basket" then emitMove({action="StageStock",customerId=d.customerId,id=d.item.id,x=d.x,y=d.y,rotation=d.rotation,revision=d.basketRevision})
-  elseif d.target=="offers" then emitMove({action="UnstageOffer",customerId=d.customerId,id=d.item.id,revision=d.basketRevision})
-  else emitMove({action="StageOffer",customerId=d.customerId,id=d.item.id,x=d.x,y=d.y,rotation=d.rotation,revision=d.basketRevision}) end
+  elseif d.origin=="inventory" and d.target=="offers" then
+   receipt.Visible=true;emitMove({action="StageStock",customerId=d.customerId,id=d.item.id,x=d.x,y=d.y,rotation=d.rotation,revision=d.basketRevision})
+  elseif d.origin=="offers" and d.target=="inventory" then
+   receipt.Visible=true
+   if self.state.customer.mode=="Buyer" then
+    emitMove({action="UnstageStock",customerId=d.customerId,id=d.item.id,x=d.x,y=d.y,rotation=d.rotation,revision=d.basketRevision})
+   else
+    local x,y,rotation=Tray.firstFit({inventory=self.state.customer.basket,upgrade=0,legacyRows=0},d.item.kind)
+    if x then emitMove({action="StageOffer",customerId=d.customerId,id=d.item.id,x=x,y=y,rotation=rotation,stockX=d.x,stockY=d.y,stockRotation=d.rotation,revision=d.basketRevision}) else notice("Trade selection is full.",P.red) end
+   end
+  elseif d.origin=="offers" and d.target=="offers" and self.state.customer.mode=="Buyer" then
+   emitMove({action="StageStock",customerId=d.customerId,id=d.item.id,x=d.x,y=d.y,rotation=d.rotation,revision=d.basketRevision})
+  end
  end)
  Input.InputBegan:Connect(function(input: InputObject)
   if input.KeyCode==Enum.KeyCode.Escape then cancel();receipt.Visible=false

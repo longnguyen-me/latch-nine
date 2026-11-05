@@ -1602,6 +1602,120 @@
       "Properties": {}
     },
     {
+      "ClassName": "Part",
+      "Name": "SleepingBag",
+      "Properties": {
+        "Anchored": true,
+        "BottomSurface": "Smooth",
+        "CFrame": [
+          -17,
+          0.5,
+          11,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ],
+        "CanCollide": false,
+        "CanQuery": true,
+        "CanTouch": false,
+        "CastShadow": false,
+        "Color": [
+          0.27450980392156865,
+          0.2901960784313726,
+          0.4117647058823529
+        ],
+        "Material": "SmoothPlastic",
+        "Size": [
+          5,
+          0.5,
+          3
+        ],
+        "TopSurface": "Smooth"
+      }
+    },
+    {
+      "ClassName": "Part",
+      "Name": "ShopToggle",
+      "Properties": {
+        "Anchored": true,
+        "BottomSurface": "Smooth",
+        "CFrame": [
+          -12,
+          5.8,
+          6,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ],
+        "CanCollide": false,
+        "CanQuery": true,
+        "CanTouch": false,
+        "CastShadow": false,
+        "Color": [
+          0.26666666666666666,
+          0.5019607843137255,
+          0.4745098039215686
+        ],
+        "Material": "SmoothPlastic",
+        "Size": [
+          3,
+          1.4,
+          0.4
+        ],
+        "TopSurface": "Smooth"
+      }
+    },
+    {
+      "ClassName": "Part",
+      "Name": "Wallet",
+      "Properties": {
+        "Anchored": true,
+        "BottomSurface": "Smooth",
+        "CFrame": [
+          -9,
+          3.6,
+          6,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          1
+        ],
+        "CanCollide": false,
+        "CanQuery": true,
+        "CanTouch": false,
+        "CastShadow": false,
+        "Color": [
+          0.32941176470588235,
+          0.2823529411764706,
+          0.3764705882352941
+        ],
+        "Material": "SmoothPlastic",
+        "Size": [
+          2,
+          0.5,
+          1.5
+        ],
+        "TopSurface": "Smooth"
+      }
+    },
+    {
       "Children": [
         {
           "Children": [
@@ -2131,7 +2245,7 @@
                     ]
                   ]
                 },
-                "Text": "--- CR",
+                "Text": "--- EDDIES",
                 "TextColor3": [
                   0.43529411764705883,
                   0.9058823529411765,

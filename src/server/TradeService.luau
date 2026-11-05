@@ -14,17 +14,22 @@ return function(config: any, definitions: any, rules: any, inventoryGrid: any, t
  local function ready(customer: any,revision: any): boolean
   return customer and customer.state=="Interact" and rules.integer(revision,0,1000000000) and revision==customer.basketRevision
  end
- function Trade.stage(customer: any,id: any,x: any,y: any,rotation: any,revision: any): (boolean,string)
+ function Trade.stage(customer: any,id: any,x: any,y: any,rotation: any,revision: any,profile: any?,stockX: any?,stockY: any?,stockRotation: any?): (boolean,string)
   if not ready(customer,revision) then return false,"Trade changed." end
   if type(id)~="string" or #id>80 then return false,"Invalid offered stock ID." end
   local entry=offer(customer,id)
   if not entry then return false,"This visitor is not offering that item." end
   local ok,reason=trayGrid.check(tray(customer),(entry :: any).item.kind,x,y,rotation,id)
   if not ok then return false,reason end
+  if profile then
+   local fits,why=inventoryGrid.check(profile,(entry :: any).item.kind,stockX,stockY,stockRotation)
+   if not fits then return false,why end
+  end
   local placed: any=nil
   for _,item in ipairs(customer.basket) do if item.id==id then placed=item;break end end
   if not placed then placed={id=id,kind=(entry :: any).item.kind};table.insert(customer.basket,placed) end
   placed.gridX=x;placed.gridY=y;placed.rotation=rotation
+  if profile then placed.stockX=stockX;placed.stockY=stockY;placed.stockRotation=stockRotation end
   customer.basketRevision+=1;customer.quote=nil
   return true,"Selected."
  end
@@ -50,6 +55,12 @@ return function(config: any, definitions: any, rules: any, inventoryGrid: any, t
    local price=(entry :: any).price
    local item=clone((entry :: any).item);item.qualityTag=item.qualityTag or rules.DefaultQuality
    local x,y,rotation=inventoryGrid.firstFit(plan,item.kind)
+   local desired: any=selection
+   if desired.stockX~=nil then
+    local fits=inventoryGrid.check(plan,item.kind,desired.stockX,desired.stockY,desired.stockRotation)
+    if not fits then customer.quote=nil;return false,"The chosen stock space is occupied." end
+    x,y,rotation=desired.stockX,desired.stockY,desired.stockRotation
+   end
    if x==nil then customer.quote=nil;return false,"Insufficient storage space." end
    item.gridX=x;item.gridY=y;item.rotation=rotation;item.paid=price
    table.insert(plan.inventory,item)
@@ -95,7 +106,7 @@ return function(config: any, definitions: any, rules: any, inventoryGrid: any, t
   if q.basketRevision~=customer.basketRevision or q.gridRevision~=profile.gridRevision then
    customer.quote=nil;return false,"Trade changed."
   end
-  if profile.cash<q.total then return false,"Not enough credits for this purchase." end
+  if profile.cash<q.total then return false,"Not enough Eddies for this purchase." end
   -- Preserve live metadata (for example inspections performed after the quote).
   local committed=table.clone(profile.inventory)
   local bought: {[string]: boolean}={}
@@ -112,7 +123,7 @@ return function(config: any, definitions: any, rules: any, inventoryGrid: any, t
   for _,entry in ipairs(customer.goods) do if not bought[(entry :: any).item.id] then table.insert(remaining,entry) end end
   customer.goods=remaining;customer.quote=nil;customer.basket={};customer.basketRevision+=1
   rules.log(profile,"Bought "..q.count.." item(s) from "..customer.name.." for "..q.total)
-  return true,"Bought "..q.count.." item(s) for "..q.total.." credits."
+  return true,"Bought "..q.count.." item(s) for "..q.total.." Eddies."
  end
  -- A buyer uses the same middle tray to hold stock from the shop.
  function Trade.stageStock(profile: any,customer: any,id: any,x: any,y: any,rotation: any,revision: any): (boolean,string)
@@ -134,7 +145,7 @@ return function(config: any, definitions: any, rules: any, inventoryGrid: any, t
   local item=rules.find(profile,id)
   if not item then return false,"Stock changed." end
   local staged=false
-  for _,entry in ipairs(customer.basket) do if entry.id==id then staged=true;break end end
+  for _,entry in ipairs(customer.basket) do if (entry :: any).id==id then staged=true;break end end
   if not staged then return false,"Item is not staged." end
   local ok,reason=inventoryGrid.check(profile,item.kind,x,y,rotation,id)
   if not ok then return false,reason end
@@ -173,7 +184,7 @@ return function(config: any, definitions: any, rules: any, inventoryGrid: any, t
   if total~=q.total or total>customer.budget then customer.quote=nil;return false,"Buyer cannot afford this selection." end
   for _,key in ipairs({"cash","inventory","revenue","costs","tradeProfit","reputation","receipts","gridRevision"}) do profile[key]=working[key] end
   customer.quote=nil;customer.basket={};customer.basketRevision+=1
-  return true,"Sold "..q.count.." item(s) for "..total.." credits."
+  return true,"Sold "..q.count.." item(s) for "..total.." Eddies."
  end
  return Trade
 end

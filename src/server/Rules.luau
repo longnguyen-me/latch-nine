@@ -113,7 +113,7 @@ return function(config: any, definitions: any, grid: any, tags: any)
 	function Rules.purchase(p: any, item: any, price: number): (boolean, string)
 		local x, y, rotation = grid.firstFit(p, item.kind)
 		if x == nil then return false, "Insufficient storage space." end
-		if p.cash < price then return false, "Not enough credits." end
+		if p.cash < price then return false, "Not enough Eddies." end
 		if Rules.find(p, item.id) then return false, "That item is already in storage." end
 		p.cash -= price; p.costs += price; item.paid = price
 		item.gridX = x; item.gridY = y; item.rotation = rotation; item.qualityTag = item.qualityTag or tags.DefaultQuality; p.gridRevision += 1
@@ -147,7 +147,7 @@ return function(config: any, definitions: any, grid: any, tags: any)
 		customer.patience -= 1
 		customer.offer = math.min(cap, math.max(customer.offer, math.floor((customer.offer + cap) / 2)))
 		if customer.patience <= 0 then return false, "Too expensive. I'm leaving.", true end
-		return false, "Too high. My counteroffer is " .. customer.offer .. " credits.", false
+		return false, "Too high. My counteroffer is " .. customer.offer .. " Eddies.", false
 	end
 	function Rules.sell(p: any, customer: any, id: string, price: number): (boolean, string)
 		local item, index = Rules.find(p, id)
@@ -164,11 +164,11 @@ return function(config: any, definitions: any, grid: any, tags: any)
 		local honest = item.authentic and not item.restricted and item.condition >= 60
 		p.reputation = math.clamp(p.reputation + (if honest then 1 else -1) - (if fine > 0 then 2 else 0), -20, 20)
 		Rules.log(p, "Sold " .. definitions[item.kind].name .. " for " .. price .. (if fine > 0 then "; Watch fine " .. fine else ""))
-		return true, "Sold for " .. price .. " credits." .. (if fine > 0 then " Restricted tech: 25-credit Watch fine." else "")
+		return true, "Sold for " .. price .. " Eddies." .. (if fine > 0 then " Restricted tech: 25-credit Watch fine." else "")
 	end
 	function Rules.endDay(p: any): (boolean, string)
 		local bill = Rules.bill(p)
-		if p.cash < bill then return false, "Need " .. bill .. " credits required for expenses." end
+		if p.cash < bill then return false, "Need " .. bill .. " Eddies required for expenses." end
 		p.cash -= bill; p.costs += bill; p.tradeProfit -= bill
 		Rules.log(p, "Rent + operations paid: " .. bill)
 		p.day += 1; p.visits = 0
@@ -178,7 +178,7 @@ return function(config: any, definitions: any, grid: any, tags: any)
 		if p.cash > Rules.bill(p) + 24 or p.aidDay == p.day then return false, "Emergency credit is available once per day when funds are low." end
 		p.cash += 40; p.aidDay = p.day; p.reputation = math.max(-20, p.reputation - 2)
 		Rules.log(p, "Emergency credit +40; trust -2")
-		return true, "The dock union advances 40 credits. Trust falls by 2."
+		return true, "The dock union advances 40 Eddies. Trust falls by 2."
 	end
 	return Rules
 end
