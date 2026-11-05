@@ -214,6 +214,12 @@ action.OnServerEvent:Connect(function(player: Player,request: any)
   local ok,message=Trade.stagePayment(s.profile,c,request.denomination,request.id)
   push(player,message);return
  end
+ if name=="RotateOffer" then
+  local c=matchingCustomer(s,request)
+  if not c then push(player,"No active offer.");return end
+  local ok,message=Trade.rotateOffer(c,request.id,request.revision)
+  push(player,message);return
+ end
  if name=="MachineInsert" or name=="MachineExtract" then
   if not Rules.integer(request.moveId,1,1000000000) then push(player,"Invalid machine move.");return end
   Machine.tick(s.profile,os.time(),function() return Http:GenerateGUID(false) end,function(a: number,b: number) return rng:NextInteger(a,b) end)

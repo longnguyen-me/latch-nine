@@ -41,6 +41,20 @@ return function(config: any, definitions: any, rules: any, inventoryGrid: any, t
   end
   return false,"That item is not selected."
  end
+ function Trade.rotateOffer(customer: any,id: any,revision: any): (boolean,string)
+  if not ready(customer,revision) or customer.mode~="Seller" then return false,"Trade changed." end
+  local entry=offer(customer,id)
+  if not entry then return false,"Offer missing." end
+  for _,selected in ipairs(customer.basket) do if selected.id==id then return false,"Return the item to the visitor first." end end
+  local item=(entry :: any).item
+  local goods={}
+  for _,raw in ipairs(customer.goods) do table.insert(goods,(raw :: any).item) end
+  local rotation=(item.rotation+1)%4
+  local fits,reason=trayGrid.check({inventory=goods,upgrade=0,legacyRows=0},item.kind,item.gridX,item.gridY,rotation,id)
+  if not fits then return false,reason end
+  item.rotation=rotation;customer.basketRevision+=1;customer.quote=nil
+  return true,"Offer rotated."
+ end
  function Trade.clear(customer: any): (boolean,string)
   if not customer or customer.state~="Interact" then return false,"No visitor is serving a trade." end
   customer.basket={};customer.payment={};customer.paymentTotal=0;customer.basketRevision+=1;customer.quote=nil

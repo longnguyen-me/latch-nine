@@ -102,7 +102,8 @@ local env={workspace={CurrentCamera=camera,children={},GetChildren=function(self
 modules.SurfaceInput=load("SurfaceInput",env)
 modules.GridWidget=load("GridWidget",env)
 local Controller=load("DeskController",env)
-local desk=Controller.new(function() end)
+local requests={}
+local desk=Controller.new(function(request) table.insert(requests,request) end)
 local function find(name,node)
  if node.Name==name then return node end
  for _,child in ipairs(node:GetChildren()) do local result=find(name,child);if result then return result end end
@@ -115,4 +116,33 @@ local arrival=table.clone(base)
 arrival.customer={id="visitor-1",name="Mara Venn",faction="Dock Union",state="Interact",mode="Seller",dialogue="I have stock to sell.",goods={{item={id="offer-1",kind="blank1",gridX=0,gridY=0,rotation=0,qualityTag="standard",marketPrice=10},price=8}},basket={},basketRevision=0,color={86,181,177}}
 desk.render(arrival)
 assert(find("VisitorDialogue",playerGui).Visible and find("Item_offer-1",playerGui),"visitor board or dialogue did not render")
-print("Desk startup, stock, visitor board, and dialogue render passed")
+local function boardPoint(name,x,y,cols)
+ local board=find("GridBoard",find(name,playerGui));local size=board.Size.X.Offset/cols
+ local part=boards[if name=="03 / YOUR INVENTORY" then "InventoryBoard" else "VisitorBoard"]
+ local layer=find(name,playerGui).Parent.Parent
+ return {X=part.rect.x+(board.Position.X.Offset+(x+0.5)*size)/layer.CanvasSize.X*part.rect.w,
+  Y=part.rect.y+(board.Position.Y.Offset+(y+0.5)*size)/layer.CanvasSize.Y*part.rect.h}
+end
+local staged=table.clone(arrival)
+staged.customer=table.clone(arrival.customer)
+staged.customer.basket={{id="offer-1",kind="blank1",gridX=0,gridY=0,rotation=0,stockX=3,stockY=0,stockRotation=0,qualityTag="standard"}}
+staged.customer.basketRevision=1
+desk.render(staged)
+local pendingView=find("Item_offer-1",find("03 / YOUR INVENTORY",playerGui))
+assert(pendingView,"staged purchase preview missing")
+local start=boardPoint("03 / YOUR INVENTORY",3,0,15)
+local target=boardPoint("01 / VISITOR OFFERS",0,0,12)
+cursor=start
+find("Hit",pendingView).InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=start})
+cursor=target;Input.InputChanged:Fire({UserInputType=Enum.UserInputType.MouseMovement,Position=target})
+Input.InputEnded:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=target})
+assert(requests[#requests] and requests[#requests].action=="UnstageOffer","dragging preview back did not cancel purchase")
+local printer={id="printer-test",kind="printer1",gridX=5,gridY=0,rotation=0,qualityTag="standard",condition=100,paid=0,authentic=true,restricted=false,inspected=false}
+local withPrinter=table.clone(base);withPrinter.inventory={profile.inventory[1],printer};withPrinter.moveAck=requests[#requests].moveId;desk.render(withPrinter)
+local printerView=find("Item_printer-test",find("03 / YOUR INVENTORY",playerGui));assert(printerView)
+local pos=boardPoint("03 / YOUR INVENTORY",5,0,15);cursor=pos
+find("Hit",printerView).InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=pos})
+Input.InputEnded:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=pos})
+find("Hit",printerView).InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=pos})
+assert(find("MachineMenu",playerGui).Visible,"double click did not open printer menu")
+print("Desk startup, staged return, printer double click, and dialogue render passed")

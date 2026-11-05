@@ -342,6 +342,14 @@ function Desk.new(send: (any)->())
   elseif self.state and self.selection and not pending then
    local item=locate(self.state.inventory,self.selection)
    if selectedOrigin=="inventory" and item then request("PlaceItem",{id=item.id,x=item.gridX,y=item.gridY,rotation=(item.rotation+1)%4,revision=self.state.gridRevision}) end
+   local c=self.state.customer
+   if selectedOrigin=="offers" and c and c.state=="Interact" then
+    if c.mode=="Seller" then request("RotateOffer",{customerId=c.id,id=self.selection,revision=c.basketRevision})
+    else
+     local staged=locate(c.basket,self.selection)
+     if staged then emitMove({action="StageStock",customerId=c.id,id=staged.id,x=staged.gridX,y=staged.gridY,rotation=(staged.rotation+1)%4,revision=c.basketRevision}) end
+    end
+   end
   end
  end
  -- Rotation remains bound to R without a screen button.
@@ -369,7 +377,8 @@ function Desk.new(send: (any)->())
   local valid=false;local x,y=0,0
   local widget=if target then widgets[target] else nil
   if widget and target then local point=canvasPoint(target,drag.point);if point then x,y=positionOf(widget,point,drag.grabX,drag.grabY) end end
-  if drag.origin=="inventory" and target=="inventory" then valid=Grid.check(s,drag.item.kind,x,y,drag.rotation,drag.item.id)
+  if drag.item.pending and target=="offers" and c and c.mode=="Seller" and c.state=="Interact" then valid=true
+  elseif drag.origin=="inventory" and target=="inventory" and not drag.item.pending then valid=Grid.check(s,drag.item.kind,x,y,drag.rotation,drag.item.id)
   elseif drag.origin=="inventory" and target=="offers" and c and c.state=="Interact" then
    if c.mode=="Seller" then valid=Items.Definitions[drag.item.kind].denomination~=nil and #c.basket>0
    elseif Items.Definitions[drag.item.kind].tagCategory==c.requestTag then valid=Tray.check({inventory=c.basket,upgrade=0,legacyRows=0},drag.item.kind,x,y,drag.rotation,drag.item.id) end
@@ -428,8 +437,14 @@ function Desk.new(send: (any)->())
   end;step()
  end
  startDrag=function(origin: string,item: any,input: any)
-  if item.payment or item.pending then return end
+  if item.payment then return end
   if drag or pending or receiptDrag or not self.state or covered(pointer(input)) then return end
+  if origin=="inventory" and not item.pending and Items.Definitions[item.kind].machine then
+   if lastMachineClick and lastMachineClick.id==item.id and os.clock()-lastMachineClick.at<0.55 then
+    activeMachine=item.id;machinePanel.Visible=true;renderMachine(self.state);lastMachineClick=nil;return
+   end
+   lastMachineClick={id=item.id,at=os.clock()}
+  end
   local c=self.state.customer
   if origin~="inventory" and (not c or c.state~="Interact") then return end
   self.selection=item.id;selectedOrigin=origin;tooltip.Visible=false;render()
@@ -562,10 +577,6 @@ for _,item in ipairs(c.basket) do staged[item.id]=true;table.insert(basket,item)
    if d.point.X>=p.X and d.point.Y>=p.Y and d.point.X<p.X+b.X and d.point.Y<p.Y+b.Y then request("DepositMoney",{id=d.item.id});return end
   end
   if not d.active then
-   if d.origin=="inventory" and Items.Definitions[d.item.kind].machine then
-    if lastMachineClick and lastMachineClick.id==d.item.id and os.clock()-lastMachineClick.at<0.45 then activeMachine=d.item.id;machinePanel.Visible=true;renderMachine(self.state);lastMachineClick=nil
-    else lastMachineClick={id=d.item.id,at=os.clock()} end
-   end
    if d.origin=="inventory" and Items.Definitions[d.item.kind].walletTier~=nil then walletPanel.Visible=true;drawWallet(self.state) end
    return
   end
@@ -581,7 +592,9 @@ for _,item in ipairs(c.basket) do staged[item.id]=true;table.insert(basket,item)
    end
   end
   if not d.valid then notice("Placement blocked.",P.red);return end
-  if d.origin=="inventory" and d.target=="inventory" then
+  if d.item.pending and d.target=="offers" then
+   emitMove({action="UnstageOffer",customerId=d.customerId,id=d.item.id,revision=d.basketRevision})
+  elseif d.origin=="inventory" and d.target=="inventory" then
    if d.x==d.item.gridX and d.y==d.item.gridY and d.rotation==d.item.rotation then return end
    emitMove({action="PlaceItem",id=d.item.id,x=d.x,y=d.y,rotation=d.rotation,revision=d.gridRevision})
   elseif d.origin=="inventory" and d.target=="offers" then
