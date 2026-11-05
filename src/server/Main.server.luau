@@ -200,7 +200,7 @@ action.OnServerEvent:Connect(function(player: Player,request: any)
   if name=="StageOffer" then ok,message=Trade.stage(c,request.id,request.x,request.y,request.rotation,request.revision)
   elseif name=="UnstageOffer" then ok,message=Trade.unstage(c,request.id,request.revision)
   elseif name=="StageStock" then ok,message=Trade.stageStock(s.profile,c,request.id,request.x,request.y,request.rotation,request.revision)
-  else ok,message=Trade.unstageStock(c,request.id,request.revision) end
+  else ok,message=Trade.unstageStock(s.profile,c,request.id,request.x,request.y,request.rotation,request.revision) end
   if ok and #c.basket>0 then ok,message=if c.mode=="Buyer" then Trade.reviewSale(s.profile,c,Http:GenerateGUID(false)) else Trade.review(s.profile,c,Http:GenerateGUID(false)) end
   push(player,message,request.moveId,ok);return
  elseif name=="ClearBasket" or name=="ReviewPurchase" or name=="ConfirmPurchase" or name=="BuyBulk" or name=="ReviewSale" or name=="ConfirmSale" then

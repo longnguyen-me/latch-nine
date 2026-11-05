@@ -36,34 +36,36 @@ function Widget.draw(parent: Instance,item: any,cells: {any},w: number,h: number
 end
 function Widget.new(parent: Instance,title: string,onBegin: any,onHover: any?): any
  local self: any={cellSize=24,items={},columns=15,rows=7}
- self.frame=make("Frame",{Name=title,BackgroundColor3=C(14,21,31),BorderSizePixel=0,ClipsDescendants=true},parent)
- make("UIStroke",{Color=C(71,93,108),Thickness=1},self.frame)
+ self.frame=make("Frame",{Name=title,BackgroundTransparency=1,BorderSizePixel=0,ClipsDescendants=true},parent)
  self.heading=make("TextLabel",{Name="Heading",Size=UDim2.new(1,0,0,28),BackgroundColor3=C(35,43,52),BorderSizePixel=0,Text="",
   Font=Enum.Font.Code,TextSize=14,TextColor3=C(225,229,207),Active=false},self.frame)
  self.heading.Visible=false
  self.scroll=make("ScrollingFrame",{Name="GridScroll",Position=UDim2.fromOffset(0,0),Size=UDim2.new(1,0,1,0),BackgroundTransparency=1,BorderSizePixel=0,
   CanvasSize=UDim2.new(),CanvasPosition=Vector2.zero,ScrollBarThickness=4,ScrollBarImageColor3=C(85,99,84),ScrollingDirection=Enum.ScrollingDirection.Y},self.frame)
- self.board=make("Frame",{Name="GridBoard",Position=UDim2.fromOffset(8,4),BackgroundColor3=C(27,42,55),BorderSizePixel=0},self.scroll)
+ self.board=make("Frame",{Name="GridBoard",Position=UDim2.fromOffset(4,4),BackgroundTransparency=1,BorderSizePixel=0},self.scroll)
  function self.render(items: {any},cols: number,rows: number,geometry: any,canvas: Vector2?)
   local bounds=canvas or self.frame.AbsoluteSize
   self.canvasWidth=bounds.X;self.canvasHeight=bounds.Y
-  local size=math.clamp(math.floor(math.min((bounds.X-20)/cols,(bounds.Y-40)/math.min(rows,7))),12,48)
-  local signature=cols..":"..rows..":"..size
+  local size=math.max(4,math.floor(math.min((bounds.X-8)/cols,(bounds.Y-8)/rows)))
+  local signature=cols..":"..rows..":"..size..":"..bounds.X..":"..bounds.Y
   for _,i in ipairs(items) do signature..="|"..i.id..":"..i.gridX..":"..i.gridY..":"..i.rotation..":"..(i.qualityTag or "standard") end
   self.items=items;self.columns=cols;self.rows=rows;self.geometry=geometry
   if self.signature==signature then return end
   self.signature=signature;self.cellSize=size;self.views={};clear(self.board)
   self.board.Size=UDim2.fromOffset(cols*size,rows*size)
-  self.boardX=math.max(8,math.floor((bounds.X-cols*size-4)/2));self.board.Position=UDim2.fromOffset(self.boardX,4)
-  self.scroll.CanvasSize=UDim2.fromOffset(0,rows*size+10)
-  for y=0,rows-1 do for x=0,cols-1 do make("Frame",{Name="EmptyCell",Position=UDim2.fromOffset(x*size+1,y*size+1),Size=UDim2.fromOffset(size-2,size-2),BackgroundColor3=C(29,43,56),BorderSizePixel=0,Active=false},self.board) end end
+  self.boardX=math.max(4,math.floor((bounds.X-cols*size)/2));self.boardY=math.max(4,math.floor((bounds.Y-rows*size)/2));self.board.Position=UDim2.fromOffset(self.boardX,self.boardY)
+  self.scroll.CanvasSize=UDim2.fromOffset(0,rows*size+self.boardY*2)
+  for y=0,rows-1 do for x=0,cols-1 do
+   local cell=make("Frame",{Name="EmptyCell",Position=UDim2.fromOffset(x*size,y*size),Size=UDim2.fromOffset(size,size),BackgroundTransparency=1,BorderSizePixel=0,Active=false},self.board)
+   make("UIStroke",{Color=C(94,145,155),Transparency=0.28,Thickness=1},cell)
+  end end
   for _,item in ipairs(items) do
    local cells,w,h=geometry.cells(item.kind,item.rotation)
    local view=Widget.draw(self.board,item,cells,w,h,size,false,onBegin,onHover);view.Position=UDim2.fromOffset(item.gridX*size,item.gridY*size);self.views[item.id]=view
   end
  end
  function self.origin(): Vector2
-  return Vector2.new(self.boardX or 8,4-self.scroll.CanvasPosition.Y)
+  return Vector2.new(self.boardX or 4,(self.boardY or 4)-self.scroll.CanvasPosition.Y)
  end
  function self.contains(point: Vector2): boolean
   local b=self.origin()

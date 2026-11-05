@@ -129,8 +129,17 @@ return function(config: any, definitions: any, rules: any, inventoryGrid: any, t
   customer.basketRevision+=1;customer.quote=nil
   return true,"Stock offered to buyer."
  end
- function Trade.unstageStock(customer: any,id: any,revision: any): (boolean,string)
-  if customer.mode~="Buyer" then return false,"No buyer at the counter." end
+ function Trade.unstageStock(profile: any,customer: any,id: any,x: any,y: any,rotation: any,revision: any): (boolean,string)
+  if customer.mode~="Buyer" or not ready(customer,revision) then return false,"Trade changed." end
+  local item=rules.find(profile,id)
+  if not item then return false,"Stock changed." end
+  local staged=false
+  for _,entry in ipairs(customer.basket) do if entry.id==id then staged=true;break end end
+  if not staged then return false,"Item is not staged." end
+  local ok,reason=inventoryGrid.check(profile,item.kind,x,y,rotation,id)
+  if not ok then return false,reason end
+  local moved,message=rules.move(profile,id,x,y,rotation,profile.gridRevision)
+  if not moved then return false,message end
   return Trade.unstage(customer,id,revision)
  end
  function Trade.reviewSale(profile: any,customer: any,quoteId: string): (boolean,string)

@@ -185,6 +185,10 @@ function Desk.new(send: (any)->())
    for key,partName in pairs({inventory="InventoryBoard",basket="BuyBoard",offers="VisitorBoard",register="RegisterBox",next="NextCustomerButton",dismiss="DismissCustomerButton"}) do
     local part=if stage then stage:FindFirstChild(partName,true) else nil
     local layer=surfaces[key];layer.part=part;layer.gui.Adornee=part;layer.gui.Enabled=part~=nil
+    if part and (key=="inventory" or key=="basket" or key=="offers") then
+     layer.canvas=Vector2.new(layer.canvas.X,math.max(80,math.floor(layer.canvas.X*part.Size.Y/part.Size.X+0.5)))
+     layer.gui.CanvasSize=layer.canvas
+    end
     if key=="register" then outline.Adornee=part elseif key=="next" then nextOutline.Adornee=part elseif key=="dismiss" then dismissOutline.Adornee=part end
     if not part then complete=false end
    end
@@ -249,7 +253,8 @@ function Desk.new(send: (any)->())
    valid=Tray.check({inventory=c.basket,upgrade=0,legacyRows=0},drag.item.kind,x,y,drag.rotation,drag.item.id)
   elseif (drag.origin=="offers" or drag.origin=="basket") and target=="basket" and c and c.state=="Interact" then
    valid=Tray.check({inventory=c.basket,upgrade=0,legacyRows=0},drag.item.kind,x,y,drag.rotation,drag.item.id)
-  elseif drag.origin=="basket" and target=="inventory" and c and c.mode=="Buyer" and c.state=="Interact" then valid=true
+  elseif drag.origin=="basket" and target=="inventory" and c and c.mode=="Buyer" and c.state=="Interact" then
+   valid=Grid.check(s,drag.item.kind,x,y,drag.rotation,drag.item.id)
   elseif drag.origin=="basket" and target=="offers" and c and c.state=="Interact" then
    valid=true
    for _,entry in ipairs(c.goods) do if entry.item.id==drag.item.id then x=entry.item.gridX;y=entry.item.gridY;break end end
@@ -406,7 +411,7 @@ for _,item in ipairs(c.basket) do staged[item.id]=true;table.insert(basket,item)
   if d.origin=="inventory" and d.target=="inventory" then
    if d.x==d.item.gridX and d.y==d.item.gridY and d.rotation==d.item.rotation then return end
    emitMove({action="PlaceItem",id=d.item.id,x=d.x,y=d.y,rotation=d.rotation,revision=d.gridRevision})
-  elseif d.origin=="basket" and d.target=="inventory" then emitMove({action="UnstageStock",customerId=d.customerId,id=d.item.id,revision=d.basketRevision})
+  elseif d.origin=="basket" and d.target=="inventory" then emitMove({action="UnstageStock",customerId=d.customerId,id=d.item.id,x=d.x,y=d.y,rotation=d.rotation,revision=d.basketRevision})
   elseif d.origin=="inventory" and d.target=="basket" then emitMove({action="StageStock",customerId=d.customerId,id=d.item.id,x=d.x,y=d.y,rotation=d.rotation,revision=d.basketRevision})
   elseif d.target=="offers" then emitMove({action="UnstageOffer",customerId=d.customerId,id=d.item.id,revision=d.basketRevision})
   else emitMove({action="StageOffer",customerId=d.customerId,id=d.item.id,x=d.x,y=d.y,rotation=d.rotation,revision=d.basketRevision}) end
