@@ -118,7 +118,7 @@ function Scene.build(parent: Instance, origin: Vector3, name: string): Model
  local balance=Instance.new("TextLabel");balance.Name="Balance";balance.Size=UDim2.fromScale(1,1)
  balance.BackgroundTransparency=1;balance.Text="--- CR";balance.Font=Enum.Font.Code
  balance.TextScaled=true;balance.TextColor3=C(111,231,192);balance.Parent=display
- sign(m,"ORE / 09",Vector3.new(6,1,0.3),origin+Vector3.new(-2,16.7,1.1),C(222,186,113))
+ sign(m,"NIGHT MARKET",Vector3.new(6,1,0.3),origin+Vector3.new(-2,16.7,1.1),C(222,186,113))
  for i=1,4 do
   p("Cable vertical",-23+i*0.3,10,0.6,0.1,18,0.2,C(28+i*5,34,40))
  end

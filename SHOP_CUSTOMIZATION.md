@@ -15,7 +15,7 @@ Make permanent changes in Edit mode. During Play, the template lives in ServerSt
 | --- | --- |
 | InventoryBoard | 15-column by 7-row inventory panel under the desk |
 | BuyBoard | Shared purchase/sale tray on the counter |
-| VisitorBoard | Seller ore haul above the tray |
+| VisitorBoard | Seller goods above the tray |
 | RegisterBox | Click to open the receipt; outlines on hover |
 | NextCustomerButton | Physical clickable next-customer button |
 | DismissCustomerButton | Physical dismissal button; customer exits right without a replacement |
@@ -30,6 +30,6 @@ These parts can be moved into nested folders/models, but keep their names unique
 
 Select invisible markers through Explorer to move them. Keep ShopTemplate near the original origin; move ViewTarget to reframe your arrangement. Move and rotate CameraMount to set your own seller view. Lighting is saved in Studio; no runtime script sets it.
 
-Ore category requests are configured by BuyerCategories in src/shared/ItemTags.luau. Buyers can request a category without any matching stock. Sellers alternate with buyers and bring randomized ore hauls.
+Buyer requests are configured by BuyerCategories in src/shared/ItemTags.luau. Buyers can request a category without any matching stock. Sellers alternate with buyers and bring randomized placeholder batches.
 
 When using the supplied source build command, Scene.luau regenerates the default template asset. Preserve a separately saved copy of your customized place before rebuilding the source project. Studio furniture edits are not automatically written back to the source asset by Rojo.

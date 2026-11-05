@@ -30,7 +30,7 @@ return table.freeze({
 	LockSeconds = 240,
 	-- Studio is deliberately memory-only unless you change this to true.
 	PersistenceInStudio = false,
-	DataStoreName = "LatchNine_Prototype_v1",
+	DataStoreName = "LatchNine_Cyberpunk_v1",
 	ReputationDiscountAt = 3,
 	MaxUpgrade = 2, -- Older save validation only.
 	RequestBurst = 10,
@@ -147,7 +147,7 @@ return table.freeze(Snap)
 -- Edit this catalog to customize tag text, colors and price effects.
 -- Category tags belong to product definitions; quality tags belong to individual stock units.
 local Tags = {
- BuyerCategories={"ore","metal","gem","volcanic","radioactive","exotic"},
+ BuyerCategories={"unknown"},
  RarityWeights={common=55,uncommon=26,rare=10,legendary=2},
  LegacyMarketConditions={retailer=true,bulk=true},
  BulkSellerChance=0.10,
@@ -156,7 +156,7 @@ local Tags = {
  DefaultQuality = "standard",
  QualityOrder = {"low", "standard", "high"},
  Categories = {
-  ore={name="Ore",badge="ORE"}, metal={name="Metal",badge="MET"},gem={name="Gemstone",badge="GEM"},volcanic={name="Volcanic",badge="VOL"},radioactive={name="Radioactive",badge="RAD"},exotic={name="Exotic",badge="EX"},
+  unknown={name="Unidentified stock",badge="?"},
   household = {name="Household good", badge="HG"},
   gun = {name="Gun", badge="GUN"},
   medicine = {name="Medicine", badge="MED"},
@@ -177,28 +177,17 @@ return table.freeze(Tags)
         <Properties>
           <string name="Name">Items</string>
           <string name="Source"><![CDATA[--!strict
-export type Definition = {name: string, category: string, base: number, wholesale: number, color: {number}, description: string, shape: {{number}}, glyph: string, tagCategory: string, rarity: string?}
-local items: {[string]: Definition} = {
-	filter = {tagCategory="household", shape = {{0,0},{1,0},{2,0},{0,1},{1,1},{2,1},{0,2},{1,2},{2,2}}, glyph = "WF", name = "Water filter", category = "LIFE SUPPORT", base = 48, wholesale = 24, color = {84, 198, 196}, description = "A district-grade filter. Check the seal and serial stamp."},
-	servo = {tagCategory="machinery", shape = {{0,0},{0,1},{1,1},{2,1}}, glyph = "SV", name = "Cargo servo", category = "MACHINERY", base = 74, wholesale = 39, color = {227, 166, 82}, description = "A compact actuator recovered from the freight decks."},
-	chip = {tagCategory="electronics", shape = {{0,0},{1,0}}, glyph = "RC", name = "Relay chip", category = "ELECTRONICS", base = 106, wholesale = 58, color = {181, 128, 213}, description = "A station-network module. Some carry restricted firmware."},
- genericOre={tagCategory="ore",rarity="common",shape={{0,0},{1,0}},glyph="OR",name="Mixed ore",category="ORE",base=19,wholesale=10,color={118,150,159},description="Unsorted planetary mineral."},
- cobalt={tagCategory="metal",rarity="common",shape={{0,0},{1,0}},glyph="CO",name="Cobalt",category="METAL",base=28,wholesale=15,color={84,132,181},description="Blue alloying metal."},
- titanium={tagCategory="metal",rarity="uncommon",shape={{0,0},{1,0},{0,1}},glyph="TI",name="Titanium",category="METAL",base=48,wholesale=26,color={174,184,195},description="Lightweight hull metal."},
- lapis={tagCategory="gem",rarity="common",shape={{0,0}},glyph="LA",name="Lapis",category="GEM",base=30,wholesale=17,color={57,92,189},description="Deep blue crystal."},
- volcanicRock={tagCategory="volcanic",rarity="common",shape={{0,0},{1,0},{0,1},{1,1}},glyph="VR",name="Volcanic rock",category="VOLCANIC",base=22,wholesale=12,color={114,87,86},description="Heat-scarred volcanic stone."},
- amethyst={tagCategory="gem",rarity="uncommon",shape={{0,0},{1,0}},glyph="AM",name="Amethyst",category="GEM",base=52,wholesale=29,color={157,93,189},description="Purple crystal."},
- topaz={tagCategory="gem",rarity="uncommon",shape={{0,0}},glyph="TO",name="Topaz",category="GEM",base=64,wholesale=36,color={228,174,78},description="Golden crystal."},
- diamond={tagCategory="gem",rarity="legendary",shape={{0,0}},glyph="DI",name="Diamond",category="GEM",base=420,wholesale=240,color={197,234,244},description="Exceptionally rare gemstone."},
- sapphire={tagCategory="gem",rarity="rare",shape={{0,0}},glyph="SA",name="Sapphire",category="GEM",base=142,wholesale=82,color={64,106,209},description="Blue gem."},
- obsidian={tagCategory="volcanic",rarity="uncommon",shape={{0,0},{1,0}},glyph="OB",name="Obsidian",category="VOLCANIC",base=60,wholesale=34,color={53,45,68},description="Black volcanic glass."},
- emerald={tagCategory="gem",rarity="rare",shape={{0,0}},glyph="EM",name="Emerald",category="GEM",base=168,wholesale=94,color={77,194,126},description="Green gem."},
- ruby={tagCategory="gem",rarity="rare",shape={{0,0}},glyph="RU",name="Ruby",category="GEM",base=180,wholesale=102,color={216,70,90},description="Red gem."},
- cuprite={tagCategory="metal",rarity="uncommon",shape={{0,0},{1,0}},glyph="CU",name="Cuprite",category="METAL",base=55,wholesale=30,color={174,81,65},description="Copper-rich oxide."},
- uranium={tagCategory="radioactive",rarity="rare",shape={{0,0},{1,0},{1,1}},glyph="U",name="Uranium",category="RADIOACTIVE",base=210,wholesale=120,color={133,214,81},description="Regulated radioactive ore."},
- mythril={tagCategory="exotic",rarity="legendary",shape={{0,0},{1,0},{0,1}},glyph="MY",name="Mythril",category="EXOTIC",base=480,wholesale=275,color={114,224,207},description="Legendary offworld metal."},
+export type Definition = {name: string, category: string, base: number, wholesale: number, color: {number}, description: string, shape: {{number}}, shapeTag: string, glyph: string, tagCategory: string, rarity: string?}
+-- shapeTag is hidden catalog metadata. Grid geometry uses the matching shape cells.
+local items = {
+ blank1={name="Blank item",category="UNIDENTIFIED",tagCategory="unknown",shapeTag="1x1",shape={{0,0}},glyph="?",rarity="common",base=10,wholesale=5,color={105,180,190},description="Unidentified stock."},
+ blankL={name="Blank item",category="UNIDENTIFIED",tagCategory="unknown",shapeTag="L",shape={{0,0},{0,1},{1,1}},glyph="?",rarity="common",base=30,wholesale=15,color={119,175,183},description="Unidentified stock."},
+ blank2={name="Blank item",category="UNIDENTIFIED",tagCategory="unknown",shapeTag="2x2",shape={{0,0},{1,0},{0,1},{1,1}},glyph="?",rarity="common",base=40,wholesale=20,color={133,170,176},description="Unidentified stock."},
+ blank3={name="Blank item",category="UNIDENTIFIED",tagCategory="unknown",shapeTag="1x3",shape={{0,0},{0,1},{0,2}},glyph="?",rarity="common",base=30,wholesale=15,color={147,165,169},description="Unidentified stock."},
+ blank4={name="Blank item",category="UNIDENTIFIED",tagCategory="unknown",shapeTag="1x4",shape={{0,0},{0,1},{0,2},{0,3}},glyph="?",rarity="common",base=40,wholesale=20,color={161,160,162},description="Unidentified stock."},
+ blank9={name="Blank item",category="UNIDENTIFIED",tagCategory="unknown",shapeTag="3x3",shape={{0,0},{1,0},{2,0},{0,1},{1,1},{2,1},{0,2},{1,2},{2,2}},glyph="?",rarity="common",base=90,wholesale=45,color={175,155,155},description="Unidentified stock."},
 }
-return table.freeze({Definitions = table.freeze(items), Order = table.freeze({"genericOre","cobalt","titanium","lapis","volcanicRock","amethyst","topaz","diamond","sapphire","obsidian","emerald","ruby","cuprite","uranium","mythril"})})
+return table.freeze({Definitions=table.freeze(items),Order=table.freeze({"blank1","blankL","blank2","blank3","blank4","blank9"})})
 ]]></string>
         </Properties>
       </Item>
@@ -325,7 +314,7 @@ function Scene.build(parent: Instance, origin: Vector3, name: string): Model
  local balance=Instance.new("TextLabel");balance.Name="Balance";balance.Size=UDim2.fromScale(1,1)
  balance.BackgroundTransparency=1;balance.Text="--- CR";balance.Font=Enum.Font.Code
  balance.TextScaled=true;balance.TextColor3=C(111,231,192);balance.Parent=display
- sign(m,"ORE / 09",Vector3.new(6,1,0.3),origin+Vector3.new(-2,16.7,1.1),C(222,186,113))
+ sign(m,"NIGHT MARKET",Vector3.new(6,1,0.3),origin+Vector3.new(-2,16.7,1.1),C(222,186,113))
  for i=1,4 do
   p("Cable vertical",-23+i*0.3,10,0.6,0.1,18,0.2,C(28+i*5,34,40))
  end
@@ -421,7 +410,7 @@ function Customers.create(p: any, rules: any, rng: Random): any
 	 for _,unit in ipairs(p.inventory) do if rules.category(unit)==requested then item=unit;break end end
 	end
 	local value=if item then rules.value(item) else 0
-	local line=if requested then "I'm looking for "..Tags.Categories[requested].name:lower()..". Do you have anything?" else "I've brought a planetary mineral haul. Looking to sell."
+	local line=if requested then "I'm looking for "..Tags.Categories[requested].name:lower()..". Do you have anything?" else "I've got some unmarked goods. Looking to sell."
 
 	return {id = HttpService:GenerateGUID(false), name = archetype.name, personality = archetype.personality,
 		faction = archetype.faction, tolerance = archetype.tolerance, color = archetype.color,
@@ -476,8 +465,8 @@ end
 local function makeOffer(kind: string,p: any): any
  local qualityRoll=rng:NextInteger(1,100)
  local item={id=Http:GenerateGUID(false),kind=kind,rarity=Items.Definitions[kind].rarity,
-  criminality=if kind=="uranium" then "mid" elseif kind=="mythril" then "high" elseif rng:NextNumber()<0.08 then "low" else "none",paid=0,qualityTag=Tags.QualityOrder[if qualityRoll<=20 then 1 elseif qualityRoll>80 then 3 else 2],condition=rng:NextInteger(65,100),
-  authentic=rng:NextNumber()>0.17,restricted=kind=="chip" and rng:NextNumber()<0.35,inspected=false}
+  criminality=if rng:NextNumber()<0.08 then "low" else "none",paid=0,qualityTag=Tags.QualityOrder[if qualityRoll<=20 then 1 elseif qualityRoll>80 then 3 else 2],condition=rng:NextInteger(65,100),
+  authentic=rng:NextNumber()>0.17,restricted=false,inspected=false}
  local price=math.max(8,math.floor(Rules.value(item)*0.58))
  if p.reputation>=Config.ReputationDiscountAt then price=math.max(1,price-2) end
  return {item=item,price=price}
@@ -554,7 +543,7 @@ schedule=function(player: Player)
   local c=Customers.create(s.profile,Rules,rng)
   if c.mode=="Seller" and rng:NextNumber()<Tags.BulkSellerChance then
    c.bulkPercent=rng:NextInteger(Tags.BulkDiscountMin,Tags.BulkDiscountMax)
-   c.dialogue="I brought a planetary mineral haul. Buy the whole batch and I'll take "..c.bulkPercent.."% off."
+   c.dialogue="I'll sell you the whole batch for "..c.bulkPercent.."% off."
   end
   local display={inventory={},upgrade=0,legacyRows=0}
   local repeats: {[string]: number}={}
@@ -651,7 +640,7 @@ action.OnServerEvent:Connect(function(player: Player,request: any)
   elseif name=="ReviewPurchase" then ok,message=Trade.review(s.profile,c,Http:GenerateGUID(false))
   elseif name=="BuyBulk" then ok,message=Trade.buyBulk(s.profile,c,Http:GenerateGUID(false));if ok then leave(player,message,"The whole haul is yours.");return end
   elseif name=="ReviewSale" then ok,message=Trade.reviewSale(s.profile,c,Http:GenerateGUID(false))
-  elseif name=="ConfirmSale" then ok,message=Trade.confirmSale(s.profile,c,request.quoteId);if ok then leave(player,message,"I'll take these ores. Pleasure trading.");return end
+  elseif name=="ConfirmSale" then ok,message=Trade.confirmSale(s.profile,c,request.quoteId);if ok then leave(player,message,"I'll take these. Pleasure trading.");return end
   else ok,message=Trade.confirm(s.profile,c,request.quoteId);if ok then leave(player,message,"Deal. These goods are yours.");return end end
   push(player,message);return
  elseif name=="InspectGoods" then
@@ -3911,7 +3900,7 @@ return Surface
                 <YS>1</YS>
                 <YO>0</YO>
               </UDim2>
-              <string name="Text">ORE / 09</string>
+              <string name="Text">NIGHT MARKET</string>
               <Color3 name="TextColor3">
                 <R>0.87058824</R>
                 <G>0.7294118</G>

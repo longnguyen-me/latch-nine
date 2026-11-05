@@ -2,7 +2,7 @@
 -- Edit this catalog to customize tag text, colors and price effects.
 -- Category tags belong to product definitions; quality tags belong to individual stock units.
 local Tags = {
- BuyerCategories={"ore","metal","gem","volcanic","radioactive","exotic"},
+ BuyerCategories={"unknown"},
  RarityWeights={common=55,uncommon=26,rare=10,legendary=2},
  LegacyMarketConditions={retailer=true,bulk=true},
  BulkSellerChance=0.10,
@@ -11,7 +11,7 @@ local Tags = {
  DefaultQuality = "standard",
  QualityOrder = {"low", "standard", "high"},
  Categories = {
-  ore={name="Ore",badge="ORE"}, metal={name="Metal",badge="MET"},gem={name="Gemstone",badge="GEM"},volcanic={name="Volcanic",badge="VOL"},radioactive={name="Radioactive",badge="RAD"},exotic={name="Exotic",badge="EX"},
+  unknown={name="Unidentified stock",badge="?"},
   household = {name="Household good", badge="HG"},
   gun = {name="Gun", badge="GUN"},
   medicine = {name="Medicine", badge="MED"},

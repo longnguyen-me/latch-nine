@@ -36,8 +36,8 @@ end
 local function makeOffer(kind: string,p: any): any
  local qualityRoll=rng:NextInteger(1,100)
  local item={id=Http:GenerateGUID(false),kind=kind,rarity=Items.Definitions[kind].rarity,
-  criminality=if kind=="uranium" then "mid" elseif kind=="mythril" then "high" elseif rng:NextNumber()<0.08 then "low" else "none",paid=0,qualityTag=Tags.QualityOrder[if qualityRoll<=20 then 1 elseif qualityRoll>80 then 3 else 2],condition=rng:NextInteger(65,100),
-  authentic=rng:NextNumber()>0.17,restricted=kind=="chip" and rng:NextNumber()<0.35,inspected=false}
+  criminality=if rng:NextNumber()<0.08 then "low" else "none",paid=0,qualityTag=Tags.QualityOrder[if qualityRoll<=20 then 1 elseif qualityRoll>80 then 3 else 2],condition=rng:NextInteger(65,100),
+  authentic=rng:NextNumber()>0.17,restricted=false,inspected=false}
  local price=math.max(8,math.floor(Rules.value(item)*0.58))
  if p.reputation>=Config.ReputationDiscountAt then price=math.max(1,price-2) end
  return {item=item,price=price}
@@ -114,7 +114,7 @@ schedule=function(player: Player)
   local c=Customers.create(s.profile,Rules,rng)
   if c.mode=="Seller" and rng:NextNumber()<Tags.BulkSellerChance then
    c.bulkPercent=rng:NextInteger(Tags.BulkDiscountMin,Tags.BulkDiscountMax)
-   c.dialogue="I brought a planetary mineral haul. Buy the whole batch and I'll take "..c.bulkPercent.."% off."
+   c.dialogue="I'll sell you the whole batch for "..c.bulkPercent.."% off."
   end
   local display={inventory={},upgrade=0,legacyRows=0}
   local repeats: {[string]: number}={}
@@ -211,7 +211,7 @@ action.OnServerEvent:Connect(function(player: Player,request: any)
   elseif name=="ReviewPurchase" then ok,message=Trade.review(s.profile,c,Http:GenerateGUID(false))
   elseif name=="BuyBulk" then ok,message=Trade.buyBulk(s.profile,c,Http:GenerateGUID(false));if ok then leave(player,message,"The whole haul is yours.");return end
   elseif name=="ReviewSale" then ok,message=Trade.reviewSale(s.profile,c,Http:GenerateGUID(false))
-  elseif name=="ConfirmSale" then ok,message=Trade.confirmSale(s.profile,c,request.quoteId);if ok then leave(player,message,"I'll take these ores. Pleasure trading.");return end
+  elseif name=="ConfirmSale" then ok,message=Trade.confirmSale(s.profile,c,request.quoteId);if ok then leave(player,message,"I'll take these. Pleasure trading.");return end
   else ok,message=Trade.confirm(s.profile,c,request.quoteId);if ok then leave(player,message,"Deal. These goods are yours.");return end end
   push(player,message);return
  elseif name=="InspectGoods" then

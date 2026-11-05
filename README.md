@@ -1,12 +1,12 @@
-# Latch Nine — offworld ore exchange
+# Latch Nine — cyberpunk black-market shop
 
-Open `LatchNine.rbxlx` in Roblox Studio and press Play/F5. This is a seller POV pawn shop for ore mined on other planets. Sellers arrive with randomized hauls; alternating buyers request a Basic ore category, even when your shop has no matching stock. Customers speak their buying or selling intent.
+Open `LatchNine.rbxlx` in Roblox Studio and press Play/F5. This is a seller POV underground shop in a cyberpunk city. Sellers arrive with randomized hauls; alternating buyers request a Basic stock category, even when your shop has no matching stock. Customers speak their buying or selling intent.
 
-The bottom 15×7 physical SurfaceGui is your stock. A seller's ores appear on the upper visitor board; drag them to the middle tray to buy. For a buyer, drag matching owned ores from the bottom stock board to that same middle tray to sell. Rotated shapes snap with a phantom preview. Press **R** while holding an item to rotate it; there is no rotate button. Hover an item for price and visible tags. Rarity remains hidden.
+The bottom 15×7 physical SurfaceGui is your stock. A seller's items appear on the upper visitor board; drag them to the middle tray to buy. For a buyer, drag matching owned items from the bottom stock board to that same middle tray to sell. Rotated shapes snap with a phantom preview. Press **R** while holding an item to rotate it; there is no rotate button. Hover an item for price and visible tags. Rarity remains hidden.
 
 Click the physical **REGISTER** box to open the movable receipt and confirm the itemized transaction. The receipt does not open when staging. Hovering the box outlines it. The physical **NEXT CUSTOMER** button calls another visitor. Credits appear on the wall terminal. Numbered grid title bars and the old guide, expansion and label editor are absent.
 
-The active catalog is mixed ore, cobalt, titanium, lapis, volcanic rock, amethyst, topaz, diamond, sapphire, obsidian, emerald, ruby, cuprite, uranium and mythril. Basic, quality, criminality and hidden rarity tags are described in `TAG_CONFIG.md`.
+The active catalog has six unidentified placeholder items: 1×1, L, 2×2, 1×3, 1×4, and 3×3. Their shape tags are hidden catalog metadata; see `TAG_CONFIG.md`.
 
 Rare bulk sellers offer 5–15% off the whole remaining haul. The receipt shows both original and bulk prices. The physical register and next-customer controls have no text and outline on hover.
 

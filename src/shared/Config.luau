@@ -18,7 +18,7 @@ return table.freeze({
 	LockSeconds = 240,
 	-- Studio is deliberately memory-only unless you change this to true.
 	PersistenceInStudio = false,
-	DataStoreName = "LatchNine_Prototype_v1",
+	DataStoreName = "LatchNine_Cyberpunk_v1",
 	ReputationDiscountAt = 3,
 	MaxUpgrade = 2, -- Older save validation only.
 	RequestBurst = 10,

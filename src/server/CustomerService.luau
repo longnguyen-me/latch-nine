@@ -17,7 +17,7 @@ function Customers.create(p: any, rules: any, rng: Random): any
 	 for _,unit in ipairs(p.inventory) do if rules.category(unit)==requested then item=unit;break end end
 	end
 	local value=if item then rules.value(item) else 0
-	local line=if requested then "I'm looking for "..Tags.Categories[requested].name:lower()..". Do you have anything?" else "I've brought a planetary mineral haul. Looking to sell."
+	local line=if requested then "I'm looking for "..Tags.Categories[requested].name:lower()..". Do you have anything?" else "I've got some unmarked goods. Looking to sell."
 
 	return {id = HttpService:GenerateGUID(false), name = archetype.name, personality = archetype.personality,
 		faction = archetype.faction, tolerance = archetype.tolerance, color = archetype.color,
