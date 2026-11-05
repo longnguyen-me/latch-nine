@@ -231,7 +231,10 @@ action.OnServerEvent:Connect(function(player: Player,request: any)
   return
  end
  if name=="NextCustomer" then
-  if not s.shopOpen then push(player,"Close the shop when the day's customers are done.");return end
+  if not s.shopOpen then
+   s.shopOpen=true
+   push(player,"Shop opened. Calling a customer.")
+  end
   if s.working then push(player,"Freight shift active.");return end
   if s.customer then
    if s.customer.state~="Leave" then leave(player,"",nil,true) end

@@ -826,7 +826,10 @@ action.OnServerEvent:Connect(function(player: Player,request: any)
   return
  end
  if name=="NextCustomer" then
-  if not s.shopOpen then push(player,"Close the shop when the day's customers are done.");return end
+  if not s.shopOpen then
+   s.shopOpen=true
+   push(player,"Shop opened. Calling a customer.")
+  end
   if s.working then push(player,"Freight shift active.");return end
   if s.customer then
    if s.customer.state~="Leave" then leave(player,"",nil,true) end
@@ -2142,7 +2145,7 @@ function Desk.new(send: (any)->())
  end
  render=function()
   local s=self.state;if not s then return end;bindStage(s.stageName);layout()
-  shopLabel.Text=if s.shopOpen then "SHOP OPEN" else "SHOP CLOSED"
+  shopLabel.Text=if s.pendingArrival then "CUSTOMER EN ROUTE" elseif s.shopOpen then "SHOP OPEN" else "SHOP CLOSED / CLICK SWITCH OR CALL BUTTON"
   if walletPanel.Visible then drawWallet(s) end
   renderMachine(s)
   local suspicion=s.suspicion or 0

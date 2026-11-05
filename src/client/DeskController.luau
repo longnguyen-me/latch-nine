@@ -453,7 +453,7 @@ function Desk.new(send: (any)->())
  end
  render=function()
   local s=self.state;if not s then return end;bindStage(s.stageName);layout()
-  shopLabel.Text=if s.shopOpen then "SHOP OPEN" else "SHOP CLOSED"
+  shopLabel.Text=if s.pendingArrival then "CUSTOMER EN ROUTE" elseif s.shopOpen then "SHOP OPEN" else "SHOP CLOSED / CLICK SWITCH OR CALL BUTTON"
   if walletPanel.Visible then drawWallet(s) end
   renderMachine(s)
   local suspicion=s.suspicion or 0
