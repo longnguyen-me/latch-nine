@@ -182,6 +182,20 @@ return table.freeze(Tags)
 export type Definition = {name: string, category: string, base: number, wholesale: number, color: {number}, description: string, shape: {{number}}, shapeTag: string, glyph: string, tagCategory: string, rarity: string?}
 -- shapeTag is hidden catalog metadata. Grid geometry uses the matching shape cells.
 local items = {
+ wallet0={name="Starter wallet",category="WALLET",tagCategory="wallet",shapeTag="1x1",shape={{0,0}},glyph="W",rarity="common",walletTier=0,base=1,wholesale=0,color={94,143,150},description="2 by 3 pocket wallet."},
+ wallet1={name="Street wallet",category="WALLET",tagCategory="wallet",shapeTag="1x1",shape={{0,0}},glyph="W",rarity="uncommon",walletTier=1,base=300,wholesale=150,color={120,142,175},description="Upgradeable wallet."},
+ wallet2={name="Courier wallet",category="WALLET",tagCategory="wallet",shapeTag="1x1",shape={{0,0}},glyph="W",rarity="rare",walletTier=2,base=700,wholesale=350,color={150,142,175},description="Upgradeable wallet."},
+ wallet3={name="Vault wallet",category="WALLET",tagCategory="wallet",shapeTag="1x1",shape={{0,0}},glyph="W",rarity="legendary",walletTier=3,base=1400,wholesale=700,color={185,142,175},description="Upgradeable wallet."},
+ cash1={name="1 Eddie note",category="CURRENCY",tagCategory="currency",shapeTag="1x1",shape={{0,0}},glyph="1",rarity="common",denomination=1,base=1,wholesale=1,color={170,183,128},description="One loose note. Does not stack in stock."},
+ cash5={name="5 Eddie note",category="CURRENCY",tagCategory="currency",shapeTag="1x1",shape={{0,0}},glyph="5",rarity="common",denomination=5,base=5,wholesale=5,color={170,183,128},description="One loose note. Does not stack in stock."},
+ cash10={name="10 Eddie note",category="CURRENCY",tagCategory="currency",shapeTag="1x1",shape={{0,0}},glyph="10",rarity="common",denomination=10,base=10,wholesale=10,color={170,183,128},description="One loose note. Does not stack in stock."},
+ cash25={name="25 Eddie note",category="CURRENCY",tagCategory="currency",shapeTag="1x1",shape={{0,0}},glyph="25",rarity="common",denomination=25,base=25,wholesale=25,color={170,183,128},description="One loose note. Does not stack in stock."},
+ cash50={name="50 Eddie note",category="CURRENCY",tagCategory="currency",shapeTag="1x1",shape={{0,0}},glyph="50",rarity="common",denomination=50,base=50,wholesale=50,color={170,183,128},description="One loose note. Does not stack in stock."},
+ cash100={name="100 Eddie note",category="CURRENCY",tagCategory="currency",shapeTag="1x1",shape={{0,0}},glyph="100",rarity="common",denomination=100,base=100,wholesale=100,color={170,183,128},description="One loose note. Does not stack in stock."},
+ cash250={name="250 Eddie note",category="CURRENCY",tagCategory="currency",shapeTag="1x1",shape={{0,0}},glyph="250",rarity="common",denomination=250,base=250,wholesale=250,color={170,183,128},description="One loose note. Does not stack in stock."},
+ cash500={name="500 Eddie note",category="CURRENCY",tagCategory="currency",shapeTag="1x1",shape={{0,0}},glyph="500",rarity="common",denomination=500,base=500,wholesale=500,color={170,183,128},description="One loose note. Does not stack in stock."},
+ cash1000={name="1000 Eddie note",category="CURRENCY",tagCategory="currency",shapeTag="1x1",shape={{0,0}},glyph="1000",rarity="common",denomination=1000,base=1000,wholesale=1000,color={170,183,128},description="One loose note. Does not stack in stock."},
+
  blank1={name="Blank item",category="UNIDENTIFIED",tagCategory="unknown",shapeTag="1x1",shape={{0,0}},glyph="?",rarity="common",base=10,wholesale=5,color={105,180,190},description="Unidentified stock."},
  blankL={name="Blank item",category="UNIDENTIFIED",tagCategory="unknown",shapeTag="L",shape={{0,0},{0,1},{1,1}},glyph="?",rarity="common",base=30,wholesale=15,color={119,175,183},description="Unidentified stock."},
  blank2={name="Blank item",category="UNIDENTIFIED",tagCategory="unknown",shapeTag="2x2",shape={{0,0},{1,0},{0,1},{1,1}},glyph="?",rarity="common",base=40,wholesale=20,color={133,170,176},description="Unidentified stock."},
@@ -189,7 +203,7 @@ local items = {
  blank4={name="Blank item",category="UNIDENTIFIED",tagCategory="unknown",shapeTag="1x4",shape={{0,0},{0,1},{0,2},{0,3}},glyph="?",rarity="common",base=40,wholesale=20,color={161,160,162},description="Unidentified stock."},
  blank9={name="Blank item",category="UNIDENTIFIED",tagCategory="unknown",shapeTag="3x3",shape={{0,0},{1,0},{2,0},{0,1},{1,1},{2,1},{0,2},{1,2},{2,2}},glyph="?",rarity="common",base=90,wholesale=45,color={175,155,155},description="Unidentified stock."},
 }
-return table.freeze({Definitions=table.freeze(items),Order=table.freeze({"blank1","blankL","blank2","blank3","blank4","blank9"})})
+return table.freeze({Definitions=table.freeze(items),Order=table.freeze({"blank1","blankL","blank2","blank3","blank4","blank9","wallet1","wallet2","wallet3"})})
 ]]></string>
         </Properties>
       </Item>
@@ -291,7 +305,6 @@ function Scene.build(parent: Instance, origin: Vector3, name: string): Model
  local controls=Instance.new("Model");controls.Name="InteractionControls";controls.Parent=m
  local sleep=p("SleepingBag",-17,0.5,11,5,0.5,3,C(70,74,105));sleep.CanQuery=true
  local shutter=p("ShopToggle",-12,5.8,6,3,1.4,0.4,C(68,128,121));shutter.CanQuery=true
- local wallet=p("Wallet",-9,3.6,6,2,0.5,1.5,C(84,72,96));wallet.CanQuery=true
  local function control(name: string,y: number,z: number,h: number,color: Color3)
   local base=board(name,-14,y,z,4.6,h);base.Parent=controls
   local face=Instance.new("SurfaceGui");face.Name="EditOutline";face.Face=Enum.NormalId.Back
@@ -469,7 +482,7 @@ local Grid = require(Shared.Grid)(Config, Items.Definitions)
 local Rules = require(script.Parent.Rules)(Config, Items.Definitions, Grid, Tags)
 local trayConfig: any = table.clone(Config);trayConfig.GridColumns=Config.TradeColumns;trayConfig.GridBaseRows=Config.TradeRows;trayConfig.GridRowsPerUpgrade=0
 local TrayGrid = require(Shared.Grid)(trayConfig, Items.Definitions)
-local Trade = require(script.Parent.TradeService)(Config, Items.Definitions, Rules, Grid, TrayGrid)
+local Trade = require(script.Parent.TradeService)(Config, Items.Definitions, Rules, Grid, TrayGrid, Wallet)
 local Persistence = require(script.Parent.Persistence)
 local Customers = require(script.Parent.CustomerService)
 Players.CharacterAutoLoads = false
@@ -533,11 +546,14 @@ local function push(player: Player,message: string?, moveAck: number?, moveOk: b
   if c.quote then
    local q=c.quote;local lines={}
    for _,line in ipairs(q.lines) do table.insert(lines,{id=line.id,kind=line.kind,name=line.name,price=line.price,basePrice=line.basePrice}) end
-   quote={id=q.id,mode=q.mode,lines=lines,subtotal=q.subtotal,discount=q.discount,total=q.total,count=q.count,affordable=q.mode=="Sale" or s.profile.cash>=q.total}
+   local loose=0
+   for _,item in ipairs(s.profile.inventory) do loose+=Items.Definitions[item.kind].denomination or 0 end
+   quote={id=q.id,mode=q.mode,lines=lines,subtotal=q.subtotal,discount=q.discount,total=q.total,count=q.count,affordable=q.mode=="Sale" or s.profile.cash+loose>=q.total}
   end
   local bulkOriginal,bulkPrice=0,0
   if c.bulkPercent then for _,entry in ipairs(c.goods) do bulkOriginal+=entry.price;bulkPrice+=math.max(1,math.floor(entry.price*(100-c.bulkPercent)/100)) end end
   customer={id=c.id,name=c.name,personality=c.personality,faction=c.faction,kind=c.kind,itemId=c.itemId,requestTag=c.requestTag,
+   payment=c.payment or {},paymentTotal=c.paymentTotal or 0,
    bulkPercent=c.bulkPercent,bulkOriginal=bulkOriginal,bulkPrice=bulkPrice,
    mode=c.mode,goods=goods,basket=basket,basketRevision=c.basketRevision,quote=quote,
    dialogue=c.dialogue,offer=c.offer,patience=c.patience,state=c.state,color=c.color,deadline=c.deadline}
@@ -619,14 +635,6 @@ action.OnServerEvent:Connect(function(player: Player,request: any)
  end
  local name=request.action
  if name=="Sync" then push(player); return end
- if name=="UpgradeWallet" then
-  local tier=s.profile.walletTier or 0
-  if tier>=3 then push(player,"Wallet is fully upgraded.");return end
-  local cost=Wallet.Prices[tier+2]
-  if s.profile.cash<cost then push(player,"Need "..cost.." Eddies for the next wallet.");return end
-  s.profile.cash-=cost;s.profile.costs+=cost;s.profile.walletTier=tier+1
-  push(player,"Wallet upgraded to "..Wallet.Rarities[tier+2]..".");return
- end
  if name=="MoveMoney" then
   local tier=s.profile.walletTier or 0;local count=Wallet.Sizes[tier+1][1]*Wallet.Sizes[tier+1][2]
   local denomination=request.denomination;local slot=request.slot
@@ -640,6 +648,30 @@ action.OnServerEvent:Connect(function(player: Player,request: any)
    if other~=denomination and (positions[tostring(other)] or i)==slot then positions[tostring(other)]=current or (table.find(Wallet.Denominations,denomination) or 1);break end
   end
   positions[tostring(denomination)]=slot;push(player);return
+ end
+ if name=="WithdrawMoney" then
+  local denomination=request.denomination;local valid=false
+  for _,stack in ipairs(Wallet.stacks(s.profile.cash,s.profile.walletTier or 0)) do if stack.denomination==denomination and stack.count>0 then valid=true end end
+  if not valid then push(player,"No note of that denomination in your wallet.");return end
+  local kind="cash"..denomination
+  local ok,message=Grid.check(s.profile,kind,request.x,request.y,0)
+  if not ok then push(player,message);return end
+  s.profile.cash-=denomination
+  table.insert(s.profile.inventory,{id=Http:GenerateGUID(false),kind=kind,paid=denomination,condition=100,authentic=true,restricted=false,inspected=false,qualityTag=Tags.DefaultQuality,gridX=request.x,gridY=request.y,rotation=0})
+  s.profile.gridRevision+=1;push(player,"Moved "..denomination.." E into stock.");return
+ end
+ if name=="DepositMoney" then
+  local item,index=Rules.find(s.profile,request.id)
+  local denomination=item and Items.Definitions[item.kind].denomination
+  if not denomination or not index then push(player,"That is not a loose note.");return end
+  table.remove(s.profile.inventory,index);s.profile.cash+=denomination;s.profile.gridRevision+=1
+  push(player,"Deposited "..denomination.." E into your wallet.");return
+ end
+ if name=="StagePayment" then
+  local c=matchingCustomer(s,request)
+  if not c then push(player,"No active trade.");return end
+  local ok,message=Trade.stagePayment(s.profile,c,request.denomination,request.id)
+  push(player,message);return
  end
  if name=="ToggleShop" then
   if s.shopOpen then
@@ -765,6 +797,12 @@ local function join(player: Player)
  loading[player]=true
  local profile,status=Persistence.load(player.UserId,Rules)
  if not profile then loading[player]=nil;if player.Parent then player:Kick(status) end; return end
+ local hasWallet=false
+ for _,item in ipairs(profile.inventory) do if Items.Definitions[item.kind].walletTier~=nil then hasWallet=true;break end end
+ if not hasWallet then
+  local x,y,rotation=Grid.firstFit(profile,"wallet0")
+  if x then table.insert(profile.inventory,{id=Http:GenerateGUID(false),kind="wallet0",paid=0,condition=100,authentic=true,restricted=false,inspected=false,qualityTag=Tags.DefaultQuality,gridX=x,gridY=y,rotation=rotation});profile.gridRevision+=1 end
+ end
  loading[player]=nil
  if not player.Parent or closing then Persistence.save(player.UserId,profile,true); return end
  local slot=0
@@ -931,7 +969,7 @@ return function(config: any, definitions: any, grid: any, tags: any)
 	end
 	Rules.integer = integer
 	function Rules.newProfile(): any
-		return {version = 5, legacyRows = 0, gridRevision = 0, cash = config.StartingCash, day = 1, inventory = {}, reputation = 0,
+		return {version = 5, legacyRows = 0, gridRevision = 0, cash = config.StartingCash, day = 1, walletTier = 0, inventory = {{id="starter-wallet",kind="wallet0",paid=0,condition=100,authentic=true,restricted=false,inspected=false,qualityTag=tags.DefaultQuality,gridX=0,gridY=0,rotation=0}}, reputation = 0,
 			upgrade = 0, revenue = 0, costs = 0, tradeProfit = 0, visits = 0, aidDay = 0, receipts = {}}
 	end
 	local function validateFields(p: any, version: number): boolean
@@ -1114,8 +1152,9 @@ end
           <string name="Name">TradeService</string>
           <string name="Source"><![CDATA[--!strict
 -- Staging is not ownership. Checkout commits an entire quoted basket atomically.
-return function(config: any, definitions: any, rules: any, inventoryGrid: any, trayGrid: any)
+return function(config: any, definitions: any, rules: any, inventoryGrid: any, trayGrid: any, walletModule: any?)
  local Trade={}
+ local wallet=walletModule or require("../shared/Wallet")
  local function clone(value: any): any
   if type(value)~="table" then return value end
   local out: any={};for k,v in pairs(value) do out[k]=clone(v) end;return out
@@ -1156,8 +1195,33 @@ return function(config: any, definitions: any, rules: any, inventoryGrid: any, t
  end
  function Trade.clear(customer: any): (boolean,string)
   if not customer or customer.state~="Interact" then return false,"No visitor is serving a trade." end
-  customer.basket={};customer.basketRevision+=1;customer.quote=nil
+  customer.basket={};customer.payment={};customer.paymentTotal=0;customer.basketRevision+=1;customer.quote=nil
   return true,"Selection cleared."
+ end
+ function Trade.stagePayment(profile: any,customer: any,denomination: any,id: any): (boolean,string)
+  if not customer or customer.mode~="Seller" or customer.state~="Interact" or #customer.basket==0 then return false,"Select goods first." end
+  if not rules.integer(denomination,1,1000) or (id~=nil and (type(id)~="string" or #id>80)) then return false,"Invalid note." end
+  local valid=false
+  if id then
+   local item=rules.find(profile,id)
+   if item and definitions[item.kind].denomination==denomination then
+    valid=true
+    for _,entry in ipairs(customer.payment or {}) do if entry.id==id then valid=false end end
+   end
+  else
+   for _,stack in ipairs(wallet.stacks(profile.cash,profile.walletTier or 0)) do
+    if stack.denomination==denomination then
+     local used=0
+     for _,entry in ipairs(customer.payment or {}) do if not entry.id and entry.denomination==denomination then used+=1 end end
+     valid=used<stack.count;break
+    end
+   end
+  end
+  if not valid then return false,"This note is not available." end
+  customer.payment=customer.payment or {}
+  table.insert(customer.payment,{id=id,denomination=denomination})
+  customer.paymentTotal=(customer.paymentTotal or 0)+denomination
+  return true,"Payment staged: "..customer.paymentTotal.." E."
  end
  function Trade.review(profile: any,customer: any,quoteId: string): (boolean,string)
   if not customer or customer.mode=="Buyer" or customer.state~="Interact" or #customer.basket==0 then return false,"No items selected." end
@@ -1220,24 +1284,59 @@ return function(config: any, definitions: any, rules: any, inventoryGrid: any, t
   if q.basketRevision~=customer.basketRevision or q.gridRevision~=profile.gridRevision then
    customer.quote=nil;return false,"Trade changed."
   end
-  if profile.cash<q.total then return false,"Not enough Eddies for this purchase." end
+  local walletCash=profile.cash;local looseIds: {[string]: boolean}={};local paid=0
+  local reserved: {[number]: number}={}
+  for _,payment in ipairs(customer.payment or {}) do
+   local denomination=payment.denomination
+   if payment.id then
+    local money=rules.find(profile,payment.id)
+    if not money or definitions[money.kind].denomination~=denomination or looseIds[payment.id] then return false,"Payment changed." end
+    looseIds[payment.id]=true
+   else reserved[denomination]=(reserved[denomination] or 0)+1 end
+   paid+=denomination
+  end
+  for _,stack in ipairs(wallet.stacks(walletCash,profile.walletTier or 0)) do
+   if (reserved[stack.denomination] or 0)>stack.count then return false,"Wallet payment changed." end
+  end
+  local walletUsed=0
+  for denomination,count in pairs(reserved) do walletUsed+=denomination*count end
+  if paid<q.total then
+   local needed=q.total-paid
+   local fromWallet=math.min(needed,walletCash-walletUsed)
+   walletUsed+=fromWallet;paid+=fromWallet
+   if paid<q.total then
+    for _,item in ipairs(profile.inventory) do
+     local amount=definitions[item.kind].denomination
+     if amount and not looseIds[item.id] then looseIds[item.id]=true;paid+=amount;if paid>=q.total then break end end
+    end
+   end
+  end
+  if paid<q.total then return false,"Not enough Eddies for this purchase." end
   -- Preserve live metadata (for example inspections performed after the quote).
-  local committed=table.clone(profile.inventory)
+  local committed={}
+  for _,item in ipairs(profile.inventory) do if not looseIds[item.id] then table.insert(committed,item) end end
   local bought: {[string]: boolean}={}
+  local newWalletTier=profile.walletTier or 0
   for _,line in ipairs(q.lines) do
    local entry=offer(customer,(line :: any).id)
    if not entry or rules.find(profile,(line :: any).id) then customer.quote=nil;return false,"An item is already owned or no longer offered." end
    local item=clone((entry :: any).item);item.qualityTag=item.qualityTag or rules.DefaultQuality;item.gridX=(line :: any).item.gridX;item.gridY=(line :: any).item.gridY;item.rotation=(line :: any).item.rotation;item.paid=(line :: any).price
+   local tier=definitions[item.kind].walletTier
+   if tier and tier>newWalletTier then
+    for index=#committed,1,-1 do if definitions[committed[index].kind].walletTier~=nil then table.remove(committed,index) end end
+    newWalletTier=tier
+   end
    table.insert(committed,item);bought[(line :: any).id]=true
   end
   local plan={inventory=committed,upgrade=profile.upgrade,legacyRows=profile.legacyRows}
   if not inventoryGrid.validate(plan) then customer.quote=nil;return false,"The purchase layout is no longer valid." end
-  profile.cash-=q.total;profile.costs+=q.total;profile.inventory=committed;profile.gridRevision+=1
+  local change=paid-q.total
+  profile.cash=walletCash-walletUsed+change;profile.costs+=q.total;profile.inventory=committed;profile.walletTier=newWalletTier;profile.gridRevision+=1
   local remaining={}
   for _,entry in ipairs(customer.goods) do if not bought[(entry :: any).item.id] then table.insert(remaining,entry) end end
-  customer.goods=remaining;customer.quote=nil;customer.basket={};customer.basketRevision+=1
+  customer.goods=remaining;customer.quote=nil;customer.basket={};customer.payment={};customer.paymentTotal=0;customer.basketRevision+=1
   rules.log(profile,"Bought "..q.count.." item(s) from "..customer.name.." for "..q.total)
-  return true,"Bought "..q.count.." item(s) for "..q.total.." Eddies."
+  return true,"Bought "..q.count.." item(s) for "..q.total.." Eddies."..(if change>0 then " Customer returned "..change.." E in change." else "")
  end
  -- A buyer uses the same middle tray to hold stock from the shop.
  function Trade.stageStock(profile: any,customer: any,id: any,x: any,y: any,rotation: any,revision: any): (boolean,string)
@@ -1567,10 +1666,7 @@ function Desk.new(send: (any)->())
  text(walletPanel,"WALLET / EDDIES",UDim2.fromOffset(12,12),UDim2.fromOffset(265,24),17,P.gold)
  button(walletPanel,"X",UDim2.fromOffset(318,8),UDim2.fromOffset(32,30),function() walletPanel.Visible=false end)
  local walletBody=make("Frame",{Name="Slots",Position=UDim2.fromOffset(12,55),Size=UDim2.fromOffset(336,255),BackgroundTransparency=1},walletPanel)
- local walletUpgrade=button(walletPanel,"",UDim2.fromOffset(12,328),UDim2.fromOffset(336,36),function() request("UpgradeWallet") end)
- local walletSurface=surface("wallet",240,100)
- walletSurface.gui.Face=Enum.NormalId.Top
- button(walletSurface.root,"",UDim2.new(),UDim2.fromScale(1,1),function() walletPanel.Visible=not walletPanel.Visible end).BackgroundTransparency=1
+ local walletUpgrade=text(walletPanel,"",UDim2.fromOffset(12,328),UDim2.fromOffset(336,36),13,P.muted)
  local walletDrag: number?=nil
  local moneyGhost=text(root,"",UDim2.new(),UDim2.fromOffset(78,38),15,P.gold);moneyGhost.Visible=false;moneyGhost.ZIndex=90;moneyGhost.BackgroundColor3=P.panel;moneyGhost.BackgroundTransparency=0.12
  Input.InputChanged:Connect(function(input: InputObject)
@@ -1593,22 +1689,36 @@ function Desk.new(send: (any)->())
    local cell=button(walletBody,if stack then stack.denomination.." E\n×"..stack.count else "",UDim2.fromOffset(x+2,y+2),UDim2.fromOffset(slotWidth-4,slotHeight-4),function() end)
    cell.Name="WalletSlot"..index;cell.BackgroundColor3=P.raised;cell.TextColor3=P.gold;cell.ZIndex=71
    cell.InputBegan:Connect(function(input: InputObject)
-    if stack and (input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch) then
+    if stack and stack.count>0 and (input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch) then
      walletDrag=stack.denomination;moneyGhost.Text=stack.denomination.." E";moneyGhost.Visible=true
      local point=pointer(input);moneyGhost.Position=UDim2.fromOffset(point.X-39,point.Y-19)
     end
    end)
   end
-  walletUpgrade.Text=if tier>=3 then "MAX WALLET / LEGENDARY" else "UPGRADE TO "..Wallet.Rarities[tier+2]:upper().." / "..Wallet.Prices[tier+2].." E"
+  walletUpgrade.Text=Wallet.Rarities[tier+1]:upper().." WALLET / "..cols.." × "..rows
  end
  Input.InputEnded:Connect(function(input: InputObject)
+  if walletDrag and not walletPanel.Visible then walletDrag=nil;moneyGhost.Visible=false;return end
   if not walletDrag or not walletPanel.Visible or (input.UserInputType~=Enum.UserInputType.MouseButton1 and input.UserInputType~=Enum.UserInputType.Touch) then return end
   local denomination=walletDrag;walletDrag=nil;moneyGhost.Visible=false
-  local point=pointer(input)-walletBody.AbsolutePosition
-  if point.X<0 or point.Y<0 or point.X>=walletBody.AbsoluteSize.X or point.Y>=walletBody.AbsoluteSize.Y then return end
-  local dims=Wallet.Sizes[(self.state.walletTier or 0)+1];local cols,rows=dims[1],dims[2]
-  local col=math.floor(point.X/(336/cols));local row=math.floor(point.Y/(255/rows))
-  request("MoveMoney",{denomination=denomination,slot=row*cols+col+1})
+  local screenPoint=pointer(input)
+  local point=screenPoint-walletBody.AbsolutePosition
+  if point.X>=0 and point.Y>=0 and point.X<walletBody.AbsoluteSize.X and point.Y<walletBody.AbsoluteSize.Y then
+   local dims=Wallet.Sizes[(self.state.walletTier or 0)+1];local cols,rows=dims[1],dims[2]
+   local col=math.floor(point.X/(336/cols));local row=math.floor(point.Y/(255/rows))
+   request("MoveMoney",{denomination=denomination,slot=row*cols+col+1});return
+  end
+  local c=self.state and self.state.customer
+  if c and c.mode=="Seller" and c.state=="Interact" then
+   local surfacePoint=Surface.project(surfaces.offers.part,surfaces.offers.canvas,screenPoint)
+   if surfacePoint and widgets.offers.contains(surfacePoint) then request("StagePayment",{customerId=c.id,denomination=denomination});receipt.Visible=true;return end
+  end
+  local stockPoint=Surface.project(surfaces.inventory.part,surfaces.inventory.canvas,screenPoint)
+  if stockPoint and widgets.inventory.contains(stockPoint) then
+   local widget=widgets.inventory;local origin=widget.origin()
+   local x=math.floor((stockPoint.X-origin.X)/widget.cellSize);local y=math.floor((stockPoint.Y-origin.Y)/widget.cellSize)
+   request("WithdrawMoney",{denomination=denomination,x=x,y=y});return
+  end
  end)
  local function bindStage(name: string?)
   if mountedStage==name then return end
@@ -1619,7 +1729,7 @@ function Desk.new(send: (any)->())
    if epoch~=mountEpoch then return end
    local stage=if name then workspace:FindFirstChild(name) else nil
    local complete=true
-   for key,partName in pairs({inventory="InventoryBoard",basket="BuyBoard",offers="VisitorBoard",register="RegisterBox",next="NextCustomerButton",dismiss="DismissCustomerButton",sleep="SleepingBag",toggle="ShopToggle",wallet="Wallet"}) do
+   for key,partName in pairs({inventory="InventoryBoard",basket="BuyBoard",offers="VisitorBoard",register="RegisterBox",next="NextCustomerButton",dismiss="DismissCustomerButton",sleep="SleepingBag",toggle="ShopToggle"}) do
     local part=if stage then stage:FindFirstChild(partName,true) else nil
     local layer=surfaces[key];layer.part=part;layer.gui.Adornee=part;layer.gui.Enabled=part~=nil
     if part and (key=="inventory" or key=="basket" or key=="offers") then
@@ -1686,8 +1796,9 @@ function Desk.new(send: (any)->())
   local widget=if target then widgets[target] else nil
   if widget and target then local point=canvasPoint(target,drag.point);if point then x,y=positionOf(widget,point,drag.grabX,drag.grabY) end end
   if drag.origin=="inventory" and target=="inventory" then valid=Grid.check(s,drag.item.kind,x,y,drag.rotation,drag.item.id)
-  elseif drag.origin=="inventory" and target=="offers" and c and c.mode=="Buyer" and c.state=="Interact" and Items.Definitions[drag.item.kind].tagCategory==c.requestTag then
-   valid=Tray.check({inventory=c.basket,upgrade=0,legacyRows=0},drag.item.kind,x,y,drag.rotation,drag.item.id)
+  elseif drag.origin=="inventory" and target=="offers" and c and c.state=="Interact" then
+   if c.mode=="Seller" then valid=Items.Definitions[drag.item.kind].denomination~=nil and #c.basket>0
+   elseif Items.Definitions[drag.item.kind].tagCategory==c.requestTag then valid=Tray.check({inventory=c.basket,upgrade=0,legacyRows=0},drag.item.kind,x,y,drag.rotation,drag.item.id) end
   elseif drag.origin=="offers" and target=="inventory" and c and c.state=="Interact" then
    valid=Grid.check(s,drag.item.kind,x,y,drag.rotation,if c.mode=="Buyer" then drag.item.id else nil)
   elseif drag.origin=="offers" and target=="offers" and c and c.mode=="Buyer" and c.state=="Interact" then
@@ -1743,6 +1854,7 @@ function Desk.new(send: (any)->())
   end;step()
  end
  startDrag=function(origin: string,item: any,input: any)
+  if item.payment then return end
   if drag or pending or receiptDrag or not self.state or covered(pointer(input)) then return end
   local c=self.state.customer
   if origin~="inventory" and (not c or c.state~="Interact") then return end
@@ -1782,12 +1894,25 @@ function Desk.new(send: (any)->())
    -- Hide staged stock from its source grid until returned or sold.
 for _,item in ipairs(c.basket) do staged[item.id]=true;table.insert(basket,item) end
    for _,entry in ipairs(c.goods) do if not staged[entry.item.id] then local item=table.clone(entry.item);item.offerPrice=entry.price;table.insert(offered,item) end end
+   if c.mode=="Seller" then
+    local display={inventory=table.clone(offered),upgrade=0,legacyRows=0}
+    for index,payment in ipairs(c.payment or {}) do
+     local kind="cash"..payment.denomination
+     local x,y,rotation=Tray.firstFit(display,kind)
+     if x then
+      local note={id="payment-"..index,kind=kind,gridX=x,gridY=y,rotation=rotation,qualityTag="standard",payment=true}
+      table.insert(display.inventory,note);table.insert(offered,note)
+     end
+    end
+   end
   end
   widgets.offers.render(if c and c.mode=="Buyer" then basket else offered,Config.TradeColumns,Config.TradeRows,Tray,surfaces.offers.canvas)
   widgets.basket.render({},Config.TradeColumns,Config.TradeRows,Tray,surfaces.basket.canvas)
   surfaces.basket.gui.Enabled=false
   local owned={}
-  for _,item in ipairs(s.inventory) do if not (c and c.mode=="Buyer" and staged and staged[item.id]) then table.insert(owned,item) end end
+  local paidIds={}
+  if c then for _,payment in ipairs(c.payment or {}) do if payment.id then paidIds[payment.id]=true end end end
+  for _,item in ipairs(s.inventory) do if not paidIds[item.id] and not (c and c.mode=="Buyer" and staged and staged[item.id]) then table.insert(owned,item) end end
   widgets.inventory.render(owned,s.gridColumns,s.gridRows,Grid,surfaces.inventory.canvas)
   widgets.basket.heading.Text=""
   clear(body)
@@ -1801,6 +1926,7 @@ for _,item in ipairs(c.basket) do staged[item.id]=true;table.insert(basket,item)
   end
   if q then
    for index,line in ipairs(q.lines) do receiptLine(body,line.name,line.price,index) end
+   if c and c.mode=="Seller" then rowText(body,"NOTES GIVEN: "..(c.paymentTotal or 0).." E",P.gold) end
    if not q.affordable then rowText(body,"Insufficient funds",P.red) end
   elseif c and c.state=="Interact" and (c.itemId or c.requestTag) then
    rowText(body,"WANTED: "..(if c.requestTag then Tags.Categories[c.requestTag].name else Items.Definitions[c.kind].name),P.gold)
@@ -1844,13 +1970,23 @@ for _,item in ipairs(c.basket) do staged[item.id]=true;table.insert(basket,item)
   if not ((drag.input.UserInputType==Enum.UserInputType.Touch and input==drag.input) or
    (drag.input.UserInputType==Enum.UserInputType.MouseButton1 and input.UserInputType==Enum.UserInputType.MouseButton1)) then return end
   updateDrag(pointer(input));local d=drag;cancel()
-  if not d.active then return end
+  if d.origin=="inventory" and Items.Definitions[d.item.kind].denomination and walletPanel.Visible then
+   local p,b=walletPanel.AbsolutePosition,walletPanel.AbsoluteSize
+   if d.point.X>=p.X and d.point.Y>=p.Y and d.point.X<p.X+b.X and d.point.Y<p.Y+b.Y then request("DepositMoney",{id=d.item.id});return end
+  end
+  if not d.active then
+   if d.origin=="inventory" and Items.Definitions[d.item.kind].walletTier~=nil then walletPanel.Visible=true;drawWallet(self.state) end
+   return
+  end
   if not d.valid then notice("Placement blocked.",P.red);return end
   if d.origin=="inventory" and d.target=="inventory" then
    if d.x==d.item.gridX and d.y==d.item.gridY and d.rotation==d.item.rotation then return end
    emitMove({action="PlaceItem",id=d.item.id,x=d.x,y=d.y,rotation=d.rotation,revision=d.gridRevision})
   elseif d.origin=="inventory" and d.target=="offers" then
-   receipt.Visible=true;emitMove({action="StageStock",customerId=d.customerId,id=d.item.id,x=d.x,y=d.y,rotation=d.rotation,revision=d.basketRevision})
+   receipt.Visible=true
+   local amount=Items.Definitions[d.item.kind].denomination
+   if amount then request("StagePayment",{customerId=d.customerId,id=d.item.id,denomination=amount})
+   else emitMove({action="StageStock",customerId=d.customerId,id=d.item.id,x=d.x,y=d.y,rotation=d.rotation,revision=d.basketRevision}) end
   elseif d.origin=="offers" and d.target=="inventory" then
    receipt.Visible=true
    if self.state.customer.mode=="Buyer" then
@@ -3542,39 +3678,6 @@ return Surface
       </Item>
       <Item class="Part" referent="73">
         <Properties>
-          <string name="Name">Wallet</string>
-          <bool name="Anchored">true</bool>
-          <token name="BottomSurface">0</token>
-          <CoordinateFrame name="CFrame">
-            <X>-9</X>
-            <Y>3.6</Y>
-            <Z>6</Z>
-            <R00>1</R00>
-            <R01>0</R01>
-            <R02>0</R02>
-            <R10>0</R10>
-            <R11>1</R11>
-            <R12>0</R12>
-            <R20>0</R20>
-            <R21>0</R21>
-            <R22>1</R22>
-          </CoordinateFrame>
-          <bool name="CanCollide">false</bool>
-          <bool name="CanQuery">true</bool>
-          <bool name="CanTouch">false</bool>
-          <bool name="CastShadow">false</bool>
-          <Color3uint8 name="Color3uint8">5523552</Color3uint8>
-          <token name="Material">272</token>
-          <Vector3 name="size">
-            <X>2</X>
-            <Y>0.5</Y>
-            <Z>1.5</Z>
-          </Vector3>
-          <token name="TopSurface">0</token>
-        </Properties>
-      </Item>
-      <Item class="Part" referent="74">
-        <Properties>
           <string name="Name">RegisterBox</string>
           <bool name="Anchored">true</bool>
           <token name="BottomSurface">0</token>
@@ -3605,7 +3708,7 @@ return Surface
           </Vector3>
           <token name="TopSurface">0</token>
         </Properties>
-        <Item class="SurfaceGui" referent="75">
+        <Item class="SurfaceGui" referent="74">
           <Properties>
             <string name="Name">EditOutline</string>
             <Vector2 name="CanvasSize">
@@ -3615,7 +3718,7 @@ return Surface
             <token name="Face">2</token>
             <float name="LightInfluence">0</float>
           </Properties>
-          <Item class="Frame" referent="76">
+          <Item class="Frame" referent="75">
             <Properties>
               <string name="Name">Border</string>
               <float name="BackgroundTransparency">1</float>
@@ -3635,7 +3738,7 @@ return Surface
           </Item>
         </Item>
       </Item>
-      <Item class="Part" referent="77">
+      <Item class="Part" referent="76">
         <Properties>
           <string name="Name">NextCustomerButton</string>
           <bool name="Anchored">true</bool>
@@ -3667,7 +3770,7 @@ return Surface
           </Vector3>
           <token name="TopSurface">0</token>
         </Properties>
-        <Item class="SurfaceGui" referent="78">
+        <Item class="SurfaceGui" referent="77">
           <Properties>
             <string name="Name">EditOutline</string>
             <Vector2 name="CanvasSize">
@@ -3677,7 +3780,7 @@ return Surface
             <token name="Face">2</token>
             <float name="LightInfluence">0</float>
           </Properties>
-          <Item class="Frame" referent="79">
+          <Item class="Frame" referent="78">
             <Properties>
               <string name="Name">Border</string>
               <float name="BackgroundTransparency">1</float>
@@ -3697,7 +3800,7 @@ return Surface
           </Item>
         </Item>
       </Item>
-      <Item class="Part" referent="80">
+      <Item class="Part" referent="79">
         <Properties>
           <string name="Name">DismissCustomerButton</string>
           <bool name="Anchored">true</bool>
@@ -3729,7 +3832,7 @@ return Surface
           </Vector3>
           <token name="TopSurface">0</token>
         </Properties>
-        <Item class="SurfaceGui" referent="81">
+        <Item class="SurfaceGui" referent="80">
           <Properties>
             <string name="Name">EditOutline</string>
             <Vector2 name="CanvasSize">
@@ -3739,7 +3842,7 @@ return Surface
             <token name="Face">2</token>
             <float name="LightInfluence">0</float>
           </Properties>
-          <Item class="Frame" referent="82">
+          <Item class="Frame" referent="81">
             <Properties>
               <string name="Name">Border</string>
               <float name="BackgroundTransparency">1</float>
@@ -3759,7 +3862,7 @@ return Surface
           </Item>
         </Item>
       </Item>
-      <Item class="Part" referent="83">
+      <Item class="Part" referent="82">
         <Properties>
           <string name="Name">ViewTarget</string>
           <bool name="Anchored">true</bool>
@@ -3793,7 +3896,7 @@ return Surface
           <float name="Transparency">1</float>
         </Properties>
       </Item>
-      <Item class="Part" referent="84">
+      <Item class="Part" referent="83">
         <Properties>
           <string name="Name">CameraMount</string>
           <bool name="Anchored">true</bool>
@@ -3827,7 +3930,7 @@ return Surface
           <float name="Transparency">0.25</float>
         </Properties>
       </Item>
-      <Item class="Part" referent="85">
+      <Item class="Part" referent="84">
         <Properties>
           <string name="Name">VisitorStand</string>
           <bool name="Anchored">true</bool>
@@ -3861,7 +3964,7 @@ return Surface
           <float name="Transparency">1</float>
         </Properties>
       </Item>
-      <Item class="Part" referent="86">
+      <Item class="Part" referent="85">
         <Properties>
           <string name="Name">VisitorEntry</string>
           <bool name="Anchored">true</bool>
@@ -3895,7 +3998,7 @@ return Surface
           <float name="Transparency">1</float>
         </Properties>
       </Item>
-      <Item class="Part" referent="87">
+      <Item class="Part" referent="86">
         <Properties>
           <string name="Name">VisitorExit</string>
           <bool name="Anchored">true</bool>
@@ -3929,7 +4032,7 @@ return Surface
           <float name="Transparency">1</float>
         </Properties>
       </Item>
-      <Item class="Part" referent="88">
+      <Item class="Part" referent="87">
         <Properties>
           <string name="Name">Status terminal</string>
           <bool name="Anchored">true</bool>
@@ -3962,7 +4065,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="89">
+      <Item class="Part" referent="88">
         <Properties>
           <string name="Name">Status glow</string>
           <bool name="Anchored">true</bool>
@@ -3995,7 +4098,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="90">
+      <Item class="Part" referent="89">
         <Properties>
           <string name="Name">MoneyDisplay</string>
           <bool name="Anchored">true</bool>
@@ -4027,7 +4130,7 @@ return Surface
           </Vector3>
           <token name="TopSurface">0</token>
         </Properties>
-        <Item class="SurfaceGui" referent="91">
+        <Item class="SurfaceGui" referent="90">
           <Properties>
             <string name="Name">CashSurface</string>
             <Vector2 name="CanvasSize">
@@ -4037,7 +4140,7 @@ return Surface
             <token name="Face">2</token>
             <float name="LightInfluence">0</float>
           </Properties>
-          <Item class="TextLabel" referent="92">
+          <Item class="TextLabel" referent="91">
             <Properties>
               <string name="Name">Balance</string>
               <float name="BackgroundTransparency">1</float>
@@ -4065,7 +4168,7 @@ return Surface
           </Item>
         </Item>
       </Item>
-      <Item class="Part" referent="93">
+      <Item class="Part" referent="92">
         <Properties>
           <string name="Name">Sign</string>
           <bool name="Anchored">true</bool>
@@ -4097,7 +4200,7 @@ return Surface
           </Vector3>
           <token name="TopSurface">0</token>
         </Properties>
-        <Item class="SurfaceGui" referent="94">
+        <Item class="SurfaceGui" referent="93">
           <Properties>
             <string name="Name">SurfaceGui</string>
             <Vector2 name="CanvasSize">
@@ -4107,7 +4210,7 @@ return Surface
             <token name="Face">2</token>
             <float name="LightInfluence">0</float>
           </Properties>
-          <Item class="TextLabel" referent="95">
+          <Item class="TextLabel" referent="94">
             <Properties>
               <string name="Name">TextLabel</string>
               <float name="BackgroundTransparency">1</float>
@@ -4132,7 +4235,7 @@ return Surface
               </Color3>
               <bool name="TextScaled">true</bool>
             </Properties>
-            <Item class="UIPadding" referent="96">
+            <Item class="UIPadding" referent="95">
               <Properties>
                 <string name="Name">UIPadding</string>
                 <UDim name="PaddingLeft">
@@ -4148,7 +4251,7 @@ return Surface
           </Item>
         </Item>
       </Item>
-      <Item class="Part" referent="97">
+      <Item class="Part" referent="96">
         <Properties>
           <string name="Name">Cable vertical</string>
           <bool name="Anchored">true</bool>
@@ -4181,7 +4284,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="98">
+      <Item class="Part" referent="97">
         <Properties>
           <string name="Name">Cable vertical</string>
           <bool name="Anchored">true</bool>
@@ -4214,7 +4317,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="99">
+      <Item class="Part" referent="98">
         <Properties>
           <string name="Name">Cable vertical</string>
           <bool name="Anchored">true</bool>
@@ -4247,7 +4350,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="100">
+      <Item class="Part" referent="99">
         <Properties>
           <string name="Name">Cable vertical</string>
           <bool name="Anchored">true</bool>
@@ -4280,7 +4383,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="101">
+      <Item class="Part" referent="100">
         <Properties>
           <string name="Name">Pipe vertical</string>
           <bool name="Anchored">true</bool>
@@ -4313,7 +4416,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="102">
+      <Item class="Part" referent="101">
         <Properties>
           <string name="Name">Pipe elbow</string>
           <bool name="Anchored">true</bool>
@@ -4346,7 +4449,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="103">
+      <Item class="Part" referent="102">
         <Properties>
           <string name="Name">Radio</string>
           <bool name="Anchored">true</bool>
@@ -4379,7 +4482,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="104">
+      <Item class="Part" referent="103">
         <Properties>
           <string name="Name">Radio screen</string>
           <bool name="Anchored">true</bool>
@@ -4412,7 +4515,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="105">
+      <Item class="Part" referent="104">
         <Properties>
           <string name="Name">Desk keypad</string>
           <bool name="Anchored">true</bool>
@@ -4445,7 +4548,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="106">
+      <Item class="Part" referent="105">
         <Properties>
           <string name="Name">Key</string>
           <bool name="Anchored">true</bool>
@@ -4454,6 +4557,39 @@ return Surface
             <X>-10</X>
             <Y>3.8</Y>
             <Z>5.2</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <bool name="CanCollide">false</bool>
+          <bool name="CanQuery">false</bool>
+          <bool name="CanTouch">false</bool>
+          <bool name="CastShadow">false</bool>
+          <Color3uint8 name="Color3uint8">9023908</Color3uint8>
+          <token name="Material">272</token>
+          <Vector3 name="size">
+            <X>0.32</X>
+            <Y>0.1</Y>
+            <Z>0.32</Z>
+          </Vector3>
+          <token name="TopSurface">0</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="106">
+        <Properties>
+          <string name="Name">Key</string>
+          <bool name="Anchored">true</bool>
+          <token name="BottomSurface">0</token>
+          <CoordinateFrame name="CFrame">
+            <X>-10</X>
+            <Y>3.8</Y>
+            <Z>5.75</Z>
             <R00>1</R00>
             <R01>0</R01>
             <R02>0</R02>
@@ -4486,7 +4622,7 @@ return Surface
           <CoordinateFrame name="CFrame">
             <X>-10</X>
             <Y>3.8</Y>
-            <Z>5.75</Z>
+            <Z>6.3</Z>
             <R00>1</R00>
             <R01>0</R01>
             <R02>0</R02>
@@ -4517,9 +4653,9 @@ return Surface
           <bool name="Anchored">true</bool>
           <token name="BottomSurface">0</token>
           <CoordinateFrame name="CFrame">
-            <X>-10</X>
+            <X>-9.4</X>
             <Y>3.8</Y>
-            <Z>6.3</Z>
+            <Z>5.2</Z>
             <R00>1</R00>
             <R01>0</R01>
             <R02>0</R02>
@@ -4552,7 +4688,7 @@ return Surface
           <CoordinateFrame name="CFrame">
             <X>-9.4</X>
             <Y>3.8</Y>
-            <Z>5.2</Z>
+            <Z>5.75</Z>
             <R00>1</R00>
             <R01>0</R01>
             <R02>0</R02>
@@ -4585,7 +4721,7 @@ return Surface
           <CoordinateFrame name="CFrame">
             <X>-9.4</X>
             <Y>3.8</Y>
-            <Z>5.75</Z>
+            <Z>6.3</Z>
             <R00>1</R00>
             <R01>0</R01>
             <R02>0</R02>
@@ -4616,9 +4752,9 @@ return Surface
           <bool name="Anchored">true</bool>
           <token name="BottomSurface">0</token>
           <CoordinateFrame name="CFrame">
-            <X>-9.4</X>
+            <X>-8.8</X>
             <Y>3.8</Y>
-            <Z>6.3</Z>
+            <Z>5.2</Z>
             <R00>1</R00>
             <R01>0</R01>
             <R02>0</R02>
@@ -4651,7 +4787,7 @@ return Surface
           <CoordinateFrame name="CFrame">
             <X>-8.8</X>
             <Y>3.8</Y>
-            <Z>5.2</Z>
+            <Z>5.75</Z>
             <R00>1</R00>
             <R01>0</R01>
             <R02>0</R02>
@@ -4684,39 +4820,6 @@ return Surface
           <CoordinateFrame name="CFrame">
             <X>-8.8</X>
             <Y>3.8</Y>
-            <Z>5.75</Z>
-            <R00>1</R00>
-            <R01>0</R01>
-            <R02>0</R02>
-            <R10>0</R10>
-            <R11>1</R11>
-            <R12>0</R12>
-            <R20>0</R20>
-            <R21>0</R21>
-            <R22>1</R22>
-          </CoordinateFrame>
-          <bool name="CanCollide">false</bool>
-          <bool name="CanQuery">false</bool>
-          <bool name="CanTouch">false</bool>
-          <bool name="CastShadow">false</bool>
-          <Color3uint8 name="Color3uint8">9023908</Color3uint8>
-          <token name="Material">272</token>
-          <Vector3 name="size">
-            <X>0.32</X>
-            <Y>0.1</Y>
-            <Z>0.32</Z>
-          </Vector3>
-          <token name="TopSurface">0</token>
-        </Properties>
-      </Item>
-      <Item class="Part" referent="114">
-        <Properties>
-          <string name="Name">Key</string>
-          <bool name="Anchored">true</bool>
-          <token name="BottomSurface">0</token>
-          <CoordinateFrame name="CFrame">
-            <X>-8.8</X>
-            <Y>3.8</Y>
             <Z>6.3</Z>
             <R00>1</R00>
             <R01>0</R01>
@@ -4742,7 +4845,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="115">
+      <Item class="Part" referent="114">
         <Properties>
           <string name="Name">Key</string>
           <bool name="Anchored">true</bool>
@@ -4775,7 +4878,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="116">
+      <Item class="Part" referent="115">
         <Properties>
           <string name="Name">Key</string>
           <bool name="Anchored">true</bool>
@@ -4808,7 +4911,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="117">
+      <Item class="Part" referent="116">
         <Properties>
           <string name="Name">Key</string>
           <bool name="Anchored">true</bool>
@@ -4841,7 +4944,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="118">
+      <Item class="Part" referent="117">
         <Properties>
           <string name="Name">Receipt machine</string>
           <bool name="Anchored">true</bool>
@@ -4874,7 +4977,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="119">
+      <Item class="Part" referent="118">
         <Properties>
           <string name="Name">Receipt paper</string>
           <bool name="Anchored">true</bool>
@@ -4907,7 +5010,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="120">
+      <Item class="Part" referent="119">
         <Properties>
           <string name="Name">Receipt line</string>
           <bool name="Anchored">true</bool>
@@ -4940,7 +5043,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="121">
+      <Item class="Part" referent="120">
         <Properties>
           <string name="Name">Receipt line</string>
           <bool name="Anchored">true</bool>
@@ -4973,7 +5076,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="122">
+      <Item class="Part" referent="121">
         <Properties>
           <string name="Name">Receipt line</string>
           <bool name="Anchored">true</bool>
@@ -5006,7 +5109,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="123">
+      <Item class="Part" referent="122">
         <Properties>
           <string name="Name">Receipt line</string>
           <bool name="Anchored">true</bool>
@@ -5039,7 +5142,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="124">
+      <Item class="Part" referent="123">
         <Properties>
           <string name="Name">Desk lamp base</string>
           <bool name="Anchored">true</bool>
@@ -5072,7 +5175,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="125">
+      <Item class="Part" referent="124">
         <Properties>
           <string name="Name">Desk lamp stem</string>
           <bool name="Anchored">true</bool>
@@ -5105,7 +5208,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="126">
+      <Item class="Part" referent="125">
         <Properties>
           <string name="Name">Desk lamp shade</string>
           <bool name="Anchored">true</bool>
@@ -5138,7 +5241,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="127">
+      <Item class="Part" referent="126">
         <Properties>
           <string name="Name">Lamp strip</string>
           <bool name="Anchored">true</bool>
@@ -5171,7 +5274,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="128">
+      <Item class="Part" referent="127">
         <Properties>
           <string name="Name">Stock1</string>
           <bool name="Anchored">true</bool>
@@ -5204,7 +5307,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="129">
+      <Item class="Part" referent="128">
         <Properties>
           <string name="Name">Stock2</string>
           <bool name="Anchored">true</bool>
@@ -5237,7 +5340,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="130">
+      <Item class="Part" referent="129">
         <Properties>
           <string name="Name">Stock3</string>
           <bool name="Anchored">true</bool>

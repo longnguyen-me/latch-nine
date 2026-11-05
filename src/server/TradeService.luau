@@ -1,7 +1,8 @@
 --!strict
 -- Staging is not ownership. Checkout commits an entire quoted basket atomically.
-return function(config: any, definitions: any, rules: any, inventoryGrid: any, trayGrid: any)
+return function(config: any, definitions: any, rules: any, inventoryGrid: any, trayGrid: any, walletModule: any?)
  local Trade={}
+ local wallet=walletModule or require("../shared/Wallet")
  local function clone(value: any): any
   if type(value)~="table" then return value end
   local out: any={};for k,v in pairs(value) do out[k]=clone(v) end;return out
@@ -42,8 +43,33 @@ return function(config: any, definitions: any, rules: any, inventoryGrid: any, t
  end
  function Trade.clear(customer: any): (boolean,string)
   if not customer or customer.state~="Interact" then return false,"No visitor is serving a trade." end
-  customer.basket={};customer.basketRevision+=1;customer.quote=nil
+  customer.basket={};customer.payment={};customer.paymentTotal=0;customer.basketRevision+=1;customer.quote=nil
   return true,"Selection cleared."
+ end
+ function Trade.stagePayment(profile: any,customer: any,denomination: any,id: any): (boolean,string)
+  if not customer or customer.mode~="Seller" or customer.state~="Interact" or #customer.basket==0 then return false,"Select goods first." end
+  if not rules.integer(denomination,1,1000) or (id~=nil and (type(id)~="string" or #id>80)) then return false,"Invalid note." end
+  local valid=false
+  if id then
+   local item=rules.find(profile,id)
+   if item and definitions[item.kind].denomination==denomination then
+    valid=true
+    for _,entry in ipairs(customer.payment or {}) do if entry.id==id then valid=false end end
+   end
+  else
+   for _,stack in ipairs(wallet.stacks(profile.cash,profile.walletTier or 0)) do
+    if stack.denomination==denomination then
+     local used=0
+     for _,entry in ipairs(customer.payment or {}) do if not entry.id and entry.denomination==denomination then used+=1 end end
+     valid=used<stack.count;break
+    end
+   end
+  end
+  if not valid then return false,"This note is not available." end
+  customer.payment=customer.payment or {}
+  table.insert(customer.payment,{id=id,denomination=denomination})
+  customer.paymentTotal=(customer.paymentTotal or 0)+denomination
+  return true,"Payment staged: "..customer.paymentTotal.." E."
  end
  function Trade.review(profile: any,customer: any,quoteId: string): (boolean,string)
   if not customer or customer.mode=="Buyer" or customer.state~="Interact" or #customer.basket==0 then return false,"No items selected." end
@@ -106,24 +132,59 @@ return function(config: any, definitions: any, rules: any, inventoryGrid: any, t
   if q.basketRevision~=customer.basketRevision or q.gridRevision~=profile.gridRevision then
    customer.quote=nil;return false,"Trade changed."
   end
-  if profile.cash<q.total then return false,"Not enough Eddies for this purchase." end
+  local walletCash=profile.cash;local looseIds: {[string]: boolean}={};local paid=0
+  local reserved: {[number]: number}={}
+  for _,payment in ipairs(customer.payment or {}) do
+   local denomination=payment.denomination
+   if payment.id then
+    local money=rules.find(profile,payment.id)
+    if not money or definitions[money.kind].denomination~=denomination or looseIds[payment.id] then return false,"Payment changed." end
+    looseIds[payment.id]=true
+   else reserved[denomination]=(reserved[denomination] or 0)+1 end
+   paid+=denomination
+  end
+  for _,stack in ipairs(wallet.stacks(walletCash,profile.walletTier or 0)) do
+   if (reserved[stack.denomination] or 0)>stack.count then return false,"Wallet payment changed." end
+  end
+  local walletUsed=0
+  for denomination,count in pairs(reserved) do walletUsed+=denomination*count end
+  if paid<q.total then
+   local needed=q.total-paid
+   local fromWallet=math.min(needed,walletCash-walletUsed)
+   walletUsed+=fromWallet;paid+=fromWallet
+   if paid<q.total then
+    for _,item in ipairs(profile.inventory) do
+     local amount=definitions[item.kind].denomination
+     if amount and not looseIds[item.id] then looseIds[item.id]=true;paid+=amount;if paid>=q.total then break end end
+    end
+   end
+  end
+  if paid<q.total then return false,"Not enough Eddies for this purchase." end
   -- Preserve live metadata (for example inspections performed after the quote).
-  local committed=table.clone(profile.inventory)
+  local committed={}
+  for _,item in ipairs(profile.inventory) do if not looseIds[item.id] then table.insert(committed,item) end end
   local bought: {[string]: boolean}={}
+  local newWalletTier=profile.walletTier or 0
   for _,line in ipairs(q.lines) do
    local entry=offer(customer,(line :: any).id)
    if not entry or rules.find(profile,(line :: any).id) then customer.quote=nil;return false,"An item is already owned or no longer offered." end
    local item=clone((entry :: any).item);item.qualityTag=item.qualityTag or rules.DefaultQuality;item.gridX=(line :: any).item.gridX;item.gridY=(line :: any).item.gridY;item.rotation=(line :: any).item.rotation;item.paid=(line :: any).price
+   local tier=definitions[item.kind].walletTier
+   if tier and tier>newWalletTier then
+    for index=#committed,1,-1 do if definitions[committed[index].kind].walletTier~=nil then table.remove(committed,index) end end
+    newWalletTier=tier
+   end
    table.insert(committed,item);bought[(line :: any).id]=true
   end
   local plan={inventory=committed,upgrade=profile.upgrade,legacyRows=profile.legacyRows}
   if not inventoryGrid.validate(plan) then customer.quote=nil;return false,"The purchase layout is no longer valid." end
-  profile.cash-=q.total;profile.costs+=q.total;profile.inventory=committed;profile.gridRevision+=1
+  local change=paid-q.total
+  profile.cash=walletCash-walletUsed+change;profile.costs+=q.total;profile.inventory=committed;profile.walletTier=newWalletTier;profile.gridRevision+=1
   local remaining={}
   for _,entry in ipairs(customer.goods) do if not bought[(entry :: any).item.id] then table.insert(remaining,entry) end end
-  customer.goods=remaining;customer.quote=nil;customer.basket={};customer.basketRevision+=1
+  customer.goods=remaining;customer.quote=nil;customer.basket={};customer.payment={};customer.paymentTotal=0;customer.basketRevision+=1
   rules.log(profile,"Bought "..q.count.." item(s) from "..customer.name.." for "..q.total)
-  return true,"Bought "..q.count.." item(s) for "..q.total.." Eddies."
+  return true,"Bought "..q.count.." item(s) for "..q.total.." Eddies."..(if change>0 then " Customer returned "..change.." E in change." else "")
  end
  -- A buyer uses the same middle tray to hold stock from the shop.
  function Trade.stageStock(profile: any,customer: any,id: any,x: any,y: any,rotation: any,revision: any): (boolean,string)

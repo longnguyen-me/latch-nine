@@ -1640,44 +1640,6 @@
       }
     },
     {
-      "ClassName": "Part",
-      "Name": "Wallet",
-      "Properties": {
-        "Anchored": true,
-        "BottomSurface": "Smooth",
-        "CFrame": [
-          -9,
-          3.6,
-          6,
-          1,
-          0,
-          0,
-          0,
-          1,
-          0,
-          0,
-          0,
-          1
-        ],
-        "CanCollide": false,
-        "CanQuery": true,
-        "CanTouch": false,
-        "CastShadow": false,
-        "Color": [
-          0.32941176470588235,
-          0.2823529411764706,
-          0.3764705882352941
-        ],
-        "Material": "SmoothPlastic",
-        "Size": [
-          2,
-          0.5,
-          1.5
-        ],
-        "TopSurface": "Smooth"
-      }
-    },
-    {
       "Children": [
         {
           "Children": [

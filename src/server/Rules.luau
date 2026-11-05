@@ -7,7 +7,7 @@ return function(config: any, definitions: any, grid: any, tags: any)
 	end
 	Rules.integer = integer
 	function Rules.newProfile(): any
-		return {version = 5, legacyRows = 0, gridRevision = 0, cash = config.StartingCash, day = 1, inventory = {}, reputation = 0,
+		return {version = 5, legacyRows = 0, gridRevision = 0, cash = config.StartingCash, day = 1, walletTier = 0, inventory = {{id="starter-wallet",kind="wallet0",paid=0,condition=100,authentic=true,restricted=false,inspected=false,qualityTag=tags.DefaultQuality,gridX=0,gridY=0,rotation=0}}, reputation = 0,
 			upgrade = 0, revenue = 0, costs = 0, tradeProfit = 0, visits = 0, aidDay = 0, receipts = {}}
 	end
 	local function validateFields(p: any, version: number): boolean

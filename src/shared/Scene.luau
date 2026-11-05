@@ -93,7 +93,6 @@ function Scene.build(parent: Instance, origin: Vector3, name: string): Model
  local controls=Instance.new("Model");controls.Name="InteractionControls";controls.Parent=m
  local sleep=p("SleepingBag",-17,0.5,11,5,0.5,3,C(70,74,105));sleep.CanQuery=true
  local shutter=p("ShopToggle",-12,5.8,6,3,1.4,0.4,C(68,128,121));shutter.CanQuery=true
- local wallet=p("Wallet",-9,3.6,6,2,0.5,1.5,C(84,72,96));wallet.CanQuery=true
  local function control(name: string,y: number,z: number,h: number,color: Color3)
   local base=board(name,-14,y,z,4.6,h);base.Parent=controls
   local face=Instance.new("SurfaceGui");face.Name="EditOutline";face.Face=Enum.NormalId.Back

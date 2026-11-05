@@ -1,0 +1,37 @@
+local config=require("../src/shared/Config")
+local items=require("../src/shared/Items")
+local tags=require("../src/shared/ItemTags")
+local wallet=require("../src/shared/Wallet")
+local grid=require("../src/shared/Grid")(config,items.Definitions)
+local trayConfig=table.clone(config);trayConfig.GridColumns=config.TradeColumns;trayConfig.GridBaseRows=config.TradeRows
+local tray=require("../src/shared/Grid")(trayConfig,items.Definitions)
+local rules=require("../src/server/Rules")(config,items.Definitions,grid,tags)
+local trade=require("../src/server/TradeService")(config,items.Definitions,rules,grid,tray,wallet)
+local function offer(kind,id,price)
+ return {item={id=id,kind=kind,condition=100,paid=0,authentic=true,restricted=false,inspected=false,qualityTag="standard",gridX=0,gridY=0,rotation=0},price=price}
+end
+local function customer(entry)
+ return {name="Test seller",mode="Seller",state="Interact",goods={entry},basket={},basketRevision=0}
+end
+local p=rules.newProfile()
+assert(#p.inventory==1 and p.inventory[1].kind=="wallet0")
+local c=customer(offer("blank1","sale-1",10))
+assert(trade.stage(c,"sale-1",0,0,0,0,p,3,2,0))
+assert(trade.review(p,c,"quote-1"))
+assert(trade.stagePayment(p,c,100,nil))
+local ok,message=trade.confirm(p,c,"quote-1")
+assert(ok and message:find("90 E in change") and p.cash==150 and p.inventory[2].gridX==3)
+local money=offer("cash25","loose-1",25).item
+money.gridX=4;money.gridY=2;table.insert(p.inventory,money)
+local c2=customer(offer("blank1","sale-2",10))
+assert(trade.stage(c2,"sale-2",0,0,0,0,p,5,2,0))
+assert(trade.review(p,c2,"quote-2"))
+assert(trade.stagePayment(p,c2,25,"loose-1"))
+assert(trade.confirm(p,c2,"quote-2"))
+assert(p.cash==165 and not rules.find(p,"loose-1"))
+local c3=customer(offer("wallet1","upgrade-1",100))
+assert(trade.stage(c3,"upgrade-1",0,0,0,0,p,6,2,0))
+assert(trade.review(p,c3,"quote-3"))
+assert(trade.confirm(p,c3,"quote-3"))
+assert(p.walletTier==1 and not rules.find(p,"starter-wallet"))
+print("Wallet item, change, loose note and customer wallet purchase passed")

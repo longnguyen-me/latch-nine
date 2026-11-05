@@ -5,3 +5,5 @@
 All placeholders currently use the visible Basic tag `Unidentified stock` so buyer requests remain playable. Quality and criminality tags still affect value. Hidden rarity still controls how often a seller offers each item. Placeholder prices are temporary.
 
 The new `LatchNine_Cyberpunk_v1` data store starts fresh so old ore inventory cannot appear in the new theme; the prior `LatchNine_Prototype_v1` save data stays untouched. Studio defaults to session-only saves.
+
+Wallets and loose Eddie notes are product definitions too. Wallet1–3 enter the seller pool with uncommon, rare, and legendary rarity. Cash1–1000 are 1×1, never stack in stock, and do not enter the customer draw pool.

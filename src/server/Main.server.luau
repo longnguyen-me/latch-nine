@@ -12,7 +12,7 @@ local Grid = require(Shared.Grid)(Config, Items.Definitions)
 local Rules = require(script.Parent.Rules)(Config, Items.Definitions, Grid, Tags)
 local trayConfig: any = table.clone(Config);trayConfig.GridColumns=Config.TradeColumns;trayConfig.GridBaseRows=Config.TradeRows;trayConfig.GridRowsPerUpgrade=0
 local TrayGrid = require(Shared.Grid)(trayConfig, Items.Definitions)
-local Trade = require(script.Parent.TradeService)(Config, Items.Definitions, Rules, Grid, TrayGrid)
+local Trade = require(script.Parent.TradeService)(Config, Items.Definitions, Rules, Grid, TrayGrid, Wallet)
 local Persistence = require(script.Parent.Persistence)
 local Customers = require(script.Parent.CustomerService)
 Players.CharacterAutoLoads = false
@@ -76,11 +76,14 @@ local function push(player: Player,message: string?, moveAck: number?, moveOk: b
   if c.quote then
    local q=c.quote;local lines={}
    for _,line in ipairs(q.lines) do table.insert(lines,{id=line.id,kind=line.kind,name=line.name,price=line.price,basePrice=line.basePrice}) end
-   quote={id=q.id,mode=q.mode,lines=lines,subtotal=q.subtotal,discount=q.discount,total=q.total,count=q.count,affordable=q.mode=="Sale" or s.profile.cash>=q.total}
+   local loose=0
+   for _,item in ipairs(s.profile.inventory) do loose+=Items.Definitions[item.kind].denomination or 0 end
+   quote={id=q.id,mode=q.mode,lines=lines,subtotal=q.subtotal,discount=q.discount,total=q.total,count=q.count,affordable=q.mode=="Sale" or s.profile.cash+loose>=q.total}
   end
   local bulkOriginal,bulkPrice=0,0
   if c.bulkPercent then for _,entry in ipairs(c.goods) do bulkOriginal+=entry.price;bulkPrice+=math.max(1,math.floor(entry.price*(100-c.bulkPercent)/100)) end end
   customer={id=c.id,name=c.name,personality=c.personality,faction=c.faction,kind=c.kind,itemId=c.itemId,requestTag=c.requestTag,
+   payment=c.payment or {},paymentTotal=c.paymentTotal or 0,
    bulkPercent=c.bulkPercent,bulkOriginal=bulkOriginal,bulkPrice=bulkPrice,
    mode=c.mode,goods=goods,basket=basket,basketRevision=c.basketRevision,quote=quote,
    dialogue=c.dialogue,offer=c.offer,patience=c.patience,state=c.state,color=c.color,deadline=c.deadline}
@@ -162,14 +165,6 @@ action.OnServerEvent:Connect(function(player: Player,request: any)
  end
  local name=request.action
  if name=="Sync" then push(player); return end
- if name=="UpgradeWallet" then
-  local tier=s.profile.walletTier or 0
-  if tier>=3 then push(player,"Wallet is fully upgraded.");return end
-  local cost=Wallet.Prices[tier+2]
-  if s.profile.cash<cost then push(player,"Need "..cost.." Eddies for the next wallet.");return end
-  s.profile.cash-=cost;s.profile.costs+=cost;s.profile.walletTier=tier+1
-  push(player,"Wallet upgraded to "..Wallet.Rarities[tier+2]..".");return
- end
  if name=="MoveMoney" then
   local tier=s.profile.walletTier or 0;local count=Wallet.Sizes[tier+1][1]*Wallet.Sizes[tier+1][2]
   local denomination=request.denomination;local slot=request.slot
@@ -183,6 +178,30 @@ action.OnServerEvent:Connect(function(player: Player,request: any)
    if other~=denomination and (positions[tostring(other)] or i)==slot then positions[tostring(other)]=current or (table.find(Wallet.Denominations,denomination) or 1);break end
   end
   positions[tostring(denomination)]=slot;push(player);return
+ end
+ if name=="WithdrawMoney" then
+  local denomination=request.denomination;local valid=false
+  for _,stack in ipairs(Wallet.stacks(s.profile.cash,s.profile.walletTier or 0)) do if stack.denomination==denomination and stack.count>0 then valid=true end end
+  if not valid then push(player,"No note of that denomination in your wallet.");return end
+  local kind="cash"..denomination
+  local ok,message=Grid.check(s.profile,kind,request.x,request.y,0)
+  if not ok then push(player,message);return end
+  s.profile.cash-=denomination
+  table.insert(s.profile.inventory,{id=Http:GenerateGUID(false),kind=kind,paid=denomination,condition=100,authentic=true,restricted=false,inspected=false,qualityTag=Tags.DefaultQuality,gridX=request.x,gridY=request.y,rotation=0})
+  s.profile.gridRevision+=1;push(player,"Moved "..denomination.." E into stock.");return
+ end
+ if name=="DepositMoney" then
+  local item,index=Rules.find(s.profile,request.id)
+  local denomination=item and Items.Definitions[item.kind].denomination
+  if not denomination or not index then push(player,"That is not a loose note.");return end
+  table.remove(s.profile.inventory,index);s.profile.cash+=denomination;s.profile.gridRevision+=1
+  push(player,"Deposited "..denomination.." E into your wallet.");return
+ end
+ if name=="StagePayment" then
+  local c=matchingCustomer(s,request)
+  if not c then push(player,"No active trade.");return end
+  local ok,message=Trade.stagePayment(s.profile,c,request.denomination,request.id)
+  push(player,message);return
  end
  if name=="ToggleShop" then
   if s.shopOpen then
@@ -308,6 +327,12 @@ local function join(player: Player)
  loading[player]=true
  local profile,status=Persistence.load(player.UserId,Rules)
  if not profile then loading[player]=nil;if player.Parent then player:Kick(status) end; return end
+ local hasWallet=false
+ for _,item in ipairs(profile.inventory) do if Items.Definitions[item.kind].walletTier~=nil then hasWallet=true;break end end
+ if not hasWallet then
+  local x,y,rotation=Grid.firstFit(profile,"wallet0")
+  if x then table.insert(profile.inventory,{id=Http:GenerateGUID(false),kind="wallet0",paid=0,condition=100,authentic=true,restricted=false,inspected=false,qualityTag=Tags.DefaultQuality,gridX=x,gridY=y,rotation=rotation});profile.gridRevision+=1 end
+ end
  loading[player]=nil
  if not player.Parent or closing then Persistence.save(player.UserId,profile,true); return end
  local slot=0
