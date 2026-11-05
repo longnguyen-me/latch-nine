@@ -34,4 +34,19 @@ p.suspicion=60;p.suspicionAt=1000
 assert(suspicion.decay(p,1000+6*3600) and p.suspicion==30)
 assert(suspicion.spend(p,4,24000,function() return 1 end))
 assert(p.suspicion==40 and not suspicion.spend(p,0,24000,function() return 1 end))
+local tags=require("../src/shared/ItemTags")
+local rules=require("../src/server/Rules")(config,items.Definitions,grid,tags,machines)
+local saved=rules.newProfile()
+p.inventory[1].machine.output={item("persist-dirty","dirty100",0,0)}
+local owned=table.clone(p.inventory[1]);owned.gridX=3;owned.gridY=0
+table.insert(saved.inventory,owned)
+saved.suspicion=75;saved.suspicionAt=24000
+assert(rules.validate(saved))
+local restored=rules.migrate(saved)
+assert(restored and restored.inventory[2].machine.output[1].kind=="dirty100")
+assert(suspicion.decay(restored,24000+3600) and restored.suspicion==70)
+local cashBefore=restored.cash
+local incident=suspicion.spend(restored,2,28000,function() return 100 end)
+assert(incident and incident:find("raid") and restored.suspicion==40 and restored.cash<cashBefore)
+for _,entry in ipairs(restored.inventory) do assert(not items.Definitions[entry.kind].machine or items.Definitions[entry.kind].machine~="printer") end
 print("Offline production cap, laundry outcomes, and offline suspicion checks passed")

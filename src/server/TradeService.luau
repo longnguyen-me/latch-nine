@@ -118,14 +118,14 @@ return function(config: any, definitions: any, rules: any, inventoryGrid: any, t
    lines=lines,subtotal=subtotal,discount=subtotal-total,total=total,count=#lines,plan=plan.inventory}
   return true,"Whole batch review."
  end
- function Trade.buyBulk(profile: any,customer: any,quoteId: string): (boolean,string)
+ function Trade.buyBulk(profile: any,customer: any,quoteId: string): (boolean,string,number?)
   local ok,message=Trade.reviewBulk(profile,customer,quoteId)
   if not ok then return false,message end
   local bought,reason,dirtySpent=Trade.confirm(profile,customer,quoteId)
   if not bought then customer.quote=nil end
   return bought,reason,dirtySpent
  end
- function Trade.confirm(profile: any,customer: any,quoteId: any): (boolean,string)
+ function Trade.confirm(profile: any,customer: any,quoteId: any): (boolean,string,number?)
   if not customer or customer.mode=="Buyer" or customer.state~="Interact" then return false,"The visitor has left." end
   local q=customer.quote
   if not q or type(quoteId)~="string" or quoteId~=q.id then return false,"That purchase review has expired." end
