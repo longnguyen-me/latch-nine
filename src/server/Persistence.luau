@@ -32,6 +32,7 @@ function Persistence.load(userId: number, rules: any): (any, string)
 	end
 	if memoryOnly then
 		local profile = rules.newProfile()
+		profile.cash = Config.StudioTestCash
 		held[userId] = true; touched[userId] = os.time(); owners[userId] = profile
 		leases[userId] = HttpService:GenerateGUID(false)
 		return profile, "SESSION ONLY / Studio"

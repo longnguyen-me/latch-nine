@@ -1,6 +1,7 @@
 --!strict
 return table.freeze({
 	StartingCash = 160,
+	StudioTestCash = 10000,
 	GridColumns = 15,
 	GridBaseRows = 7,
 	GridRowsPerUpgrade = 0,
