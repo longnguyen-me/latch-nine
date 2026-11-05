@@ -1591,6 +1591,33 @@
                   ]
                 }
               }
+            },
+            {
+              "ClassName": "TextLabel",
+              "Name": "ButtonTitle",
+              "Properties": {
+                "BackgroundTransparency": 1,
+                "Font": "GothamBold",
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "Text": "OPEN / CLOSE",
+                "TextColor3": [
+                  0.43529411764705883,
+                  0.8549019607843137,
+                  0.7686274509803922
+                ],
+                "TextScaled": true
+              }
             }
           ],
           "ClassName": "SurfaceGui",
@@ -1669,6 +1696,33 @@
                     ]
                   ]
                 }
+              }
+            },
+            {
+              "ClassName": "TextLabel",
+              "Name": "ButtonTitle",
+              "Properties": {
+                "BackgroundTransparency": 1,
+                "Font": "GothamBold",
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "Text": "REGISTER",
+                "TextColor3": [
+                  0.9450980392156862,
+                  0.7607843137254902,
+                  0.4549019607843137
+                ],
+                "TextScaled": true
               }
             }
           ],
@@ -1749,6 +1803,33 @@
                   ]
                 }
               }
+            },
+            {
+              "ClassName": "TextLabel",
+              "Name": "ButtonTitle",
+              "Properties": {
+                "BackgroundTransparency": 1,
+                "Font": "GothamBold",
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "Text": "NEXT CUSTOMER",
+                "TextColor3": [
+                  0.43529411764705883,
+                  0.8549019607843137,
+                  0.7686274509803922
+                ],
+                "TextScaled": true
+              }
             }
           ],
           "ClassName": "SurfaceGui",
@@ -1827,6 +1908,33 @@
                     ]
                   ]
                 }
+              }
+            },
+            {
+              "ClassName": "TextLabel",
+              "Name": "ButtonTitle",
+              "Properties": {
+                "BackgroundTransparency": 1,
+                "Font": "GothamBold",
+                "Size": {
+                  "UDim2": [
+                    [
+                      1,
+                      0
+                    ],
+                    [
+                      1,
+                      0
+                    ]
+                  ]
+                },
+                "Text": "DISMISS",
+                "TextColor3": [
+                  0.9490196078431372,
+                  0.4980392156862745,
+                  0.47058823529411764
+                ],
+                "TextScaled": true
               }
             }
           ],

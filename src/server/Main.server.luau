@@ -220,11 +220,12 @@ action.OnServerEvent:Connect(function(player: Player,request: any)
   local ok,message=Trade.rotateOffer(c,request.id,request.revision)
   push(player,message);return
  end
- if name=="MachineInsert" or name=="MachineExtract" then
+ if name=="MachineInsert" or name=="MachineExtract" or name=="MachineMove" then
   if not Rules.integer(request.moveId,1,1000000000) then push(player,"Invalid machine move.");return end
   Machine.tick(s.profile,os.time(),function() return Http:GenerateGUID(false) end,function(a: number,b: number) return rng:NextInteger(a,b) end)
   local ok,message
   if name=="MachineInsert" then ok,message=Machine.insert(s.profile,request.machineId,request.id,request.slot,request.x,request.y,os.time())
+  elseif name=="MachineMove" then ok,message=Machine.move(s.profile,request.machineId,request.id,request.slot,request.x,request.y)
   else ok,message=Machine.extract(s.profile,request.machineId,request.id,request.slot,request.x,request.y) end
   push(player,message,request.moveId,ok);return
  end

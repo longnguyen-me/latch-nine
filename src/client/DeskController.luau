@@ -72,7 +72,7 @@ function Desk.new(send: (any)->())
  local dialogue=text(dialoguePanel,"",UDim2.fromOffset(10,8),UDim2.new(1,-20,1,-16),15,P.ink)
  local visitorName=text(namePlate,"SERVICE WINDOW",UDim2.fromOffset(10,6),UDim2.new(1,-20,1,-12),16,P.ink)
  local receipt=panel(root,"Receipt");receipt.Visible=false;receipt.ZIndex=20
- local receiptDrag: any=nil;local movedReceipt=false;local receiptCustomer: string?=nil
+ local receiptDrag: any=nil;local menuDrag: any=nil;local movedReceipt=false;local receiptCustomer: string?=nil
  local title=button(receipt,"TRADE RECEIPT",UDim2.fromOffset(0,0),UDim2.new(1,-44,0,42),function() end);title.Name="ReceiptHandle";title.BackgroundColor3=P.panel;title.TextColor3=P.ink;title.TextXAlignment=Enum.TextXAlignment.Left;title.TextSize=15
  make("UIPadding",{PaddingLeft=UDim.new(0,14)},title)
  local close=button(receipt,"X",UDim2.new(1,-42,0,5),UDim2.fromOffset(34,32),function() receipt.Visible=false;receiptDrag=nil end);close.BackgroundColor3=P.raised;close.TextColor3=P.ink;make("UICorner",{CornerRadius=UDim.new(0,5)},close)
@@ -109,6 +109,18 @@ function Desk.new(send: (any)->())
  local function covered(point: Vector2): boolean
   local p,b=receipt.AbsolutePosition,receipt.AbsoluteSize
   return receipt.Visible and point.X>=p.X and point.Y>=p.Y and point.X<p.X+b.X and point.Y<p.Y+b.Y
+ end
+ local function inside(frame: GuiObject,point: Vector2): boolean
+  local p,b=frame.AbsolutePosition,frame.AbsoluteSize
+  return frame.Visible and point.X>=p.X and point.Y>=p.Y and point.X<p.X+b.X and point.Y<p.Y+b.Y
+ end
+ local function moveMenu(frame: Frame,handle: GuiObject)
+  handle.Active=true
+  handle.InputBegan:Connect(function(input: InputObject)
+   if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
+    menuDrag={frame=frame,input=input,start=pointer(input),position=frame.AbsolutePosition}
+   end
+  end)
  end
  local function hover(origin: string,item: any,x: number,y: number)
   tooltip.Visible=false
@@ -187,21 +199,26 @@ function Desk.new(send: (any)->())
  local suspicionTrack=make("Frame",{Name="SuspicionTrack",Position=UDim2.new(1,-235,0,40),Size=UDim2.fromOffset(210,8),BackgroundColor3=P.raised,BorderSizePixel=0},root)
  local suspicionFill=make("Frame",{Name="SuspicionFill",Size=UDim2.fromScale(0,1),BackgroundColor3=P.teal,BorderSizePixel=0},suspicionTrack)
  local walletPanel=panel(root,"WalletGrid");walletPanel.Position=UDim2.new(0.5,-180,0.5,-190);walletPanel.Size=UDim2.fromOffset(360,380);walletPanel.Visible=false;walletPanel.ZIndex=70
- text(walletPanel,"WALLET / EDDIES",UDim2.fromOffset(12,12),UDim2.fromOffset(265,24),17,P.gold)
+ local walletTitle=text(walletPanel,"WALLET / EDDIES",UDim2.fromOffset(12,12),UDim2.fromOffset(265,30),17,P.gold)
+ walletTitle.Name="WalletHandle"
+ moveMenu(walletPanel,walletTitle)
  button(walletPanel,"X",UDim2.fromOffset(318,8),UDim2.fromOffset(32,30),function() walletPanel.Visible=false end)
  local walletBody=make("Frame",{Name="Slots",Position=UDim2.fromOffset(12,55),Size=UDim2.fromOffset(336,255),BackgroundTransparency=1},walletPanel)
  local walletUpgrade=text(walletPanel,"",UDim2.fromOffset(12,328),UDim2.fromOffset(336,36),13,P.muted)
  local walletDrag: number?=nil
- local moneyGhost=text(root,"",UDim2.new(),UDim2.fromOffset(78,38),15,P.gold);moneyGhost.Visible=false;moneyGhost.ZIndex=90;moneyGhost.BackgroundColor3=P.panel;moneyGhost.BackgroundTransparency=0.12
+ local walletWidget: any
+ local moneyGhost=make("Frame",{Name="WalletNoteDrag",BackgroundTransparency=1,Visible=false,ZIndex=90},root)
  Input.InputChanged:Connect(function(input: InputObject)
   if walletDrag and (input.UserInputType==Enum.UserInputType.MouseMovement or input.UserInputType==Enum.UserInputType.Touch) then
-   local point=pointer(input);moneyGhost.Position=UDim2.fromOffset(point.X-39,point.Y-19)
+   local point=pointer(input);moneyGhost.Position=UDim2.fromOffset(point.X-walletWidget.cellSize/2,point.Y-walletWidget.cellSize/2)
   end
  end)
- local walletWidget=Widget.new(walletBody,"WalletCells",function(item: any,input: InputObject)
+ walletWidget=Widget.new(walletBody,"WalletCells",function(item: any,input: InputObject)
   if item.walletCount<=0 then return end
-  walletDrag=item.denomination;moneyGhost.Text=item.denomination.." E";moneyGhost.Visible=true
-  local point=pointer(input);moneyGhost.Position=UDim2.fromOffset(point.X-39,point.Y-19)
+  walletDrag=item.denomination;clear(moneyGhost)
+  Widget.draw(moneyGhost,item,Grid.cells(item.kind,0),1,1,walletWidget.cellSize,false,function() end)
+  moneyGhost.Size=UDim2.fromOffset(walletWidget.cellSize,walletWidget.cellSize);moneyGhost.Visible=true
+  local point=pointer(input);moneyGhost.Position=UDim2.fromOffset(point.X-walletWidget.cellSize/2,point.Y-walletWidget.cellSize/2)
  end)
  walletWidget.frame.Size=UDim2.fromScale(1,1)
  local walletPhantom=make("Frame",{Name="WalletPhantom",BackgroundColor3=P.teal,BackgroundTransparency=0.55,BorderSizePixel=0,Visible=false,Active=false,ZIndex=20},walletBody)
@@ -218,9 +235,11 @@ function Desk.new(send: (any)->())
   local tier=s.walletTier or 0;local dims=Wallet.Sizes[tier+1];local cols,rows=dims[1],dims[2]
   local items={}
   for index,stack in ipairs(s.walletStacks or {}) do
+   if stack.count>0 then
    local slot=(s.walletSlots or {})[tostring(stack.denomination)] or index
    table.insert(items,{id="wallet-"..stack.denomination,kind="cash"..stack.denomination,denomination=stack.denomination,walletCount=stack.count,
     gridX=(slot-1)%cols,gridY=math.floor((slot-1)/cols),rotation=0,qualityTag="standard"})
+   end
   end
   walletWidget.render(items,cols,rows,Grid,Vector2.new(336,255))
   walletUpgrade.Text=Wallet.Rarities[tier+1]:upper().." WALLET / "..cols.." × "..rows
@@ -249,10 +268,28 @@ function Desk.new(send: (any)->())
  end)
  local machinePanel=panel(root,"MachineMenu");machinePanel.Size=UDim2.fromOffset(570,430);machinePanel.Position=UDim2.new(0.5,-285,0.5,-215);machinePanel.Visible=false;machinePanel.ZIndex=65
  local machineTitle=text(machinePanel,"MACHINE",UDim2.fromOffset(14,10),UDim2.fromOffset(475,26),17,P.gold)
- button(machinePanel,"X",UDim2.fromOffset(525,8),UDim2.fromOffset(32,30),function() machinePanel.Visible=false end)
+ machineTitle.Name="MachineHandle"
+ moveMenu(machinePanel,machineTitle)
+ local machineClose=button(machinePanel,"X",UDim2.fromOffset(525,8),UDim2.fromOffset(32,30),function() machinePanel.Visible=false end);machineClose.Name="MachineClose"
  local machineProgress=text(machinePanel,"",UDim2.fromOffset(14,40),UDim2.fromOffset(540,24),13,P.muted)
  local machineWidgets: any={};local machineDrag: any=nil;local activeMachine: string?=nil;local lastMachineClick: any=nil
  local machineGhost=text(root,"",UDim2.new(),UDim2.fromOffset(92,34),14,P.gold);machineGhost.Visible=false;machineGhost.ZIndex=90;machineGhost.BackgroundColor3=P.panel;machineGhost.BackgroundTransparency=0.1
+ local machinePhantom=make("Frame",{Name="MachinePhantom",BackgroundColor3=P.teal,BackgroundTransparency=0.48,BorderSizePixel=0,Visible=false,Active=false,ZIndex=30},machinePanel)
+ local function machineCell(slot: string,point: Vector2): (number?,number?,any?)
+  local widget=machineWidgets[slot];local holder=widget.frame.Parent
+  local localPoint=Vector2.new(point.X-holder.AbsolutePosition.X,point.Y-holder.AbsolutePosition.Y)
+  if not widget.frame.Visible or not widget.contains(localPoint) then return nil,nil,nil end
+  local origin=widget.origin()
+  return math.floor((localPoint.X-origin.X)/widget.cellSize),math.floor((localPoint.Y-origin.Y)/widget.cellSize),widget
+ end
+ local function machineAccept(machine: any,item: any,slot: string,x: number,y: number): boolean
+  local def=Items.Definitions[machine.kind];local m=machine.machine or {input={},output={}}
+  if slot=="press" then return def.machine=="printer" and item.kind=="mintPress" and m.press==nil end
+  if slot~="input" or not (if def.machine=="printer" then Items.Definitions[item.kind].paperQuality else item.kind=="dirty100") then return false end
+  if x<0 or y<0 or x>=def.inputColumns or y>=def.inputRows then return false end
+  for _,entry in ipairs(m.input) do if entry.machineX==x and entry.machineY==y then return false end end
+  return true
+ end
  local function machineSection(slot: string,x: number,y: number,w: number,h: number)
   text(machinePanel,slot:upper(),UDim2.fromOffset(x,y-22),UDim2.fromOffset(w,20),12,P.muted)
   local holder=make("Frame",{Name=slot.."Grid",Position=UDim2.fromOffset(x,y),Size=UDim2.fromOffset(w,h),BackgroundTransparency=1},machinePanel)
@@ -283,11 +320,32 @@ function Desk.new(send: (any)->())
  Input.InputChanged:Connect(function(input: InputObject)
   if machineDrag and (input.UserInputType==Enum.UserInputType.MouseMovement or input.UserInputType==Enum.UserInputType.Touch) then
    local point=pointer(input);machineGhost.Position=UDim2.fromOffset(point.X-46,point.Y-17)
+   machinePhantom.Visible=false
+   local x,y,widget=machineCell(machineDrag.slot,point)
+   if x and y and widget and machineDrag.slot~="press" then
+    local machine=locate(self.state.inventory,activeMachine)
+    local entry=machine and machine.machine and machine.machine[machineDrag.slot] or {}
+    local occupied=false
+    for index,other in ipairs(entry) do
+     local ox=if machineDrag.slot=="input" then other.machineX else 0
+     local oy=if machineDrag.slot=="input" then other.machineY else index-1
+     if ox==x and oy==y and other.id~=machineDrag.item.id then occupied=true end
+    end
+    machinePhantom.BackgroundColor3=if occupied then P.red else P.teal
+    machinePhantom.Position=UDim2.fromOffset(widget.frame.Parent.Position.X.Offset+widget.origin().X+x*widget.cellSize,widget.frame.Parent.Position.Y.Offset+widget.origin().Y+y*widget.cellSize)
+    machinePhantom.Size=UDim2.fromOffset(widget.cellSize,widget.cellSize);machinePhantom.Visible=true
+   end
   end
  end)
  Input.InputEnded:Connect(function(input: InputObject)
   if not machineDrag or (input.UserInputType~=Enum.UserInputType.MouseButton1 and input.UserInputType~=Enum.UserInputType.Touch) then return end
-  local d=machineDrag;machineDrag=nil;machineGhost.Visible=false
+  local d=machineDrag;machineDrag=nil;machineGhost.Visible=false;machinePhantom.Visible=false
+  if activeMachine then
+   local x,y=machineCell(d.slot,pointer(input))
+   if x and y and d.slot~="press" then
+    emitMove({action="MachineMove",machineId=activeMachine,id=d.item.id,slot=d.slot,x=x,y=y});return
+   end
+  end
   local point=Surface.project(surfaces.inventory.part,surfaces.inventory.canvas,pointer(input))
   local widget=widgets.inventory
   if not point or not widget.contains(point) or not activeMachine then return end
@@ -361,6 +419,26 @@ function Desk.new(send: (any)->())
   local p=widget.origin()
   return Snap.project(point.X,point.Y,p.X,p.Y,widget.cellSize,gx,gy)
  end
+ local function closedContainer(s: any,item: any,point: Vector2): any
+  local widget=widgets.inventory;local origin=widget.origin()
+  local col=math.floor((point.X-origin.X)/widget.cellSize);local row=math.floor((point.Y-origin.Y)/widget.cellSize)
+  local occupantId=Grid.occupied(s,item.id)[col..","..row]
+  local occupant=if occupantId then locate(s.inventory,occupantId) else nil
+  if not occupant then return nil end
+  local definition=Items.Definitions[item.kind];local containerDef=Items.Definitions[occupant.kind]
+  if containerDef.walletTier~=nil and definition.denomination and not definition.dirty then return {action="DepositMoney",id=item.id} end
+  if not containerDef.machine then return nil end
+  local m=occupant.machine or {input={},output={}}
+  if item.kind=="mintPress" and containerDef.machine=="printer" and not m.press then
+   return {action="MachineInsert",machineId=occupant.id,id=item.id,slot="press",x=0,y=0}
+  end
+  if (containerDef.machine=="printer" and definition.paperQuality) or (containerDef.machine=="laundry" and item.kind=="dirty100") then
+   for y=0,containerDef.inputRows-1 do for x=0,containerDef.inputColumns-1 do
+    if machineAccept(occupant,item,"input",x,y) then return {action="MachineInsert",machineId=occupant.id,id=item.id,slot="input",x=x,y=y} end
+   end end
+  end
+  return nil
+ end
  preview=function()
   if not drag or not drag.active then return end
   local s=self.state;local c=s.customer;local target: string?=nil
@@ -376,9 +454,46 @@ function Desk.new(send: (any)->())
   if surfaceName and projected and widgets[surfaceName].contains(projected) then target=surfaceName end
   local valid=false;local x,y=0,0
   local widget=if target then widgets[target] else nil
+  drag.container=nil;machinePhantom.Visible=false;walletPhantom.Visible=false
+  if drag.origin=="inventory" then
+   if walletPanel.Visible and inside(walletBody,drag.point) then
+    local localPoint=Vector2.new(drag.point.X-walletBody.AbsolutePosition.X,drag.point.Y-walletBody.AbsolutePosition.Y)
+    local accepts=Items.Definitions[drag.item.kind].denomination~=nil and not Items.Definitions[drag.item.kind].dirty and walletWidget.contains(localPoint)
+    if accepts then drag.container={action="DepositMoney",id=drag.item.id} end
+    drag.target="wallet";drag.valid=accepts
+    local wx,wy=positionOf(walletWidget,localPoint,0.5,0.5)
+    walletPhantom.Position=UDim2.fromOffset(walletWidget.origin().X+wx*walletWidget.cellSize,walletWidget.origin().Y+wy*walletWidget.cellSize)
+    walletPhantom.Size=UDim2.fromOffset(walletWidget.cellSize,walletWidget.cellSize)
+    walletPhantom.BackgroundColor3=if accepts then P.teal else P.red
+    walletPhantom.Visible=walletWidget.contains(localPoint)
+    ghost.Position=UDim2.fromOffset(drag.point.X-drag.grabX*drag.sourceSize,drag.point.Y-drag.grabY*drag.sourceHeight)
+    if phantom then phantom:Destroy();phantom=nil;phantomWidget=nil end
+    return
+   end
+   if machinePanel.Visible and activeMachine and inside(machinePanel,drag.point) then
+    local machine=locate(s.inventory,activeMachine)
+    for _,slot in ipairs({"press","input"}) do
+     local mx,my,mwidget=machineCell(slot,drag.point)
+     if mx and my and mwidget and machine then
+      local accepts=machineAccept(machine,drag.item,slot,mx,my)
+      if accepts then drag.container={action="MachineInsert",machineId=activeMachine,id=drag.item.id,slot=slot,x=mx,y=my} end
+      drag.target="machine";drag.valid=accepts
+      machinePhantom.Position=UDim2.fromOffset(mwidget.frame.Parent.Position.X.Offset+mwidget.origin().X+mx*mwidget.cellSize,mwidget.frame.Parent.Position.Y.Offset+mwidget.origin().Y+my*mwidget.cellSize)
+      machinePhantom.Size=UDim2.fromOffset(mwidget.cellSize,mwidget.cellSize);machinePhantom.BackgroundColor3=if accepts then P.teal else P.red;machinePhantom.Visible=true
+      ghost.Position=UDim2.fromOffset(drag.point.X-drag.grabX*drag.sourceSize,drag.point.Y-drag.grabY*drag.sourceHeight)
+      if phantom then phantom:Destroy();phantom=nil;phantomWidget=nil end
+      return
+     end
+    end
+    target=nil;widget=nil
+   end
+  end
   if widget and target then local point=canvasPoint(target,drag.point);if point then x,y=positionOf(widget,point,drag.grabX,drag.grabY) end end
   if drag.item.pending and target=="offers" and c and c.mode=="Seller" and c.state=="Interact" then valid=true
-  elseif drag.origin=="inventory" and target=="inventory" and not drag.item.pending then valid=Grid.check(s,drag.item.kind,x,y,drag.rotation,drag.item.id)
+  elseif drag.origin=="inventory" and target=="inventory" and not drag.item.pending then
+   local point=canvasPoint("inventory",drag.point)
+   if point then drag.container=closedContainer(s,drag.item,point) end
+   valid=drag.container~=nil or Grid.check(s,drag.item.kind,x,y,drag.rotation,drag.item.id)
   elseif drag.origin=="inventory" and target=="offers" and c and c.state=="Interact" then
    if c.mode=="Seller" then valid=Items.Definitions[drag.item.kind].denomination~=nil and #c.basket>0
    elseif Items.Definitions[drag.item.kind].tagCategory==c.requestTag then valid=Tray.check({inventory=c.basket,upgrade=0,legacyRows=0},drag.item.kind,x,y,drag.rotation,drag.item.id) end
@@ -549,6 +664,14 @@ for _,item in ipairs(c.basket) do staged[item.id]=true;table.insert(basket,item)
   notice(s.message or "")
  end
  Input.InputChanged:Connect(function(input: InputObject)
+  if menuDrag then
+   local d=menuDrag
+   if (d.input.UserInputType==Enum.UserInputType.Touch and input==d.input) or (d.input.UserInputType==Enum.UserInputType.MouseButton1 and input.UserInputType==Enum.UserInputType.MouseMovement) then
+    local point=pointer(input);local bounds=d.frame.AbsoluteSize;local size=root.AbsoluteSize
+    d.frame.Position=UDim2.fromOffset(math.clamp(d.position.X+point.X-d.start.X,0,math.max(0,size.X-bounds.X)),math.clamp(d.position.Y+point.Y-d.start.Y,0,math.max(0,size.Y-bounds.Y)))
+   end
+   return
+  end
   if receiptDrag then
    local d=receiptDrag
    if (d.input.UserInputType==Enum.UserInputType.Touch and input==d.input) or (d.input.UserInputType==Enum.UserInputType.MouseButton1 and input.UserInputType==Enum.UserInputType.MouseMovement) then
@@ -563,6 +686,11 @@ for _,item in ipairs(c.basket) do staged[item.id]=true;table.insert(basket,item)
   end
  end)
  Input.InputEnded:Connect(function(input: InputObject)
+  if menuDrag then
+   local d=menuDrag
+   if (d.input.UserInputType==Enum.UserInputType.Touch and input==d.input) or (d.input.UserInputType==Enum.UserInputType.MouseButton1 and input.UserInputType==Enum.UserInputType.MouseButton1) then menuDrag=nil end
+   return
+  end
   if receiptDrag then
    local d=receiptDrag
    if (d.input.UserInputType==Enum.UserInputType.Touch and input==d.input) or (d.input.UserInputType==Enum.UserInputType.MouseButton1 and input.UserInputType==Enum.UserInputType.MouseButton1) then receiptDrag=nil end
@@ -572,24 +700,13 @@ for _,item in ipairs(c.basket) do staged[item.id]=true;table.insert(basket,item)
   if not ((drag.input.UserInputType==Enum.UserInputType.Touch and input==drag.input) or
    (drag.input.UserInputType==Enum.UserInputType.MouseButton1 and input.UserInputType==Enum.UserInputType.MouseButton1)) then return end
   updateDrag(pointer(input));local d=drag;cancel()
-  if d.origin=="inventory" and Items.Definitions[d.item.kind].denomination and walletPanel.Visible then
-   local p,b=walletPanel.AbsolutePosition,walletPanel.AbsoluteSize
-   if d.point.X>=p.X and d.point.Y>=p.Y and d.point.X<p.X+b.X and d.point.Y<p.Y+b.Y then request("DepositMoney",{id=d.item.id});return end
-  end
   if not d.active then
    if d.origin=="inventory" and Items.Definitions[d.item.kind].walletTier~=nil then walletPanel.Visible=true;drawWallet(self.state) end
    return
   end
-  if d.origin=="inventory" and machinePanel.Visible and activeMachine then
-   local screenPoint=d.point
-   for _,slot in ipairs({"input","press"}) do
-    local widget=machineWidgets[slot];local holder=widget.frame.Parent
-    local localPoint=screenPoint-holder.AbsolutePosition
-    if widget.frame.Visible and widget.contains(localPoint) then
-     local origin=widget.origin();local x=math.floor((localPoint.X-origin.X)/widget.cellSize);local y=math.floor((localPoint.Y-origin.Y)/widget.cellSize)
-     emitMove({action="MachineInsert",machineId=activeMachine,id=d.item.id,slot=slot,x=x,y=y});return
-    end
-   end
+  if d.container and d.valid then
+   if d.container.action=="DepositMoney" then request("DepositMoney",{id=d.item.id}) else emitMove(d.container) end
+   return
   end
   if not d.valid then notice("Placement blocked.",P.red);return end
   if d.item.pending and d.target=="offers" then

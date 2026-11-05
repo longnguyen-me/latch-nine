@@ -74,6 +74,29 @@ return function(definitions: any, grid: any)
   if #m.input==0 or (definitions[machine.kind].machine=="printer" and not m.press) then m.nextAt=nil end
   return true,"Returned item to stock."
  end
+ function Machine.move(profile: any,machineId: any,itemId: any,slot: any,x: any,y: any): (boolean,string)
+  local machine=find(profile,machineId)
+  local def=machine and definitions[machine.kind]
+  if not def or not def.machine or (slot~="input" and slot~="output") then return false,"Machine slot missing." end
+  local m=state(machine)
+  local columns=if slot=="input" then def.inputColumns else 1
+  local rows=if slot=="input" then def.inputRows else def.outputCapacity
+  if type(x)~="number" or type(y)~="number" or x%1~=0 or y%1~=0 or x<0 or y<0 or x>=columns or y>=rows then return false,"Invalid machine cell." end
+  local source=m[slot];local item: any=nil;local sourceIndex: number?=nil
+  for index,entry in ipairs(source) do if entry.id==itemId then item=entry;sourceIndex=index;break end end
+  if not item then return false,"Machine item missing." end
+  if slot=="output" then
+   -- Outputs occupy the first #output cells; swapping keeps collection order and avoids holes.
+   local target=y+1
+   if target>#source then return false,"Output cell is empty." end
+   source[sourceIndex],source[target]=source[target],source[sourceIndex]
+  else
+   for _,entry in ipairs(source) do if entry~=item and entry.machineX==x and entry.machineY==y then return false,"Input cell occupied." end end
+   item.machineX=x;item.machineY=y
+  end
+  profile.gridRevision+=1
+  return true,"Machine items rearranged."
+ end
  function Machine.tick(profile: any,now: number,newId: ()->string,roll: (number,number)->number): boolean
   local changed=false
   for _,machine in ipairs(profile.inventory) do

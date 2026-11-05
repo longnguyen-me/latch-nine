@@ -96,17 +96,21 @@ function Scene.build(parent: Instance, origin: Vector3, name: string): Model
   local face=Instance.new("SurfaceGui");face.Name="EditOutline";face.Face=entry[2];face.CanvasSize=Vector2.new(320,100);face.LightInfluence=0;face.Parent=entry[1]
   local border=Instance.new("Frame");border.Name="Border";border.Size=UDim2.fromScale(1,1);border.BackgroundTransparency=1
   border.BorderSizePixel=5;border.BorderColor3=entry[3];border.Parent=face
+  local label=Instance.new("TextLabel");label.Name="ButtonTitle";label.Size=UDim2.fromScale(1,1);label.BackgroundTransparency=1
+  label.Text="OPEN / CLOSE";label.TextScaled=true;label.Font=Enum.Font.GothamBold;label.TextColor3=entry[3];label.Parent=face
  end
- local function control(name: string,y: number,z: number,h: number,color: Color3)
+ local function control(name: string,title: string,y: number,z: number,h: number,color: Color3)
   local base=board(name,-14,y,z,4.6,h);base.Parent=controls
   local face=Instance.new("SurfaceGui");face.Name="EditOutline";face.Face=Enum.NormalId.Back
   face.CanvasSize=Vector2.new(320,100);face.LightInfluence=0;face.Parent=base
   local border=Instance.new("Frame");border.Name="Border";border.Size=UDim2.fromScale(1,1)
   border.BackgroundTransparency=1;border.BorderSizePixel=5;border.BorderColor3=color;border.Parent=face
+  local label=Instance.new("TextLabel");label.Name="ButtonTitle";label.Size=UDim2.fromScale(1,1);label.BackgroundTransparency=1
+  label.Text=title;label.TextScaled=true;label.Font=Enum.Font.GothamBold;label.TextColor3=color;label.Parent=face
  end
- control("RegisterBox",4.9,7.4,2.8,C(241,194,116))
- control("NextCustomerButton",2.8,9.2,1.1,C(111,218,196))
- control("DismissCustomerButton",1.5,9.2,1.1,C(242,127,120))
+ control("RegisterBox","REGISTER",4.9,7.4,2.8,C(241,194,116))
+ control("NextCustomerButton","NEXT CUSTOMER",2.8,9.2,1.1,C(111,218,196))
+ control("DismissCustomerButton","DISMISS",1.5,9.2,1.1,C(242,127,120))
  local function marker(name: string,x: number,y: number,z: number)
   local value=p(name,x,y,z,0.2,0.2,0.2,C(113,209,182));value.Transparency=1
  end

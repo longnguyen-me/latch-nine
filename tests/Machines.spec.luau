@@ -9,12 +9,18 @@ end
 local p={inventory={item("printer","printer2",0,0),item("press","mintPress",4,0),item("paper1","paperhigh",5,0),item("paper2","paperlow",6,0),item("paper3","papermid",7,0),item("paper4","paperlow",8,0)},upgrade=0,legacyRows=0,gridRevision=0,cash=160,costs=0,tradeProfit=0,suspicion=0,suspicionAt=1000}
 assert(machines.insert(p,"printer","press","press",0,0,1000))
 for i=1,4 do assert(machines.insert(p,"printer","paper"..i,"input",(i-1)%2,math.floor((i-1)/2),1000)) end
+assert(not machines.insert(p,"printer","press","input",0,2,1000))
+assert(machines.move(p,"printer","paper1","input",1,2))
+assert(p.inventory[1].machine.input[1].machineX==1 and p.inventory[1].machine.input[1].machineY==2)
+assert(not machines.move(p,"printer","paper1","input",1,0))
+assert(not machines.move(p,"printer","paper1","input",9,0))
 assert(machines.validate(p.inventory[1]))
 local serial=0
 local function newId() serial+=1;return "new-"..serial end
 local function roll(a,b) return 100 end
 assert(machines.tick(p,1000+10000,newId,roll))
 assert(#p.inventory[1].machine.output==3 and #p.inventory[1].machine.input==1 and not p.inventory[1].machine.nextAt)
+assert(machines.move(p,"printer",p.inventory[1].machine.output[1].id,"output",0,2))
 assert(not machines.tick(p,1000+20000,newId,roll))
 assert(machines.extract(p,"printer","new-1","output",9,0))
 assert(machines.tick(p,1000+20000,newId,roll))

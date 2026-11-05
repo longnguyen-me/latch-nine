@@ -319,17 +319,21 @@ function Scene.build(parent: Instance, origin: Vector3, name: string): Model
   local face=Instance.new("SurfaceGui");face.Name="EditOutline";face.Face=entry[2];face.CanvasSize=Vector2.new(320,100);face.LightInfluence=0;face.Parent=entry[1]
   local border=Instance.new("Frame");border.Name="Border";border.Size=UDim2.fromScale(1,1);border.BackgroundTransparency=1
   border.BorderSizePixel=5;border.BorderColor3=entry[3];border.Parent=face
+  local label=Instance.new("TextLabel");label.Name="ButtonTitle";label.Size=UDim2.fromScale(1,1);label.BackgroundTransparency=1
+  label.Text="OPEN / CLOSE";label.TextScaled=true;label.Font=Enum.Font.GothamBold;label.TextColor3=entry[3];label.Parent=face
  end
- local function control(name: string,y: number,z: number,h: number,color: Color3)
+ local function control(name: string,title: string,y: number,z: number,h: number,color: Color3)
   local base=board(name,-14,y,z,4.6,h);base.Parent=controls
   local face=Instance.new("SurfaceGui");face.Name="EditOutline";face.Face=Enum.NormalId.Back
   face.CanvasSize=Vector2.new(320,100);face.LightInfluence=0;face.Parent=base
   local border=Instance.new("Frame");border.Name="Border";border.Size=UDim2.fromScale(1,1)
   border.BackgroundTransparency=1;border.BorderSizePixel=5;border.BorderColor3=color;border.Parent=face
+  local label=Instance.new("TextLabel");label.Name="ButtonTitle";label.Size=UDim2.fromScale(1,1);label.BackgroundTransparency=1
+  label.Text=title;label.TextScaled=true;label.Font=Enum.Font.GothamBold;label.TextColor3=color;label.Parent=face
  end
- control("RegisterBox",4.9,7.4,2.8,C(241,194,116))
- control("NextCustomerButton",2.8,9.2,1.1,C(111,218,196))
- control("DismissCustomerButton",1.5,9.2,1.1,C(242,127,120))
+ control("RegisterBox","REGISTER",4.9,7.4,2.8,C(241,194,116))
+ control("NextCustomerButton","NEXT CUSTOMER",2.8,9.2,1.1,C(111,218,196))
+ control("DismissCustomerButton","DISMISS",1.5,9.2,1.1,C(242,127,120))
  local function marker(name: string,x: number,y: number,z: number)
   local value=p(name,x,y,z,0.2,0.2,0.2,C(113,209,182));value.Transparency=1
  end
@@ -557,6 +561,29 @@ return function(definitions: any, grid: any)
   table.insert(profile.inventory,item);profile.gridRevision+=1
   if #m.input==0 or (definitions[machine.kind].machine=="printer" and not m.press) then m.nextAt=nil end
   return true,"Returned item to stock."
+ end
+ function Machine.move(profile: any,machineId: any,itemId: any,slot: any,x: any,y: any): (boolean,string)
+  local machine=find(profile,machineId)
+  local def=machine and definitions[machine.kind]
+  if not def or not def.machine or (slot~="input" and slot~="output") then return false,"Machine slot missing." end
+  local m=state(machine)
+  local columns=if slot=="input" then def.inputColumns else 1
+  local rows=if slot=="input" then def.inputRows else def.outputCapacity
+  if type(x)~="number" or type(y)~="number" or x%1~=0 or y%1~=0 or x<0 or y<0 or x>=columns or y>=rows then return false,"Invalid machine cell." end
+  local source=m[slot];local item: any=nil;local sourceIndex: number?=nil
+  for index,entry in ipairs(source) do if entry.id==itemId then item=entry;sourceIndex=index;break end end
+  if not item then return false,"Machine item missing." end
+  if slot=="output" then
+   -- Outputs occupy the first #output cells; swapping keeps collection order and avoids holes.
+   local target=y+1
+   if target>#source then return false,"Output cell is empty." end
+   source[sourceIndex],source[target]=source[target],source[sourceIndex]
+  else
+   for _,entry in ipairs(source) do if entry~=item and entry.machineX==x and entry.machineY==y then return false,"Input cell occupied." end end
+   item.machineX=x;item.machineY=y
+  end
+  profile.gridRevision+=1
+  return true,"Machine items rearranged."
  end
  function Machine.tick(profile: any,now: number,newId: ()->string,roll: (number,number)->number): boolean
   local changed=false
@@ -816,11 +843,12 @@ action.OnServerEvent:Connect(function(player: Player,request: any)
   local ok,message=Trade.rotateOffer(c,request.id,request.revision)
   push(player,message);return
  end
- if name=="MachineInsert" or name=="MachineExtract" then
+ if name=="MachineInsert" or name=="MachineExtract" or name=="MachineMove" then
   if not Rules.integer(request.moveId,1,1000000000) then push(player,"Invalid machine move.");return end
   Machine.tick(s.profile,os.time(),function() return Http:GenerateGUID(false) end,function(a: number,b: number) return rng:NextInteger(a,b) end)
   local ok,message
   if name=="MachineInsert" then ok,message=Machine.insert(s.profile,request.machineId,request.id,request.slot,request.x,request.y,os.time())
+  elseif name=="MachineMove" then ok,message=Machine.move(s.profile,request.machineId,request.id,request.slot,request.x,request.y)
   else ok,message=Machine.extract(s.profile,request.machineId,request.id,request.slot,request.x,request.y) end
   push(player,message,request.moveId,ok);return
  end
@@ -1026,6 +1054,8 @@ local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
 local Shared = game:GetService("ReplicatedStorage"):WaitForChild("Shared")
 local Config = require(Shared.Config)
+local Items = require(Shared.Items)
+local Grid = require(Shared.Grid)(Config, Items.Definitions)
 local Persistence = {}
 local memoryOnly = RunService:IsStudio() and not Config.PersistenceInStudio
 local store: any = nil
@@ -1055,6 +1085,13 @@ function Persistence.load(userId: number, rules: any): (any, string)
 	if memoryOnly then
 		local profile = rules.newProfile()
 		profile.cash = Config.StudioTestCash
+		for _,kind in ipairs({"printer1", "mintPress", "paperlow", "papermid", "paperhigh", "paperlow"}) do
+			local x,y,rotation=Grid.firstFit(profile,kind)
+			if x then
+				table.insert(profile.inventory,{id=HttpService:GenerateGUID(false),kind=kind,paid=0,condition=100,authentic=true,restricted=false,inspected=false,qualityTag="standard",gridX=x,gridY=y,rotation=rotation})
+				profile.gridRevision+=1
+			end
+		end
 		held[userId] = true; touched[userId] = os.time(); owners[userId] = profile
 		leases[userId] = HttpService:GenerateGUID(false)
 		return profile, "SESSION ONLY / Studio"
@@ -1786,7 +1823,7 @@ function Desk.new(send: (any)->())
  local dialogue=text(dialoguePanel,"",UDim2.fromOffset(10,8),UDim2.new(1,-20,1,-16),15,P.ink)
  local visitorName=text(namePlate,"SERVICE WINDOW",UDim2.fromOffset(10,6),UDim2.new(1,-20,1,-12),16,P.ink)
  local receipt=panel(root,"Receipt");receipt.Visible=false;receipt.ZIndex=20
- local receiptDrag: any=nil;local movedReceipt=false;local receiptCustomer: string?=nil
+ local receiptDrag: any=nil;local menuDrag: any=nil;local movedReceipt=false;local receiptCustomer: string?=nil
  local title=button(receipt,"TRADE RECEIPT",UDim2.fromOffset(0,0),UDim2.new(1,-44,0,42),function() end);title.Name="ReceiptHandle";title.BackgroundColor3=P.panel;title.TextColor3=P.ink;title.TextXAlignment=Enum.TextXAlignment.Left;title.TextSize=15
  make("UIPadding",{PaddingLeft=UDim.new(0,14)},title)
  local close=button(receipt,"X",UDim2.new(1,-42,0,5),UDim2.fromOffset(34,32),function() receipt.Visible=false;receiptDrag=nil end);close.BackgroundColor3=P.raised;close.TextColor3=P.ink;make("UICorner",{CornerRadius=UDim.new(0,5)},close)
@@ -1823,6 +1860,18 @@ function Desk.new(send: (any)->())
  local function covered(point: Vector2): boolean
   local p,b=receipt.AbsolutePosition,receipt.AbsoluteSize
   return receipt.Visible and point.X>=p.X and point.Y>=p.Y and point.X<p.X+b.X and point.Y<p.Y+b.Y
+ end
+ local function inside(frame: GuiObject,point: Vector2): boolean
+  local p,b=frame.AbsolutePosition,frame.AbsoluteSize
+  return frame.Visible and point.X>=p.X and point.Y>=p.Y and point.X<p.X+b.X and point.Y<p.Y+b.Y
+ end
+ local function moveMenu(frame: Frame,handle: GuiObject)
+  handle.Active=true
+  handle.InputBegan:Connect(function(input: InputObject)
+   if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
+    menuDrag={frame=frame,input=input,start=pointer(input),position=frame.AbsolutePosition}
+   end
+  end)
  end
  local function hover(origin: string,item: any,x: number,y: number)
   tooltip.Visible=false
@@ -1901,21 +1950,26 @@ function Desk.new(send: (any)->())
  local suspicionTrack=make("Frame",{Name="SuspicionTrack",Position=UDim2.new(1,-235,0,40),Size=UDim2.fromOffset(210,8),BackgroundColor3=P.raised,BorderSizePixel=0},root)
  local suspicionFill=make("Frame",{Name="SuspicionFill",Size=UDim2.fromScale(0,1),BackgroundColor3=P.teal,BorderSizePixel=0},suspicionTrack)
  local walletPanel=panel(root,"WalletGrid");walletPanel.Position=UDim2.new(0.5,-180,0.5,-190);walletPanel.Size=UDim2.fromOffset(360,380);walletPanel.Visible=false;walletPanel.ZIndex=70
- text(walletPanel,"WALLET / EDDIES",UDim2.fromOffset(12,12),UDim2.fromOffset(265,24),17,P.gold)
+ local walletTitle=text(walletPanel,"WALLET / EDDIES",UDim2.fromOffset(12,12),UDim2.fromOffset(265,30),17,P.gold)
+ walletTitle.Name="WalletHandle"
+ moveMenu(walletPanel,walletTitle)
  button(walletPanel,"X",UDim2.fromOffset(318,8),UDim2.fromOffset(32,30),function() walletPanel.Visible=false end)
  local walletBody=make("Frame",{Name="Slots",Position=UDim2.fromOffset(12,55),Size=UDim2.fromOffset(336,255),BackgroundTransparency=1},walletPanel)
  local walletUpgrade=text(walletPanel,"",UDim2.fromOffset(12,328),UDim2.fromOffset(336,36),13,P.muted)
  local walletDrag: number?=nil
- local moneyGhost=text(root,"",UDim2.new(),UDim2.fromOffset(78,38),15,P.gold);moneyGhost.Visible=false;moneyGhost.ZIndex=90;moneyGhost.BackgroundColor3=P.panel;moneyGhost.BackgroundTransparency=0.12
+ local walletWidget: any
+ local moneyGhost=make("Frame",{Name="WalletNoteDrag",BackgroundTransparency=1,Visible=false,ZIndex=90},root)
  Input.InputChanged:Connect(function(input: InputObject)
   if walletDrag and (input.UserInputType==Enum.UserInputType.MouseMovement or input.UserInputType==Enum.UserInputType.Touch) then
-   local point=pointer(input);moneyGhost.Position=UDim2.fromOffset(point.X-39,point.Y-19)
+   local point=pointer(input);moneyGhost.Position=UDim2.fromOffset(point.X-walletWidget.cellSize/2,point.Y-walletWidget.cellSize/2)
   end
  end)
- local walletWidget=Widget.new(walletBody,"WalletCells",function(item: any,input: InputObject)
+ walletWidget=Widget.new(walletBody,"WalletCells",function(item: any,input: InputObject)
   if item.walletCount<=0 then return end
-  walletDrag=item.denomination;moneyGhost.Text=item.denomination.." E";moneyGhost.Visible=true
-  local point=pointer(input);moneyGhost.Position=UDim2.fromOffset(point.X-39,point.Y-19)
+  walletDrag=item.denomination;clear(moneyGhost)
+  Widget.draw(moneyGhost,item,Grid.cells(item.kind,0),1,1,walletWidget.cellSize,false,function() end)
+  moneyGhost.Size=UDim2.fromOffset(walletWidget.cellSize,walletWidget.cellSize);moneyGhost.Visible=true
+  local point=pointer(input);moneyGhost.Position=UDim2.fromOffset(point.X-walletWidget.cellSize/2,point.Y-walletWidget.cellSize/2)
  end)
  walletWidget.frame.Size=UDim2.fromScale(1,1)
  local walletPhantom=make("Frame",{Name="WalletPhantom",BackgroundColor3=P.teal,BackgroundTransparency=0.55,BorderSizePixel=0,Visible=false,Active=false,ZIndex=20},walletBody)
@@ -1932,9 +1986,11 @@ function Desk.new(send: (any)->())
   local tier=s.walletTier or 0;local dims=Wallet.Sizes[tier+1];local cols,rows=dims[1],dims[2]
   local items={}
   for index,stack in ipairs(s.walletStacks or {}) do
+   if stack.count>0 then
    local slot=(s.walletSlots or {})[tostring(stack.denomination)] or index
    table.insert(items,{id="wallet-"..stack.denomination,kind="cash"..stack.denomination,denomination=stack.denomination,walletCount=stack.count,
     gridX=(slot-1)%cols,gridY=math.floor((slot-1)/cols),rotation=0,qualityTag="standard"})
+   end
   end
   walletWidget.render(items,cols,rows,Grid,Vector2.new(336,255))
   walletUpgrade.Text=Wallet.Rarities[tier+1]:upper().." WALLET / "..cols.." × "..rows
@@ -1963,10 +2019,28 @@ function Desk.new(send: (any)->())
  end)
  local machinePanel=panel(root,"MachineMenu");machinePanel.Size=UDim2.fromOffset(570,430);machinePanel.Position=UDim2.new(0.5,-285,0.5,-215);machinePanel.Visible=false;machinePanel.ZIndex=65
  local machineTitle=text(machinePanel,"MACHINE",UDim2.fromOffset(14,10),UDim2.fromOffset(475,26),17,P.gold)
- button(machinePanel,"X",UDim2.fromOffset(525,8),UDim2.fromOffset(32,30),function() machinePanel.Visible=false end)
+ machineTitle.Name="MachineHandle"
+ moveMenu(machinePanel,machineTitle)
+ local machineClose=button(machinePanel,"X",UDim2.fromOffset(525,8),UDim2.fromOffset(32,30),function() machinePanel.Visible=false end);machineClose.Name="MachineClose"
  local machineProgress=text(machinePanel,"",UDim2.fromOffset(14,40),UDim2.fromOffset(540,24),13,P.muted)
  local machineWidgets: any={};local machineDrag: any=nil;local activeMachine: string?=nil;local lastMachineClick: any=nil
  local machineGhost=text(root,"",UDim2.new(),UDim2.fromOffset(92,34),14,P.gold);machineGhost.Visible=false;machineGhost.ZIndex=90;machineGhost.BackgroundColor3=P.panel;machineGhost.BackgroundTransparency=0.1
+ local machinePhantom=make("Frame",{Name="MachinePhantom",BackgroundColor3=P.teal,BackgroundTransparency=0.48,BorderSizePixel=0,Visible=false,Active=false,ZIndex=30},machinePanel)
+ local function machineCell(slot: string,point: Vector2): (number?,number?,any?)
+  local widget=machineWidgets[slot];local holder=widget.frame.Parent
+  local localPoint=Vector2.new(point.X-holder.AbsolutePosition.X,point.Y-holder.AbsolutePosition.Y)
+  if not widget.frame.Visible or not widget.contains(localPoint) then return nil,nil,nil end
+  local origin=widget.origin()
+  return math.floor((localPoint.X-origin.X)/widget.cellSize),math.floor((localPoint.Y-origin.Y)/widget.cellSize),widget
+ end
+ local function machineAccept(machine: any,item: any,slot: string,x: number,y: number): boolean
+  local def=Items.Definitions[machine.kind];local m=machine.machine or {input={},output={}}
+  if slot=="press" then return def.machine=="printer" and item.kind=="mintPress" and m.press==nil end
+  if slot~="input" or not (if def.machine=="printer" then Items.Definitions[item.kind].paperQuality else item.kind=="dirty100") then return false end
+  if x<0 or y<0 or x>=def.inputColumns or y>=def.inputRows then return false end
+  for _,entry in ipairs(m.input) do if entry.machineX==x and entry.machineY==y then return false end end
+  return true
+ end
  local function machineSection(slot: string,x: number,y: number,w: number,h: number)
   text(machinePanel,slot:upper(),UDim2.fromOffset(x,y-22),UDim2.fromOffset(w,20),12,P.muted)
   local holder=make("Frame",{Name=slot.."Grid",Position=UDim2.fromOffset(x,y),Size=UDim2.fromOffset(w,h),BackgroundTransparency=1},machinePanel)
@@ -1997,11 +2071,32 @@ function Desk.new(send: (any)->())
  Input.InputChanged:Connect(function(input: InputObject)
   if machineDrag and (input.UserInputType==Enum.UserInputType.MouseMovement or input.UserInputType==Enum.UserInputType.Touch) then
    local point=pointer(input);machineGhost.Position=UDim2.fromOffset(point.X-46,point.Y-17)
+   machinePhantom.Visible=false
+   local x,y,widget=machineCell(machineDrag.slot,point)
+   if x and y and widget and machineDrag.slot~="press" then
+    local machine=locate(self.state.inventory,activeMachine)
+    local entry=machine and machine.machine and machine.machine[machineDrag.slot] or {}
+    local occupied=false
+    for index,other in ipairs(entry) do
+     local ox=if machineDrag.slot=="input" then other.machineX else 0
+     local oy=if machineDrag.slot=="input" then other.machineY else index-1
+     if ox==x and oy==y and other.id~=machineDrag.item.id then occupied=true end
+    end
+    machinePhantom.BackgroundColor3=if occupied then P.red else P.teal
+    machinePhantom.Position=UDim2.fromOffset(widget.frame.Parent.Position.X.Offset+widget.origin().X+x*widget.cellSize,widget.frame.Parent.Position.Y.Offset+widget.origin().Y+y*widget.cellSize)
+    machinePhantom.Size=UDim2.fromOffset(widget.cellSize,widget.cellSize);machinePhantom.Visible=true
+   end
   end
  end)
  Input.InputEnded:Connect(function(input: InputObject)
   if not machineDrag or (input.UserInputType~=Enum.UserInputType.MouseButton1 and input.UserInputType~=Enum.UserInputType.Touch) then return end
-  local d=machineDrag;machineDrag=nil;machineGhost.Visible=false
+  local d=machineDrag;machineDrag=nil;machineGhost.Visible=false;machinePhantom.Visible=false
+  if activeMachine then
+   local x,y=machineCell(d.slot,pointer(input))
+   if x and y and d.slot~="press" then
+    emitMove({action="MachineMove",machineId=activeMachine,id=d.item.id,slot=d.slot,x=x,y=y});return
+   end
+  end
   local point=Surface.project(surfaces.inventory.part,surfaces.inventory.canvas,pointer(input))
   local widget=widgets.inventory
   if not point or not widget.contains(point) or not activeMachine then return end
@@ -2075,6 +2170,26 @@ function Desk.new(send: (any)->())
   local p=widget.origin()
   return Snap.project(point.X,point.Y,p.X,p.Y,widget.cellSize,gx,gy)
  end
+ local function closedContainer(s: any,item: any,point: Vector2): any
+  local widget=widgets.inventory;local origin=widget.origin()
+  local col=math.floor((point.X-origin.X)/widget.cellSize);local row=math.floor((point.Y-origin.Y)/widget.cellSize)
+  local occupantId=Grid.occupied(s,item.id)[col..","..row]
+  local occupant=if occupantId then locate(s.inventory,occupantId) else nil
+  if not occupant then return nil end
+  local definition=Items.Definitions[item.kind];local containerDef=Items.Definitions[occupant.kind]
+  if containerDef.walletTier~=nil and definition.denomination and not definition.dirty then return {action="DepositMoney",id=item.id} end
+  if not containerDef.machine then return nil end
+  local m=occupant.machine or {input={},output={}}
+  if item.kind=="mintPress" and containerDef.machine=="printer" and not m.press then
+   return {action="MachineInsert",machineId=occupant.id,id=item.id,slot="press",x=0,y=0}
+  end
+  if (containerDef.machine=="printer" and definition.paperQuality) or (containerDef.machine=="laundry" and item.kind=="dirty100") then
+   for y=0,containerDef.inputRows-1 do for x=0,containerDef.inputColumns-1 do
+    if machineAccept(occupant,item,"input",x,y) then return {action="MachineInsert",machineId=occupant.id,id=item.id,slot="input",x=x,y=y} end
+   end end
+  end
+  return nil
+ end
  preview=function()
   if not drag or not drag.active then return end
   local s=self.state;local c=s.customer;local target: string?=nil
@@ -2090,9 +2205,46 @@ function Desk.new(send: (any)->())
   if surfaceName and projected and widgets[surfaceName].contains(projected) then target=surfaceName end
   local valid=false;local x,y=0,0
   local widget=if target then widgets[target] else nil
+  drag.container=nil;machinePhantom.Visible=false;walletPhantom.Visible=false
+  if drag.origin=="inventory" then
+   if walletPanel.Visible and inside(walletBody,drag.point) then
+    local localPoint=Vector2.new(drag.point.X-walletBody.AbsolutePosition.X,drag.point.Y-walletBody.AbsolutePosition.Y)
+    local accepts=Items.Definitions[drag.item.kind].denomination~=nil and not Items.Definitions[drag.item.kind].dirty and walletWidget.contains(localPoint)
+    if accepts then drag.container={action="DepositMoney",id=drag.item.id} end
+    drag.target="wallet";drag.valid=accepts
+    local wx,wy=positionOf(walletWidget,localPoint,0.5,0.5)
+    walletPhantom.Position=UDim2.fromOffset(walletWidget.origin().X+wx*walletWidget.cellSize,walletWidget.origin().Y+wy*walletWidget.cellSize)
+    walletPhantom.Size=UDim2.fromOffset(walletWidget.cellSize,walletWidget.cellSize)
+    walletPhantom.BackgroundColor3=if accepts then P.teal else P.red
+    walletPhantom.Visible=walletWidget.contains(localPoint)
+    ghost.Position=UDim2.fromOffset(drag.point.X-drag.grabX*drag.sourceSize,drag.point.Y-drag.grabY*drag.sourceHeight)
+    if phantom then phantom:Destroy();phantom=nil;phantomWidget=nil end
+    return
+   end
+   if machinePanel.Visible and activeMachine and inside(machinePanel,drag.point) then
+    local machine=locate(s.inventory,activeMachine)
+    for _,slot in ipairs({"press","input"}) do
+     local mx,my,mwidget=machineCell(slot,drag.point)
+     if mx and my and mwidget and machine then
+      local accepts=machineAccept(machine,drag.item,slot,mx,my)
+      if accepts then drag.container={action="MachineInsert",machineId=activeMachine,id=drag.item.id,slot=slot,x=mx,y=my} end
+      drag.target="machine";drag.valid=accepts
+      machinePhantom.Position=UDim2.fromOffset(mwidget.frame.Parent.Position.X.Offset+mwidget.origin().X+mx*mwidget.cellSize,mwidget.frame.Parent.Position.Y.Offset+mwidget.origin().Y+my*mwidget.cellSize)
+      machinePhantom.Size=UDim2.fromOffset(mwidget.cellSize,mwidget.cellSize);machinePhantom.BackgroundColor3=if accepts then P.teal else P.red;machinePhantom.Visible=true
+      ghost.Position=UDim2.fromOffset(drag.point.X-drag.grabX*drag.sourceSize,drag.point.Y-drag.grabY*drag.sourceHeight)
+      if phantom then phantom:Destroy();phantom=nil;phantomWidget=nil end
+      return
+     end
+    end
+    target=nil;widget=nil
+   end
+  end
   if widget and target then local point=canvasPoint(target,drag.point);if point then x,y=positionOf(widget,point,drag.grabX,drag.grabY) end end
   if drag.item.pending and target=="offers" and c and c.mode=="Seller" and c.state=="Interact" then valid=true
-  elseif drag.origin=="inventory" and target=="inventory" and not drag.item.pending then valid=Grid.check(s,drag.item.kind,x,y,drag.rotation,drag.item.id)
+  elseif drag.origin=="inventory" and target=="inventory" and not drag.item.pending then
+   local point=canvasPoint("inventory",drag.point)
+   if point then drag.container=closedContainer(s,drag.item,point) end
+   valid=drag.container~=nil or Grid.check(s,drag.item.kind,x,y,drag.rotation,drag.item.id)
   elseif drag.origin=="inventory" and target=="offers" and c and c.state=="Interact" then
    if c.mode=="Seller" then valid=Items.Definitions[drag.item.kind].denomination~=nil and #c.basket>0
    elseif Items.Definitions[drag.item.kind].tagCategory==c.requestTag then valid=Tray.check({inventory=c.basket,upgrade=0,legacyRows=0},drag.item.kind,x,y,drag.rotation,drag.item.id) end
@@ -2263,6 +2415,14 @@ for _,item in ipairs(c.basket) do staged[item.id]=true;table.insert(basket,item)
   notice(s.message or "")
  end
  Input.InputChanged:Connect(function(input: InputObject)
+  if menuDrag then
+   local d=menuDrag
+   if (d.input.UserInputType==Enum.UserInputType.Touch and input==d.input) or (d.input.UserInputType==Enum.UserInputType.MouseButton1 and input.UserInputType==Enum.UserInputType.MouseMovement) then
+    local point=pointer(input);local bounds=d.frame.AbsoluteSize;local size=root.AbsoluteSize
+    d.frame.Position=UDim2.fromOffset(math.clamp(d.position.X+point.X-d.start.X,0,math.max(0,size.X-bounds.X)),math.clamp(d.position.Y+point.Y-d.start.Y,0,math.max(0,size.Y-bounds.Y)))
+   end
+   return
+  end
   if receiptDrag then
    local d=receiptDrag
    if (d.input.UserInputType==Enum.UserInputType.Touch and input==d.input) or (d.input.UserInputType==Enum.UserInputType.MouseButton1 and input.UserInputType==Enum.UserInputType.MouseMovement) then
@@ -2277,6 +2437,11 @@ for _,item in ipairs(c.basket) do staged[item.id]=true;table.insert(basket,item)
   end
  end)
  Input.InputEnded:Connect(function(input: InputObject)
+  if menuDrag then
+   local d=menuDrag
+   if (d.input.UserInputType==Enum.UserInputType.Touch and input==d.input) or (d.input.UserInputType==Enum.UserInputType.MouseButton1 and input.UserInputType==Enum.UserInputType.MouseButton1) then menuDrag=nil end
+   return
+  end
   if receiptDrag then
    local d=receiptDrag
    if (d.input.UserInputType==Enum.UserInputType.Touch and input==d.input) or (d.input.UserInputType==Enum.UserInputType.MouseButton1 and input.UserInputType==Enum.UserInputType.MouseButton1) then receiptDrag=nil end
@@ -2286,24 +2451,13 @@ for _,item in ipairs(c.basket) do staged[item.id]=true;table.insert(basket,item)
   if not ((drag.input.UserInputType==Enum.UserInputType.Touch and input==drag.input) or
    (drag.input.UserInputType==Enum.UserInputType.MouseButton1 and input.UserInputType==Enum.UserInputType.MouseButton1)) then return end
   updateDrag(pointer(input));local d=drag;cancel()
-  if d.origin=="inventory" and Items.Definitions[d.item.kind].denomination and walletPanel.Visible then
-   local p,b=walletPanel.AbsolutePosition,walletPanel.AbsoluteSize
-   if d.point.X>=p.X and d.point.Y>=p.Y and d.point.X<p.X+b.X and d.point.Y<p.Y+b.Y then request("DepositMoney",{id=d.item.id});return end
-  end
   if not d.active then
    if d.origin=="inventory" and Items.Definitions[d.item.kind].walletTier~=nil then walletPanel.Visible=true;drawWallet(self.state) end
    return
   end
-  if d.origin=="inventory" and machinePanel.Visible and activeMachine then
-   local screenPoint=d.point
-   for _,slot in ipairs({"input","press"}) do
-    local widget=machineWidgets[slot];local holder=widget.frame.Parent
-    local localPoint=screenPoint-holder.AbsolutePosition
-    if widget.frame.Visible and widget.contains(localPoint) then
-     local origin=widget.origin();local x=math.floor((localPoint.X-origin.X)/widget.cellSize);local y=math.floor((localPoint.Y-origin.Y)/widget.cellSize)
-     emitMove({action="MachineInsert",machineId=activeMachine,id=d.item.id,slot=slot,x=x,y=y});return
-    end
-   end
+  if d.container and d.valid then
+   if d.container.action=="DepositMoney" then request("DepositMoney",{id=d.item.id}) else emitMove(d.container) end
+   return
   end
   if not d.valid then notice("Placement blocked.",P.red);return end
   if d.item.pending and d.target=="offers" then
@@ -3999,9 +4153,35 @@ return Surface
               </UDim2>
             </Properties>
           </Item>
+          <Item class="TextLabel" referent="76">
+            <Properties>
+              <string name="Name">ButtonTitle</string>
+              <float name="BackgroundTransparency">1</float>
+              <Font name="FontFace">
+                <Family>
+                  <url>rbxasset://fonts/families/GothamSSm.json</url>
+                </Family>
+                <Weight>700</Weight>
+                <Style>Normal</Style>
+              </Font>
+              <UDim2 name="Size">
+                <XS>1</XS>
+                <XO>0</XO>
+                <YS>1</YS>
+                <YO>0</YO>
+              </UDim2>
+              <string name="Text">OPEN / CLOSE</string>
+              <Color3 name="TextColor3">
+                <R>0.43529412</R>
+                <G>0.85490197</G>
+                <B>0.76862746</B>
+              </Color3>
+              <bool name="TextScaled">true</bool>
+            </Properties>
+          </Item>
         </Item>
       </Item>
-      <Item class="Part" referent="76">
+      <Item class="Part" referent="77">
         <Properties>
           <string name="Name">RegisterBox</string>
           <bool name="Anchored">true</bool>
@@ -4033,7 +4213,7 @@ return Surface
           </Vector3>
           <token name="TopSurface">0</token>
         </Properties>
-        <Item class="SurfaceGui" referent="77">
+        <Item class="SurfaceGui" referent="78">
           <Properties>
             <string name="Name">EditOutline</string>
             <Vector2 name="CanvasSize">
@@ -4043,7 +4223,7 @@ return Surface
             <token name="Face">2</token>
             <float name="LightInfluence">0</float>
           </Properties>
-          <Item class="Frame" referent="78">
+          <Item class="Frame" referent="79">
             <Properties>
               <string name="Name">Border</string>
               <float name="BackgroundTransparency">1</float>
@@ -4061,9 +4241,35 @@ return Surface
               </UDim2>
             </Properties>
           </Item>
+          <Item class="TextLabel" referent="80">
+            <Properties>
+              <string name="Name">ButtonTitle</string>
+              <float name="BackgroundTransparency">1</float>
+              <Font name="FontFace">
+                <Family>
+                  <url>rbxasset://fonts/families/GothamSSm.json</url>
+                </Family>
+                <Weight>700</Weight>
+                <Style>Normal</Style>
+              </Font>
+              <UDim2 name="Size">
+                <XS>1</XS>
+                <XO>0</XO>
+                <YS>1</YS>
+                <YO>0</YO>
+              </UDim2>
+              <string name="Text">REGISTER</string>
+              <Color3 name="TextColor3">
+                <R>0.94509804</R>
+                <G>0.7607843</G>
+                <B>0.45490196</B>
+              </Color3>
+              <bool name="TextScaled">true</bool>
+            </Properties>
+          </Item>
         </Item>
       </Item>
-      <Item class="Part" referent="79">
+      <Item class="Part" referent="81">
         <Properties>
           <string name="Name">NextCustomerButton</string>
           <bool name="Anchored">true</bool>
@@ -4095,7 +4301,7 @@ return Surface
           </Vector3>
           <token name="TopSurface">0</token>
         </Properties>
-        <Item class="SurfaceGui" referent="80">
+        <Item class="SurfaceGui" referent="82">
           <Properties>
             <string name="Name">EditOutline</string>
             <Vector2 name="CanvasSize">
@@ -4105,7 +4311,7 @@ return Surface
             <token name="Face">2</token>
             <float name="LightInfluence">0</float>
           </Properties>
-          <Item class="Frame" referent="81">
+          <Item class="Frame" referent="83">
             <Properties>
               <string name="Name">Border</string>
               <float name="BackgroundTransparency">1</float>
@@ -4123,9 +4329,35 @@ return Surface
               </UDim2>
             </Properties>
           </Item>
+          <Item class="TextLabel" referent="84">
+            <Properties>
+              <string name="Name">ButtonTitle</string>
+              <float name="BackgroundTransparency">1</float>
+              <Font name="FontFace">
+                <Family>
+                  <url>rbxasset://fonts/families/GothamSSm.json</url>
+                </Family>
+                <Weight>700</Weight>
+                <Style>Normal</Style>
+              </Font>
+              <UDim2 name="Size">
+                <XS>1</XS>
+                <XO>0</XO>
+                <YS>1</YS>
+                <YO>0</YO>
+              </UDim2>
+              <string name="Text">NEXT CUSTOMER</string>
+              <Color3 name="TextColor3">
+                <R>0.43529412</R>
+                <G>0.85490197</G>
+                <B>0.76862746</B>
+              </Color3>
+              <bool name="TextScaled">true</bool>
+            </Properties>
+          </Item>
         </Item>
       </Item>
-      <Item class="Part" referent="82">
+      <Item class="Part" referent="85">
         <Properties>
           <string name="Name">DismissCustomerButton</string>
           <bool name="Anchored">true</bool>
@@ -4157,7 +4389,7 @@ return Surface
           </Vector3>
           <token name="TopSurface">0</token>
         </Properties>
-        <Item class="SurfaceGui" referent="83">
+        <Item class="SurfaceGui" referent="86">
           <Properties>
             <string name="Name">EditOutline</string>
             <Vector2 name="CanvasSize">
@@ -4167,7 +4399,7 @@ return Surface
             <token name="Face">2</token>
             <float name="LightInfluence">0</float>
           </Properties>
-          <Item class="Frame" referent="84">
+          <Item class="Frame" referent="87">
             <Properties>
               <string name="Name">Border</string>
               <float name="BackgroundTransparency">1</float>
@@ -4185,9 +4417,35 @@ return Surface
               </UDim2>
             </Properties>
           </Item>
+          <Item class="TextLabel" referent="88">
+            <Properties>
+              <string name="Name">ButtonTitle</string>
+              <float name="BackgroundTransparency">1</float>
+              <Font name="FontFace">
+                <Family>
+                  <url>rbxasset://fonts/families/GothamSSm.json</url>
+                </Family>
+                <Weight>700</Weight>
+                <Style>Normal</Style>
+              </Font>
+              <UDim2 name="Size">
+                <XS>1</XS>
+                <XO>0</XO>
+                <YS>1</YS>
+                <YO>0</YO>
+              </UDim2>
+              <string name="Text">DISMISS</string>
+              <Color3 name="TextColor3">
+                <R>0.9490196</R>
+                <G>0.49803922</G>
+                <B>0.47058824</B>
+              </Color3>
+              <bool name="TextScaled">true</bool>
+            </Properties>
+          </Item>
         </Item>
       </Item>
-      <Item class="Part" referent="85">
+      <Item class="Part" referent="89">
         <Properties>
           <string name="Name">ViewTarget</string>
           <bool name="Anchored">true</bool>
@@ -4221,7 +4479,7 @@ return Surface
           <float name="Transparency">1</float>
         </Properties>
       </Item>
-      <Item class="Part" referent="86">
+      <Item class="Part" referent="90">
         <Properties>
           <string name="Name">CameraMount</string>
           <bool name="Anchored">true</bool>
@@ -4255,7 +4513,7 @@ return Surface
           <float name="Transparency">0.25</float>
         </Properties>
       </Item>
-      <Item class="Part" referent="87">
+      <Item class="Part" referent="91">
         <Properties>
           <string name="Name">VisitorStand</string>
           <bool name="Anchored">true</bool>
@@ -4289,7 +4547,7 @@ return Surface
           <float name="Transparency">1</float>
         </Properties>
       </Item>
-      <Item class="Part" referent="88">
+      <Item class="Part" referent="92">
         <Properties>
           <string name="Name">VisitorEntry</string>
           <bool name="Anchored">true</bool>
@@ -4323,7 +4581,7 @@ return Surface
           <float name="Transparency">1</float>
         </Properties>
       </Item>
-      <Item class="Part" referent="89">
+      <Item class="Part" referent="93">
         <Properties>
           <string name="Name">VisitorExit</string>
           <bool name="Anchored">true</bool>
@@ -4357,7 +4615,7 @@ return Surface
           <float name="Transparency">1</float>
         </Properties>
       </Item>
-      <Item class="Part" referent="90">
+      <Item class="Part" referent="94">
         <Properties>
           <string name="Name">Status terminal</string>
           <bool name="Anchored">true</bool>
@@ -4390,7 +4648,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="91">
+      <Item class="Part" referent="95">
         <Properties>
           <string name="Name">Status glow</string>
           <bool name="Anchored">true</bool>
@@ -4423,7 +4681,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="92">
+      <Item class="Part" referent="96">
         <Properties>
           <string name="Name">MoneyDisplay</string>
           <bool name="Anchored">true</bool>
@@ -4455,7 +4713,7 @@ return Surface
           </Vector3>
           <token name="TopSurface">0</token>
         </Properties>
-        <Item class="SurfaceGui" referent="93">
+        <Item class="SurfaceGui" referent="97">
           <Properties>
             <string name="Name">CashSurface</string>
             <Vector2 name="CanvasSize">
@@ -4465,7 +4723,7 @@ return Surface
             <token name="Face">2</token>
             <float name="LightInfluence">0</float>
           </Properties>
-          <Item class="TextLabel" referent="94">
+          <Item class="TextLabel" referent="98">
             <Properties>
               <string name="Name">Balance</string>
               <float name="BackgroundTransparency">1</float>
@@ -4493,7 +4751,7 @@ return Surface
           </Item>
         </Item>
       </Item>
-      <Item class="Part" referent="95">
+      <Item class="Part" referent="99">
         <Properties>
           <string name="Name">Sign</string>
           <bool name="Anchored">true</bool>
@@ -4525,7 +4783,7 @@ return Surface
           </Vector3>
           <token name="TopSurface">0</token>
         </Properties>
-        <Item class="SurfaceGui" referent="96">
+        <Item class="SurfaceGui" referent="100">
           <Properties>
             <string name="Name">SurfaceGui</string>
             <Vector2 name="CanvasSize">
@@ -4535,7 +4793,7 @@ return Surface
             <token name="Face">2</token>
             <float name="LightInfluence">0</float>
           </Properties>
-          <Item class="TextLabel" referent="97">
+          <Item class="TextLabel" referent="101">
             <Properties>
               <string name="Name">TextLabel</string>
               <float name="BackgroundTransparency">1</float>
@@ -4560,7 +4818,7 @@ return Surface
               </Color3>
               <bool name="TextScaled">true</bool>
             </Properties>
-            <Item class="UIPadding" referent="98">
+            <Item class="UIPadding" referent="102">
               <Properties>
                 <string name="Name">UIPadding</string>
                 <UDim name="PaddingLeft">
@@ -4576,7 +4834,7 @@ return Surface
           </Item>
         </Item>
       </Item>
-      <Item class="Part" referent="99">
+      <Item class="Part" referent="103">
         <Properties>
           <string name="Name">Cable vertical</string>
           <bool name="Anchored">true</bool>
@@ -4609,7 +4867,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="100">
+      <Item class="Part" referent="104">
         <Properties>
           <string name="Name">Cable vertical</string>
           <bool name="Anchored">true</bool>
@@ -4642,7 +4900,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="101">
+      <Item class="Part" referent="105">
         <Properties>
           <string name="Name">Cable vertical</string>
           <bool name="Anchored">true</bool>
@@ -4675,7 +4933,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="102">
+      <Item class="Part" referent="106">
         <Properties>
           <string name="Name">Cable vertical</string>
           <bool name="Anchored">true</bool>
@@ -4708,7 +4966,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="103">
+      <Item class="Part" referent="107">
         <Properties>
           <string name="Name">Pipe vertical</string>
           <bool name="Anchored">true</bool>
@@ -4741,7 +4999,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="104">
+      <Item class="Part" referent="108">
         <Properties>
           <string name="Name">Pipe elbow</string>
           <bool name="Anchored">true</bool>
@@ -4774,7 +5032,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="105">
+      <Item class="Part" referent="109">
         <Properties>
           <string name="Name">Radio</string>
           <bool name="Anchored">true</bool>
@@ -4807,7 +5065,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="106">
+      <Item class="Part" referent="110">
         <Properties>
           <string name="Name">Radio screen</string>
           <bool name="Anchored">true</bool>
@@ -4840,7 +5098,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="107">
+      <Item class="Part" referent="111">
         <Properties>
           <string name="Name">Desk keypad</string>
           <bool name="Anchored">true</bool>
@@ -4873,147 +5131,15 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="108">
-        <Properties>
-          <string name="Name">Key</string>
-          <bool name="Anchored">true</bool>
-          <token name="BottomSurface">0</token>
-          <CoordinateFrame name="CFrame">
-            <X>-10</X>
-            <Y>3.8</Y>
-            <Z>5.2</Z>
-            <R00>1</R00>
-            <R01>0</R01>
-            <R02>0</R02>
-            <R10>0</R10>
-            <R11>1</R11>
-            <R12>0</R12>
-            <R20>0</R20>
-            <R21>0</R21>
-            <R22>1</R22>
-          </CoordinateFrame>
-          <bool name="CanCollide">false</bool>
-          <bool name="CanQuery">false</bool>
-          <bool name="CanTouch">false</bool>
-          <bool name="CastShadow">false</bool>
-          <Color3uint8 name="Color3uint8">9023908</Color3uint8>
-          <token name="Material">272</token>
-          <Vector3 name="size">
-            <X>0.32</X>
-            <Y>0.1</Y>
-            <Z>0.32</Z>
-          </Vector3>
-          <token name="TopSurface">0</token>
-        </Properties>
-      </Item>
-      <Item class="Part" referent="109">
-        <Properties>
-          <string name="Name">Key</string>
-          <bool name="Anchored">true</bool>
-          <token name="BottomSurface">0</token>
-          <CoordinateFrame name="CFrame">
-            <X>-10</X>
-            <Y>3.8</Y>
-            <Z>5.75</Z>
-            <R00>1</R00>
-            <R01>0</R01>
-            <R02>0</R02>
-            <R10>0</R10>
-            <R11>1</R11>
-            <R12>0</R12>
-            <R20>0</R20>
-            <R21>0</R21>
-            <R22>1</R22>
-          </CoordinateFrame>
-          <bool name="CanCollide">false</bool>
-          <bool name="CanQuery">false</bool>
-          <bool name="CanTouch">false</bool>
-          <bool name="CastShadow">false</bool>
-          <Color3uint8 name="Color3uint8">9023908</Color3uint8>
-          <token name="Material">272</token>
-          <Vector3 name="size">
-            <X>0.32</X>
-            <Y>0.1</Y>
-            <Z>0.32</Z>
-          </Vector3>
-          <token name="TopSurface">0</token>
-        </Properties>
-      </Item>
-      <Item class="Part" referent="110">
-        <Properties>
-          <string name="Name">Key</string>
-          <bool name="Anchored">true</bool>
-          <token name="BottomSurface">0</token>
-          <CoordinateFrame name="CFrame">
-            <X>-10</X>
-            <Y>3.8</Y>
-            <Z>6.3</Z>
-            <R00>1</R00>
-            <R01>0</R01>
-            <R02>0</R02>
-            <R10>0</R10>
-            <R11>1</R11>
-            <R12>0</R12>
-            <R20>0</R20>
-            <R21>0</R21>
-            <R22>1</R22>
-          </CoordinateFrame>
-          <bool name="CanCollide">false</bool>
-          <bool name="CanQuery">false</bool>
-          <bool name="CanTouch">false</bool>
-          <bool name="CastShadow">false</bool>
-          <Color3uint8 name="Color3uint8">9023908</Color3uint8>
-          <token name="Material">272</token>
-          <Vector3 name="size">
-            <X>0.32</X>
-            <Y>0.1</Y>
-            <Z>0.32</Z>
-          </Vector3>
-          <token name="TopSurface">0</token>
-        </Properties>
-      </Item>
-      <Item class="Part" referent="111">
-        <Properties>
-          <string name="Name">Key</string>
-          <bool name="Anchored">true</bool>
-          <token name="BottomSurface">0</token>
-          <CoordinateFrame name="CFrame">
-            <X>-9.4</X>
-            <Y>3.8</Y>
-            <Z>5.2</Z>
-            <R00>1</R00>
-            <R01>0</R01>
-            <R02>0</R02>
-            <R10>0</R10>
-            <R11>1</R11>
-            <R12>0</R12>
-            <R20>0</R20>
-            <R21>0</R21>
-            <R22>1</R22>
-          </CoordinateFrame>
-          <bool name="CanCollide">false</bool>
-          <bool name="CanQuery">false</bool>
-          <bool name="CanTouch">false</bool>
-          <bool name="CastShadow">false</bool>
-          <Color3uint8 name="Color3uint8">9023908</Color3uint8>
-          <token name="Material">272</token>
-          <Vector3 name="size">
-            <X>0.32</X>
-            <Y>0.1</Y>
-            <Z>0.32</Z>
-          </Vector3>
-          <token name="TopSurface">0</token>
-        </Properties>
-      </Item>
       <Item class="Part" referent="112">
         <Properties>
           <string name="Name">Key</string>
           <bool name="Anchored">true</bool>
           <token name="BottomSurface">0</token>
           <CoordinateFrame name="CFrame">
-            <X>-9.4</X>
+            <X>-10</X>
             <Y>3.8</Y>
-            <Z>5.75</Z>
+            <Z>5.2</Z>
             <R00>1</R00>
             <R01>0</R01>
             <R02>0</R02>
@@ -5044,9 +5170,9 @@ return Surface
           <bool name="Anchored">true</bool>
           <token name="BottomSurface">0</token>
           <CoordinateFrame name="CFrame">
-            <X>-9.4</X>
+            <X>-10</X>
             <Y>3.8</Y>
-            <Z>6.3</Z>
+            <Z>5.75</Z>
             <R00>1</R00>
             <R01>0</R01>
             <R02>0</R02>
@@ -5077,9 +5203,9 @@ return Surface
           <bool name="Anchored">true</bool>
           <token name="BottomSurface">0</token>
           <CoordinateFrame name="CFrame">
-            <X>-8.8</X>
+            <X>-10</X>
             <Y>3.8</Y>
-            <Z>5.2</Z>
+            <Z>6.3</Z>
             <R00>1</R00>
             <R01>0</R01>
             <R02>0</R02>
@@ -5110,6 +5236,138 @@ return Surface
           <bool name="Anchored">true</bool>
           <token name="BottomSurface">0</token>
           <CoordinateFrame name="CFrame">
+            <X>-9.4</X>
+            <Y>3.8</Y>
+            <Z>5.2</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <bool name="CanCollide">false</bool>
+          <bool name="CanQuery">false</bool>
+          <bool name="CanTouch">false</bool>
+          <bool name="CastShadow">false</bool>
+          <Color3uint8 name="Color3uint8">9023908</Color3uint8>
+          <token name="Material">272</token>
+          <Vector3 name="size">
+            <X>0.32</X>
+            <Y>0.1</Y>
+            <Z>0.32</Z>
+          </Vector3>
+          <token name="TopSurface">0</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="116">
+        <Properties>
+          <string name="Name">Key</string>
+          <bool name="Anchored">true</bool>
+          <token name="BottomSurface">0</token>
+          <CoordinateFrame name="CFrame">
+            <X>-9.4</X>
+            <Y>3.8</Y>
+            <Z>5.75</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <bool name="CanCollide">false</bool>
+          <bool name="CanQuery">false</bool>
+          <bool name="CanTouch">false</bool>
+          <bool name="CastShadow">false</bool>
+          <Color3uint8 name="Color3uint8">9023908</Color3uint8>
+          <token name="Material">272</token>
+          <Vector3 name="size">
+            <X>0.32</X>
+            <Y>0.1</Y>
+            <Z>0.32</Z>
+          </Vector3>
+          <token name="TopSurface">0</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="117">
+        <Properties>
+          <string name="Name">Key</string>
+          <bool name="Anchored">true</bool>
+          <token name="BottomSurface">0</token>
+          <CoordinateFrame name="CFrame">
+            <X>-9.4</X>
+            <Y>3.8</Y>
+            <Z>6.3</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <bool name="CanCollide">false</bool>
+          <bool name="CanQuery">false</bool>
+          <bool name="CanTouch">false</bool>
+          <bool name="CastShadow">false</bool>
+          <Color3uint8 name="Color3uint8">9023908</Color3uint8>
+          <token name="Material">272</token>
+          <Vector3 name="size">
+            <X>0.32</X>
+            <Y>0.1</Y>
+            <Z>0.32</Z>
+          </Vector3>
+          <token name="TopSurface">0</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="118">
+        <Properties>
+          <string name="Name">Key</string>
+          <bool name="Anchored">true</bool>
+          <token name="BottomSurface">0</token>
+          <CoordinateFrame name="CFrame">
+            <X>-8.8</X>
+            <Y>3.8</Y>
+            <Z>5.2</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <bool name="CanCollide">false</bool>
+          <bool name="CanQuery">false</bool>
+          <bool name="CanTouch">false</bool>
+          <bool name="CastShadow">false</bool>
+          <Color3uint8 name="Color3uint8">9023908</Color3uint8>
+          <token name="Material">272</token>
+          <Vector3 name="size">
+            <X>0.32</X>
+            <Y>0.1</Y>
+            <Z>0.32</Z>
+          </Vector3>
+          <token name="TopSurface">0</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="119">
+        <Properties>
+          <string name="Name">Key</string>
+          <bool name="Anchored">true</bool>
+          <token name="BottomSurface">0</token>
+          <CoordinateFrame name="CFrame">
             <X>-8.8</X>
             <Y>3.8</Y>
             <Z>5.75</Z>
@@ -5137,7 +5395,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="116">
+      <Item class="Part" referent="120">
         <Properties>
           <string name="Name">Key</string>
           <bool name="Anchored">true</bool>
@@ -5170,7 +5428,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="117">
+      <Item class="Part" referent="121">
         <Properties>
           <string name="Name">Key</string>
           <bool name="Anchored">true</bool>
@@ -5203,7 +5461,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="118">
+      <Item class="Part" referent="122">
         <Properties>
           <string name="Name">Key</string>
           <bool name="Anchored">true</bool>
@@ -5236,7 +5494,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="119">
+      <Item class="Part" referent="123">
         <Properties>
           <string name="Name">Key</string>
           <bool name="Anchored">true</bool>
@@ -5269,7 +5527,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="120">
+      <Item class="Part" referent="124">
         <Properties>
           <string name="Name">Receipt machine</string>
           <bool name="Anchored">true</bool>
@@ -5302,7 +5560,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="121">
+      <Item class="Part" referent="125">
         <Properties>
           <string name="Name">Receipt paper</string>
           <bool name="Anchored">true</bool>
@@ -5335,7 +5593,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="122">
+      <Item class="Part" referent="126">
         <Properties>
           <string name="Name">Receipt line</string>
           <bool name="Anchored">true</bool>
@@ -5368,7 +5626,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="123">
+      <Item class="Part" referent="127">
         <Properties>
           <string name="Name">Receipt line</string>
           <bool name="Anchored">true</bool>
@@ -5401,7 +5659,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="124">
+      <Item class="Part" referent="128">
         <Properties>
           <string name="Name">Receipt line</string>
           <bool name="Anchored">true</bool>
@@ -5434,7 +5692,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="125">
+      <Item class="Part" referent="129">
         <Properties>
           <string name="Name">Receipt line</string>
           <bool name="Anchored">true</bool>
@@ -5467,7 +5725,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="126">
+      <Item class="Part" referent="130">
         <Properties>
           <string name="Name">Desk lamp base</string>
           <bool name="Anchored">true</bool>
@@ -5500,7 +5758,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="127">
+      <Item class="Part" referent="131">
         <Properties>
           <string name="Name">Desk lamp stem</string>
           <bool name="Anchored">true</bool>
@@ -5533,7 +5791,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="128">
+      <Item class="Part" referent="132">
         <Properties>
           <string name="Name">Desk lamp shade</string>
           <bool name="Anchored">true</bool>
@@ -5566,7 +5824,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="129">
+      <Item class="Part" referent="133">
         <Properties>
           <string name="Name">Lamp strip</string>
           <bool name="Anchored">true</bool>
@@ -5599,7 +5857,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="130">
+      <Item class="Part" referent="134">
         <Properties>
           <string name="Name">Stock1</string>
           <bool name="Anchored">true</bool>
@@ -5632,7 +5890,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="131">
+      <Item class="Part" referent="135">
         <Properties>
           <string name="Name">Stock2</string>
           <bool name="Anchored">true</bool>
@@ -5665,7 +5923,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="132">
+      <Item class="Part" referent="136">
         <Properties>
           <string name="Name">Stock3</string>
           <bool name="Anchored">true</bool>

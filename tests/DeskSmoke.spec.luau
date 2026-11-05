@@ -79,7 +79,7 @@ local playerGui=Instance.new("PlayerGui")
 local Input={InputChanged=signal(),InputEnded=signal(),InputBegan=signal(),WindowFocusReleased=signal(),GetFocusedTextBox=function() return nil end,GetMouseLocation=function() return cursor end}
 local services={Players={LocalPlayer={WaitForChild=function() return playerGui end}},UserInputService=Input,
  GuiService={GetGuiInset=function() return inset end},TweenService={Create=function(_,object,_,props) return {Play=function() for k,v in pairs(props) do object[k]=v end end,Cancel=function() end} end},
- ReplicatedStorage={WaitForChild=function() return {Config="Config",Items="Items",Grid="Grid",ItemTags="ItemTags",GridSnap="GridSnap"} end}}
+ ReplicatedStorage={WaitForChild=function() return {Config="Config",Items="Items",Grid="Grid",ItemTags="ItemTags",GridSnap="GridSnap",Wallet="Wallet"} end}}
 local modules={Config=Config,Items=Items,Grid=GridFactory,ItemTags=Tags,GridSnap=Snap,Wallet=load("Wallet")}
 local boards={
  VisitorBoard={Name="VisitorBoard",Parent=true,rect={x=800,y=70,w=310,h=150}},
@@ -145,4 +145,69 @@ find("Hit",printerView).InputBegan:Fire({UserInputType=Enum.UserInputType.MouseB
 Input.InputEnded:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=pos})
 find("Hit",printerView).InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=pos})
 assert(find("MachineMenu",playerGui).Visible,"double click did not open printer menu")
-print("Desk startup, staged return, printer double click, and dialogue render passed")
+local function center(node)
+ local p,b=node.AbsolutePosition,node.AbsoluteSize
+ return v(p.X+b.X/2,p.Y+b.Y/2)
+end
+local menu=find("MachineMenu",playerGui)
+local title=find("MachineHandle",menu)
+local menuStart=center(title);cursor=menuStart
+title.InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=menuStart})
+cursor=v(menuStart.X+24,menuStart.Y+15);Input.InputChanged:Fire({UserInputType=Enum.UserInputType.MouseMovement,Position=cursor})
+Input.InputEnded:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=cursor})
+assert(menu.Position.X.Offset>0,"printer menu title did not drag")
+local press=item("press-test","mintPress",12,0);press.qualityTag="standard"
+local paper=item("paper-test","paperlow",13,0);paper.qualityTag="standard"
+local testState=table.clone(withPrinter);testState.inventory={profile.inventory[1],printer,press,paper};desk.render(testState)
+local pressStart=boardPoint("03 / YOUR INVENTORY",12,0,15)
+local pressTarget=center(find("pressGrid",menu))
+cursor=pressStart;find("Hit",find("Item_press-test",find("03 / YOUR INVENTORY",playerGui))).InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=pressStart})
+cursor=pressTarget;Input.InputChanged:Fire({UserInputType=Enum.UserInputType.MouseMovement,Position=pressTarget})
+assert(find("MachinePhantom",menu).Visible,"Mint Press has no slot preview")
+Input.InputEnded:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=pressTarget})
+assert(requests[#requests].action=="MachineInsert" and requests[#requests].slot=="press" and requests[#requests].id=="press-test","Mint Press drop did not reach press slot")
+local ack=table.clone(testState);ack.moveAck=requests[#requests].moveId;desk.render(ack)
+local paperStart=boardPoint("03 / YOUR INVENTORY",13,0,15)
+local paperTarget=center(find("inputGrid",menu))
+cursor=paperStart;find("Hit",find("Item_paper-test",find("03 / YOUR INVENTORY",playerGui))).InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=paperStart})
+cursor=paperTarget;Input.InputChanged:Fire({UserInputType=Enum.UserInputType.MouseMovement,Position=paperTarget})
+assert(find("MachinePhantom",menu).Visible,"paper has no input preview")
+Input.InputEnded:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=paperTarget})
+assert(requests[#requests].action=="MachineInsert" and requests[#requests].slot=="input","paper drop did not reach input grid")
+local moved=table.clone(testState);moved.moveAck=requests[#requests].moveId
+local loadedPrinter=table.clone(printer);loadedPrinter.machine={input={{id="paper-loaded",kind="paperlow",machineX=0,machineY=0,rotation=0,qualityTag="standard"}},output={},press={id="press-loaded",kind="mintPress",rotation=0,qualityTag="standard"}}
+moved.inventory={profile.inventory[1],loadedPrinter,press,paper};desk.render(moved)
+local loadedView=find("Item_paper-loaded",find("inputGrid",menu));assert(loadedView,"machine input item missing")
+local inputBoard=find("GridBoard",find("inputGrid",menu));local cell=inputBoard.Size.X.Offset
+local from=center(loadedView);local to=v(from.X,from.Y+cell)
+cursor=from;find("Hit",loadedView).InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=from})
+cursor=to;Input.InputChanged:Fire({UserInputType=Enum.UserInputType.MouseMovement,Position=to})
+assert(find("MachinePhantom",menu).Visible,"moving paper inside printer has no preview")
+Input.InputEnded:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=to})
+assert(requests[#requests].action=="MachineMove" and requests[#requests].y==1,"printer input does not rearrange")
+find("MachineClose",menu).Activated:Fire()
+local closed=table.clone(testState);closed.moveAck=requests[#requests].moveId
+local cash=item("cash-test","cash100",14,0);cash.qualityTag="standard"
+closed.inventory={profile.inventory[1],printer,press,paper,cash};desk.render(closed)
+local closedPaperStart=boardPoint("03 / YOUR INVENTORY",13,0,15);local closedPrinterTarget=boardPoint("03 / YOUR INVENTORY",5,0,15)
+cursor=closedPaperStart;find("Hit",find("Item_paper-test",find("03 / YOUR INVENTORY",playerGui))).InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=closedPaperStart})
+cursor=closedPrinterTarget;Input.InputChanged:Fire({UserInputType=Enum.UserInputType.MouseMovement,Position=closedPrinterTarget})
+Input.InputEnded:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=closedPrinterTarget})
+assert(requests[#requests].action=="MachineInsert" and requests[#requests].machineId=="printer-test" and requests[#requests].slot=="input","closed printer rejected paper")
+closed.moveAck=requests[#requests].moveId;desk.render(closed)
+local cashStart=boardPoint("03 / YOUR INVENTORY",14,0,15);local walletTarget=boardPoint("03 / YOUR INVENTORY",0,0,15)
+cursor=cashStart;find("Hit",find("Item_cash-test",find("03 / YOUR INVENTORY",playerGui))).InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=cashStart})
+cursor=walletTarget;Input.InputChanged:Fire({UserInputType=Enum.UserInputType.MouseMovement,Position=walletTarget})
+assert(find("GridPhantom",find("03 / YOUR INVENTORY",playerGui)),"closed wallet drop has no phantom")
+Input.InputEnded:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=walletTarget})
+assert(requests[#requests].action=="DepositMoney" and requests[#requests].id=="cash-test","closed wallet rejected clean money")
+cursor=walletTarget;find("Hit",find("Item_starter-wallet",find("03 / YOUR INVENTORY",playerGui))).InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=walletTarget})
+Input.InputEnded:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=walletTarget})
+local walletMenu=find("WalletGrid",playerGui);assert(walletMenu.Visible,"wallet did not open")
+assert(not find("Item_wallet-1",walletMenu),"empty denominations appeared as items")
+local walletHandle=find("WalletHandle",walletMenu);local origin=center(walletHandle);cursor=origin
+walletHandle.InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=origin})
+cursor=v(origin.X+30,origin.Y+10);Input.InputChanged:Fire({UserInputType=Enum.UserInputType.MouseMovement,Position=cursor})
+Input.InputEnded:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=cursor})
+assert(walletMenu.Position.X.Offset>0,"wallet menu title did not drag")
+print("Desk startup, machine slots, wallet deposits, and draggable menus passed")

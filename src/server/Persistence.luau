@@ -4,6 +4,8 @@ local RunService = game:GetService("RunService")
 local HttpService = game:GetService("HttpService")
 local Shared = game:GetService("ReplicatedStorage"):WaitForChild("Shared")
 local Config = require(Shared.Config)
+local Items = require(Shared.Items)
+local Grid = require(Shared.Grid)(Config, Items.Definitions)
 local Persistence = {}
 local memoryOnly = RunService:IsStudio() and not Config.PersistenceInStudio
 local store: any = nil
@@ -33,6 +35,13 @@ function Persistence.load(userId: number, rules: any): (any, string)
 	if memoryOnly then
 		local profile = rules.newProfile()
 		profile.cash = Config.StudioTestCash
+		for _,kind in ipairs({"printer1", "mintPress", "paperlow", "papermid", "paperhigh", "paperlow"}) do
+			local x,y,rotation=Grid.firstFit(profile,kind)
+			if x then
+				table.insert(profile.inventory,{id=HttpService:GenerateGUID(false),kind=kind,paid=0,condition=100,authentic=true,restricted=false,inspected=false,qualityTag="standard",gridX=x,gridY=y,rotation=rotation})
+				profile.gridRevision+=1
+			end
+		end
 		held[userId] = true; touched[userId] = os.time(); owners[userId] = profile
 		leases[userId] = HttpService:GenerateGUID(false)
 		return profile, "SESSION ONLY / Studio"
