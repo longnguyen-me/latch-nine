@@ -89,7 +89,6 @@ function Scene.build(parent: Instance, origin: Vector3, name: string): Model
   return b
  end
  board("InventoryBoard",0,-1.8,9.3,23,10)
- board("BuyBoard",12,4.9,9.1,13,5.9,-22)
  board("VisitorBoard",12,11.1,2,13,5.9)
  local controls=Instance.new("Model");controls.Name="InteractionControls";controls.Parent=m
  local sleep=p("SleepingBag",-17,0.5,11,5,0.5,3,C(70,74,105));sleep.CanQuery=true

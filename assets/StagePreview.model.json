@@ -1522,44 +1522,6 @@
     },
     {
       "ClassName": "Part",
-      "Name": "BuyBoard",
-      "Properties": {
-        "Anchored": true,
-        "BottomSurface": "Smooth",
-        "CFrame": [
-          12,
-          4.9,
-          9.1,
-          1,
-          0,
-          0,
-          0,
-          0.9271838545667874,
-          0.374606593415912,
-          0,
-          -0.374606593415912,
-          0.9271838545667874
-        ],
-        "CanCollide": false,
-        "CanQuery": true,
-        "CanTouch": false,
-        "CastShadow": false,
-        "Color": [
-          0.10196078431372549,
-          0.13333333333333333,
-          0.17254901960784313
-        ],
-        "Material": "SmoothPlastic",
-        "Size": [
-          13,
-          5.9,
-          0.35
-        ],
-        "TopSurface": "Smooth"
-      }
-    },
-    {
-      "ClassName": "Part",
       "Name": "VisitorBoard",
       "Properties": {
         "Anchored": true,

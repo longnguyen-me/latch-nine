@@ -287,7 +287,6 @@ function Scene.build(parent: Instance, origin: Vector3, name: string): Model
   return b
  end
  board("InventoryBoard",0,-1.8,9.3,23,10)
- board("BuyBoard",12,4.9,9.1,13,5.9,-22)
  board("VisitorBoard",12,11.1,2,13,5.9)
  local controls=Instance.new("Model");controls.Name="InteractionControls";controls.Parent=m
  local sleep=p("SleepingBag",-17,0.5,11,5,0.5,3,C(70,74,105));sleep.CanQuery=true
@@ -1628,7 +1627,7 @@ function Desk.new(send: (any)->())
      layer.gui.CanvasSize=layer.canvas
     end
     if key=="register" then outline.Adornee=part elseif key=="next" then nextOutline.Adornee=part elseif key=="dismiss" then dismissOutline.Adornee=part end
-    if not part then complete=false end
+    if not part and key~="basket" then complete=false end
    end
    if not complete then task.delay(0.25,attempt) end
   end
@@ -1730,9 +1729,9 @@ function Desk.new(send: (any)->())
   if scrolling or not drag or not drag.active then return end;scrolling=true
   local function step()
    if not drag or not drag.active then scrolling=false;return end
-   local widget=widgets[if drag.origin=="inventory" then "inventory" else "basket"]
+   local widget=widgets[drag.origin]
    local p,size=Vector2.new(0,0),Vector2.new(widget.canvasWidth,widget.canvasHeight)
-   local pointer=canvasPoint(if drag.origin=="inventory" then "inventory" else "basket",drag.point)
+   local pointer=canvasPoint(drag.origin,drag.point)
    local delta=0
    if pointer and pointer.X>=p.X and pointer.X<p.X+size.X then
     delta=if pointer.Y<p.Y+24 and pointer.Y>=p.Y then -widget.cellSize*0.4 elseif pointer.Y>p.Y+size.Y-24 and pointer.Y<p.Y+size.Y then widget.cellSize*0.4 else 0
@@ -3438,39 +3437,6 @@ return Surface
       </Item>
       <Item class="Part" referent="69">
         <Properties>
-          <string name="Name">BuyBoard</string>
-          <bool name="Anchored">true</bool>
-          <token name="BottomSurface">0</token>
-          <CoordinateFrame name="CFrame">
-            <X>12</X>
-            <Y>4.9</Y>
-            <Z>9.1</Z>
-            <R00>1</R00>
-            <R01>0</R01>
-            <R02>0</R02>
-            <R10>0</R10>
-            <R11>0.92718387</R11>
-            <R12>0.37460658</R12>
-            <R20>0</R20>
-            <R21>-0.37460658</R21>
-            <R22>0.92718387</R22>
-          </CoordinateFrame>
-          <bool name="CanCollide">false</bool>
-          <bool name="CanQuery">true</bool>
-          <bool name="CanTouch">false</bool>
-          <bool name="CastShadow">false</bool>
-          <Color3uint8 name="Color3uint8">1712684</Color3uint8>
-          <token name="Material">272</token>
-          <Vector3 name="size">
-            <X>13</X>
-            <Y>5.9</Y>
-            <Z>0.35</Z>
-          </Vector3>
-          <token name="TopSurface">0</token>
-        </Properties>
-      </Item>
-      <Item class="Part" referent="70">
-        <Properties>
           <string name="Name">VisitorBoard</string>
           <bool name="Anchored">true</bool>
           <token name="BottomSurface">0</token>
@@ -3502,13 +3468,13 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Model" referent="71">
+      <Item class="Model" referent="70">
         <Properties>
           <string name="Name">InteractionControls</string>
           <bool name="NeedsPivotMigration">false</bool>
         </Properties>
       </Item>
-      <Item class="Part" referent="72">
+      <Item class="Part" referent="71">
         <Properties>
           <string name="Name">SleepingBag</string>
           <bool name="Anchored">true</bool>
@@ -3541,7 +3507,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="73">
+      <Item class="Part" referent="72">
         <Properties>
           <string name="Name">ShopToggle</string>
           <bool name="Anchored">true</bool>
@@ -3574,7 +3540,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="74">
+      <Item class="Part" referent="73">
         <Properties>
           <string name="Name">Wallet</string>
           <bool name="Anchored">true</bool>
@@ -3607,7 +3573,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="75">
+      <Item class="Part" referent="74">
         <Properties>
           <string name="Name">RegisterBox</string>
           <bool name="Anchored">true</bool>
@@ -3639,7 +3605,7 @@ return Surface
           </Vector3>
           <token name="TopSurface">0</token>
         </Properties>
-        <Item class="SurfaceGui" referent="76">
+        <Item class="SurfaceGui" referent="75">
           <Properties>
             <string name="Name">EditOutline</string>
             <Vector2 name="CanvasSize">
@@ -3649,7 +3615,7 @@ return Surface
             <token name="Face">2</token>
             <float name="LightInfluence">0</float>
           </Properties>
-          <Item class="Frame" referent="77">
+          <Item class="Frame" referent="76">
             <Properties>
               <string name="Name">Border</string>
               <float name="BackgroundTransparency">1</float>
@@ -3669,7 +3635,7 @@ return Surface
           </Item>
         </Item>
       </Item>
-      <Item class="Part" referent="78">
+      <Item class="Part" referent="77">
         <Properties>
           <string name="Name">NextCustomerButton</string>
           <bool name="Anchored">true</bool>
@@ -3701,7 +3667,7 @@ return Surface
           </Vector3>
           <token name="TopSurface">0</token>
         </Properties>
-        <Item class="SurfaceGui" referent="79">
+        <Item class="SurfaceGui" referent="78">
           <Properties>
             <string name="Name">EditOutline</string>
             <Vector2 name="CanvasSize">
@@ -3711,7 +3677,7 @@ return Surface
             <token name="Face">2</token>
             <float name="LightInfluence">0</float>
           </Properties>
-          <Item class="Frame" referent="80">
+          <Item class="Frame" referent="79">
             <Properties>
               <string name="Name">Border</string>
               <float name="BackgroundTransparency">1</float>
@@ -3731,7 +3697,7 @@ return Surface
           </Item>
         </Item>
       </Item>
-      <Item class="Part" referent="81">
+      <Item class="Part" referent="80">
         <Properties>
           <string name="Name">DismissCustomerButton</string>
           <bool name="Anchored">true</bool>
@@ -3763,7 +3729,7 @@ return Surface
           </Vector3>
           <token name="TopSurface">0</token>
         </Properties>
-        <Item class="SurfaceGui" referent="82">
+        <Item class="SurfaceGui" referent="81">
           <Properties>
             <string name="Name">EditOutline</string>
             <Vector2 name="CanvasSize">
@@ -3773,7 +3739,7 @@ return Surface
             <token name="Face">2</token>
             <float name="LightInfluence">0</float>
           </Properties>
-          <Item class="Frame" referent="83">
+          <Item class="Frame" referent="82">
             <Properties>
               <string name="Name">Border</string>
               <float name="BackgroundTransparency">1</float>
@@ -3793,7 +3759,7 @@ return Surface
           </Item>
         </Item>
       </Item>
-      <Item class="Part" referent="84">
+      <Item class="Part" referent="83">
         <Properties>
           <string name="Name">ViewTarget</string>
           <bool name="Anchored">true</bool>
@@ -3827,7 +3793,7 @@ return Surface
           <float name="Transparency">1</float>
         </Properties>
       </Item>
-      <Item class="Part" referent="85">
+      <Item class="Part" referent="84">
         <Properties>
           <string name="Name">CameraMount</string>
           <bool name="Anchored">true</bool>
@@ -3861,7 +3827,7 @@ return Surface
           <float name="Transparency">0.25</float>
         </Properties>
       </Item>
-      <Item class="Part" referent="86">
+      <Item class="Part" referent="85">
         <Properties>
           <string name="Name">VisitorStand</string>
           <bool name="Anchored">true</bool>
@@ -3895,7 +3861,7 @@ return Surface
           <float name="Transparency">1</float>
         </Properties>
       </Item>
-      <Item class="Part" referent="87">
+      <Item class="Part" referent="86">
         <Properties>
           <string name="Name">VisitorEntry</string>
           <bool name="Anchored">true</bool>
@@ -3929,7 +3895,7 @@ return Surface
           <float name="Transparency">1</float>
         </Properties>
       </Item>
-      <Item class="Part" referent="88">
+      <Item class="Part" referent="87">
         <Properties>
           <string name="Name">VisitorExit</string>
           <bool name="Anchored">true</bool>
@@ -3963,7 +3929,7 @@ return Surface
           <float name="Transparency">1</float>
         </Properties>
       </Item>
-      <Item class="Part" referent="89">
+      <Item class="Part" referent="88">
         <Properties>
           <string name="Name">Status terminal</string>
           <bool name="Anchored">true</bool>
@@ -3996,7 +3962,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="90">
+      <Item class="Part" referent="89">
         <Properties>
           <string name="Name">Status glow</string>
           <bool name="Anchored">true</bool>
@@ -4029,7 +3995,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="91">
+      <Item class="Part" referent="90">
         <Properties>
           <string name="Name">MoneyDisplay</string>
           <bool name="Anchored">true</bool>
@@ -4061,7 +4027,7 @@ return Surface
           </Vector3>
           <token name="TopSurface">0</token>
         </Properties>
-        <Item class="SurfaceGui" referent="92">
+        <Item class="SurfaceGui" referent="91">
           <Properties>
             <string name="Name">CashSurface</string>
             <Vector2 name="CanvasSize">
@@ -4071,7 +4037,7 @@ return Surface
             <token name="Face">2</token>
             <float name="LightInfluence">0</float>
           </Properties>
-          <Item class="TextLabel" referent="93">
+          <Item class="TextLabel" referent="92">
             <Properties>
               <string name="Name">Balance</string>
               <float name="BackgroundTransparency">1</float>
@@ -4099,7 +4065,7 @@ return Surface
           </Item>
         </Item>
       </Item>
-      <Item class="Part" referent="94">
+      <Item class="Part" referent="93">
         <Properties>
           <string name="Name">Sign</string>
           <bool name="Anchored">true</bool>
@@ -4131,7 +4097,7 @@ return Surface
           </Vector3>
           <token name="TopSurface">0</token>
         </Properties>
-        <Item class="SurfaceGui" referent="95">
+        <Item class="SurfaceGui" referent="94">
           <Properties>
             <string name="Name">SurfaceGui</string>
             <Vector2 name="CanvasSize">
@@ -4141,7 +4107,7 @@ return Surface
             <token name="Face">2</token>
             <float name="LightInfluence">0</float>
           </Properties>
-          <Item class="TextLabel" referent="96">
+          <Item class="TextLabel" referent="95">
             <Properties>
               <string name="Name">TextLabel</string>
               <float name="BackgroundTransparency">1</float>
@@ -4166,7 +4132,7 @@ return Surface
               </Color3>
               <bool name="TextScaled">true</bool>
             </Properties>
-            <Item class="UIPadding" referent="97">
+            <Item class="UIPadding" referent="96">
               <Properties>
                 <string name="Name">UIPadding</string>
                 <UDim name="PaddingLeft">
@@ -4182,7 +4148,7 @@ return Surface
           </Item>
         </Item>
       </Item>
-      <Item class="Part" referent="98">
+      <Item class="Part" referent="97">
         <Properties>
           <string name="Name">Cable vertical</string>
           <bool name="Anchored">true</bool>
@@ -4215,7 +4181,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="99">
+      <Item class="Part" referent="98">
         <Properties>
           <string name="Name">Cable vertical</string>
           <bool name="Anchored">true</bool>
@@ -4248,7 +4214,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="100">
+      <Item class="Part" referent="99">
         <Properties>
           <string name="Name">Cable vertical</string>
           <bool name="Anchored">true</bool>
@@ -4281,7 +4247,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="101">
+      <Item class="Part" referent="100">
         <Properties>
           <string name="Name">Cable vertical</string>
           <bool name="Anchored">true</bool>
@@ -4314,7 +4280,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="102">
+      <Item class="Part" referent="101">
         <Properties>
           <string name="Name">Pipe vertical</string>
           <bool name="Anchored">true</bool>
@@ -4347,7 +4313,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="103">
+      <Item class="Part" referent="102">
         <Properties>
           <string name="Name">Pipe elbow</string>
           <bool name="Anchored">true</bool>
@@ -4380,7 +4346,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="104">
+      <Item class="Part" referent="103">
         <Properties>
           <string name="Name">Radio</string>
           <bool name="Anchored">true</bool>
@@ -4413,7 +4379,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="105">
+      <Item class="Part" referent="104">
         <Properties>
           <string name="Name">Radio screen</string>
           <bool name="Anchored">true</bool>
@@ -4446,7 +4412,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="106">
+      <Item class="Part" referent="105">
         <Properties>
           <string name="Name">Desk keypad</string>
           <bool name="Anchored">true</bool>
@@ -4479,7 +4445,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="107">
+      <Item class="Part" referent="106">
         <Properties>
           <string name="Name">Key</string>
           <bool name="Anchored">true</bool>
@@ -4488,6 +4454,39 @@ return Surface
             <X>-10</X>
             <Y>3.8</Y>
             <Z>5.2</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <bool name="CanCollide">false</bool>
+          <bool name="CanQuery">false</bool>
+          <bool name="CanTouch">false</bool>
+          <bool name="CastShadow">false</bool>
+          <Color3uint8 name="Color3uint8">9023908</Color3uint8>
+          <token name="Material">272</token>
+          <Vector3 name="size">
+            <X>0.32</X>
+            <Y>0.1</Y>
+            <Z>0.32</Z>
+          </Vector3>
+          <token name="TopSurface">0</token>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="107">
+        <Properties>
+          <string name="Name">Key</string>
+          <bool name="Anchored">true</bool>
+          <token name="BottomSurface">0</token>
+          <CoordinateFrame name="CFrame">
+            <X>-10</X>
+            <Y>3.8</Y>
+            <Z>5.75</Z>
             <R00>1</R00>
             <R01>0</R01>
             <R02>0</R02>
@@ -4520,7 +4519,7 @@ return Surface
           <CoordinateFrame name="CFrame">
             <X>-10</X>
             <Y>3.8</Y>
-            <Z>5.75</Z>
+            <Z>6.3</Z>
             <R00>1</R00>
             <R01>0</R01>
             <R02>0</R02>
@@ -4551,9 +4550,9 @@ return Surface
           <bool name="Anchored">true</bool>
           <token name="BottomSurface">0</token>
           <CoordinateFrame name="CFrame">
-            <X>-10</X>
+            <X>-9.4</X>
             <Y>3.8</Y>
-            <Z>6.3</Z>
+            <Z>5.2</Z>
             <R00>1</R00>
             <R01>0</R01>
             <R02>0</R02>
@@ -4586,7 +4585,7 @@ return Surface
           <CoordinateFrame name="CFrame">
             <X>-9.4</X>
             <Y>3.8</Y>
-            <Z>5.2</Z>
+            <Z>5.75</Z>
             <R00>1</R00>
             <R01>0</R01>
             <R02>0</R02>
@@ -4619,7 +4618,7 @@ return Surface
           <CoordinateFrame name="CFrame">
             <X>-9.4</X>
             <Y>3.8</Y>
-            <Z>5.75</Z>
+            <Z>6.3</Z>
             <R00>1</R00>
             <R01>0</R01>
             <R02>0</R02>
@@ -4650,9 +4649,9 @@ return Surface
           <bool name="Anchored">true</bool>
           <token name="BottomSurface">0</token>
           <CoordinateFrame name="CFrame">
-            <X>-9.4</X>
+            <X>-8.8</X>
             <Y>3.8</Y>
-            <Z>6.3</Z>
+            <Z>5.2</Z>
             <R00>1</R00>
             <R01>0</R01>
             <R02>0</R02>
@@ -4685,7 +4684,7 @@ return Surface
           <CoordinateFrame name="CFrame">
             <X>-8.8</X>
             <Y>3.8</Y>
-            <Z>5.2</Z>
+            <Z>5.75</Z>
             <R00>1</R00>
             <R01>0</R01>
             <R02>0</R02>
@@ -4718,39 +4717,6 @@ return Surface
           <CoordinateFrame name="CFrame">
             <X>-8.8</X>
             <Y>3.8</Y>
-            <Z>5.75</Z>
-            <R00>1</R00>
-            <R01>0</R01>
-            <R02>0</R02>
-            <R10>0</R10>
-            <R11>1</R11>
-            <R12>0</R12>
-            <R20>0</R20>
-            <R21>0</R21>
-            <R22>1</R22>
-          </CoordinateFrame>
-          <bool name="CanCollide">false</bool>
-          <bool name="CanQuery">false</bool>
-          <bool name="CanTouch">false</bool>
-          <bool name="CastShadow">false</bool>
-          <Color3uint8 name="Color3uint8">9023908</Color3uint8>
-          <token name="Material">272</token>
-          <Vector3 name="size">
-            <X>0.32</X>
-            <Y>0.1</Y>
-            <Z>0.32</Z>
-          </Vector3>
-          <token name="TopSurface">0</token>
-        </Properties>
-      </Item>
-      <Item class="Part" referent="115">
-        <Properties>
-          <string name="Name">Key</string>
-          <bool name="Anchored">true</bool>
-          <token name="BottomSurface">0</token>
-          <CoordinateFrame name="CFrame">
-            <X>-8.8</X>
-            <Y>3.8</Y>
             <Z>6.3</Z>
             <R00>1</R00>
             <R01>0</R01>
@@ -4776,7 +4742,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="116">
+      <Item class="Part" referent="115">
         <Properties>
           <string name="Name">Key</string>
           <bool name="Anchored">true</bool>
@@ -4809,7 +4775,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="117">
+      <Item class="Part" referent="116">
         <Properties>
           <string name="Name">Key</string>
           <bool name="Anchored">true</bool>
@@ -4842,7 +4808,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="118">
+      <Item class="Part" referent="117">
         <Properties>
           <string name="Name">Key</string>
           <bool name="Anchored">true</bool>
@@ -4875,7 +4841,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="119">
+      <Item class="Part" referent="118">
         <Properties>
           <string name="Name">Receipt machine</string>
           <bool name="Anchored">true</bool>
@@ -4908,7 +4874,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="120">
+      <Item class="Part" referent="119">
         <Properties>
           <string name="Name">Receipt paper</string>
           <bool name="Anchored">true</bool>
@@ -4941,7 +4907,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="121">
+      <Item class="Part" referent="120">
         <Properties>
           <string name="Name">Receipt line</string>
           <bool name="Anchored">true</bool>
@@ -4974,7 +4940,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="122">
+      <Item class="Part" referent="121">
         <Properties>
           <string name="Name">Receipt line</string>
           <bool name="Anchored">true</bool>
@@ -5007,7 +4973,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="123">
+      <Item class="Part" referent="122">
         <Properties>
           <string name="Name">Receipt line</string>
           <bool name="Anchored">true</bool>
@@ -5040,7 +5006,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="124">
+      <Item class="Part" referent="123">
         <Properties>
           <string name="Name">Receipt line</string>
           <bool name="Anchored">true</bool>
@@ -5073,7 +5039,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="125">
+      <Item class="Part" referent="124">
         <Properties>
           <string name="Name">Desk lamp base</string>
           <bool name="Anchored">true</bool>
@@ -5106,7 +5072,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="126">
+      <Item class="Part" referent="125">
         <Properties>
           <string name="Name">Desk lamp stem</string>
           <bool name="Anchored">true</bool>
@@ -5139,7 +5105,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="127">
+      <Item class="Part" referent="126">
         <Properties>
           <string name="Name">Desk lamp shade</string>
           <bool name="Anchored">true</bool>
@@ -5172,7 +5138,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="128">
+      <Item class="Part" referent="127">
         <Properties>
           <string name="Name">Lamp strip</string>
           <bool name="Anchored">true</bool>
@@ -5205,7 +5171,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="129">
+      <Item class="Part" referent="128">
         <Properties>
           <string name="Name">Stock1</string>
           <bool name="Anchored">true</bool>
@@ -5238,7 +5204,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="130">
+      <Item class="Part" referent="129">
         <Properties>
           <string name="Name">Stock2</string>
           <bool name="Anchored">true</bool>
@@ -5271,7 +5237,7 @@ return Surface
           <token name="TopSurface">0</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="131">
+      <Item class="Part" referent="130">
         <Properties>
           <string name="Name">Stock3</string>
           <bool name="Anchored">true</bool>

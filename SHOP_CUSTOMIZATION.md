@@ -14,7 +14,6 @@ Make permanent changes in Edit mode. During Play, the template lives in ServerSt
 | Keep this name | Purpose |
 | --- | --- |
 | InventoryBoard | 15-column by 7-row inventory panel under the desk |
-| BuyBoard | Shared purchase/sale tray on the counter |
 | VisitorBoard | Seller goods above the tray |
 | RegisterBox | Click to open the receipt; outlines on hover |
 | NextCustomerButton | Physical clickable next-customer button |

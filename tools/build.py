@@ -23,7 +23,6 @@ embedded={s.find("Properties/*[@name='Source']").text for s in scripts}
 assert sources==embedded,'Serialized sources differ from workspace sources'
 # Physical surfaces must accept SurfaceGui input; preserve the counter's tilt in the editor scene.
 parts={n.find("Properties/*[@name='Name']").text:n for n in tree.findall('.//Item[@class="Part"]')}
-for name in ['InventoryBoard','BuyBoard','VisitorBoard','RegisterBox']:
+for name in ['InventoryBoard','VisitorBoard','RegisterBox']:
     assert parts[name].find("Properties/*[@name='CanQuery']").text=='true', name
-assert abs(float(parts['BuyBoard'].find("Properties/*[@name='CFrame']/R12").text))>0.3
 print(f'Verified {len(scripts)} embedded scripts; {len(tree.findall(".//Item"))} serialized instances; {output.stat().st_size:,} bytes')

@@ -252,7 +252,7 @@ function Desk.new(send: (any)->())
      layer.gui.CanvasSize=layer.canvas
     end
     if key=="register" then outline.Adornee=part elseif key=="next" then nextOutline.Adornee=part elseif key=="dismiss" then dismissOutline.Adornee=part end
-    if not part then complete=false end
+    if not part and key~="basket" then complete=false end
    end
    if not complete then task.delay(0.25,attempt) end
   end
@@ -354,9 +354,9 @@ function Desk.new(send: (any)->())
   if scrolling or not drag or not drag.active then return end;scrolling=true
   local function step()
    if not drag or not drag.active then scrolling=false;return end
-   local widget=widgets[if drag.origin=="inventory" then "inventory" else "basket"]
+   local widget=widgets[drag.origin]
    local p,size=Vector2.new(0,0),Vector2.new(widget.canvasWidth,widget.canvasHeight)
-   local pointer=canvasPoint(if drag.origin=="inventory" then "inventory" else "basket",drag.point)
+   local pointer=canvasPoint(drag.origin,drag.point)
    local delta=0
    if pointer and pointer.X>=p.X and pointer.X<p.X+size.X then
     delta=if pointer.Y<p.Y+24 and pointer.Y>=p.Y then -widget.cellSize*0.4 elseif pointer.Y>p.Y+size.Y-24 and pointer.Y<p.Y+size.Y then widget.cellSize*0.4 else 0
