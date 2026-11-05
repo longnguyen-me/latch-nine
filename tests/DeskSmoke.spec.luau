@@ -15,7 +15,7 @@ local function dim(a,b,c,d) return {X={Scale=a,Offset=b},Y={Scale=c,Offset=d}} e
 local Enum=setmetatable({},{__index=function(_,name) return setmetatable({},{__index=function(_,value) return name.."."..value end}) end})
 local Instance={}
 function Instance.new(class)
- local data={ClassName=class,children={},events={},Activated=signal(),InputBegan=signal(),MouseEnter=signal(),MouseLeave=signal(),CanvasPosition=v(0,0),Visible=true}
+ local data={ClassName=class,Name=class,attributes={},children={},events={},Activated=signal(),InputBegan=signal(),MouseEnter=signal(),MouseLeave=signal(),CanvasPosition=v(0,0),Visible=true}
  local obj={};local methods={}
  local function absoluteSize()
   if data.override then return data.override end
@@ -33,7 +33,8 @@ function Instance.new(class)
    if not data.Parent then return v(0,0) end
    local p=data.Parent.AbsolutePosition;local size=data.Parent.AbsoluteSize;local pos=data.Position or dim(0,0,0,0)
    local scroll=if data.Parent.ClassName=="ScrollingFrame" then data.Parent.CanvasPosition else v(0,0)
-   return v(p.X+size.X*pos.X.Scale+pos.X.Offset-scroll.X,p.Y+size.Y*pos.Y.Scale+pos.Y.Offset-scroll.Y)
+   local anchor=data.AnchorPoint or v(0,0);local bounds=absoluteSize()
+   return v(p.X+size.X*pos.X.Scale+pos.X.Offset-scroll.X-bounds.X*anchor.X,p.Y+size.Y*pos.Y.Scale+pos.Y.Offset-scroll.Y-bounds.Y*anchor.Y)
   end
   return data[key]
  end,__newindex=function(_,key,value)
@@ -41,6 +42,23 @@ function Instance.new(class)
   if key=="Parent" and value then table.insert(value.children,obj) end
   if data.events[key] then data.events[key]:Fire() end
  end})
+ function methods:FindFirstChild(name,recursive)
+  for _,child in ipairs(data.children) do if child.Name==name then return child end end
+  if recursive then for _,child in ipairs(data.children) do local found=child:FindFirstChild(name,true);if found then return found end end end
+  return nil
+ end
+ function methods:WaitForChild(name) return assert(self:FindFirstChild(name),"Missing authored child "..tostring(name).." under "..tostring(data.Name)) end
+ function methods:SetAttribute(name,value) data.attributes[name]=value end
+ function methods:GetAttribute(name) return data.attributes[name] end
+ function methods:Clone()
+  local result=Instance.new(class)
+  for key,value in pairs(data) do
+   if key~="Parent" and key~="children" and key~="events" and key~="attributes" and key~="Activated" and key~="InputBegan" and key~="MouseEnter" and key~="MouseLeave" then result[key]=value end
+  end
+  for key,value in pairs(data.attributes) do result:SetAttribute(key,value) end
+  for _,child in ipairs(data.children) do local clone=child:Clone();clone.Parent=result end
+  return result
+ end
  function methods:GetChildren() return table.clone(data.children) end
  function methods:IsA(kind) return class==kind or (kind=="GuiObject" and (class=="Frame" or class=="TextButton" or class=="TextLabel" or class=="ScrollingFrame")) end
  function methods:GetPropertyChangedSignal(key) if not data.events[key] then data.events[key]=signal() end;return data.events[key] end
@@ -76,10 +94,37 @@ local function customer(prefix)
 end
 local c=customer("visitor1");c.bulkPercent=10;c.bulkOriginal=121;c.bulkPrice=108
 local playerGui=Instance.new("PlayerGui")
+local function instantiate(model,parent)
+ local n=Instance.new(model.class)
+ for key,value in pairs(model.properties) do
+  if type(value)=="table" and value.kind then
+   local vls=value.values
+   if value.kind=="UDim2" then value=dim(vls[1],vls[2],vls[3],vls[4])
+   elseif value.kind=="Vector2" then value=v(vls[1],vls[2])
+   elseif value.kind=="UDim" then value={Scale=vls[1],Offset=vls[2]}
+   else value=vls end
+  end
+  n[key]=value
+ end
+ if parent then n.Parent=parent end
+ for _,child in ipairs(model.children) do instantiate(child,n) end
+ return n
+end
+local savedScreen=instantiate(GuiModels.ShopDeskUI)
+local guiTemplates=instantiate(GuiModels.GuiTemplates)
+local savedShop=instantiate(GuiModels.ShopTemplate)
+local shopSurfaces=Instance.new("Folder");shopSurfaces.Name="ShopSurfaces"
+for _,name in ipairs({"inventory","offers","register","next","dismiss","toggle"}) do
+ local surface=savedShop:FindFirstChild(name.."Surface",true):Clone();surface.Parent=shopSurfaces
+end
 local Input={InputChanged=signal(),InputEnded=signal(),InputBegan=signal(),WindowFocusReleased=signal(),GetFocusedTextBox=function() return nil end,GetMouseLocation=function() return cursor end}
 local services={Players={LocalPlayer={WaitForChild=function() return playerGui end}},UserInputService=Input,
  GuiService={GetGuiInset=function() return inset end},TweenService={Create=function(_,object,_,props) return {Play=function() for k,v in pairs(props) do object[k]=v end end,Cancel=function() end} end},
- ReplicatedStorage={WaitForChild=function() return {Config="Config",Items="Items",Grid="Grid",ItemTags="ItemTags",GridSnap="GridSnap",Wallet="Wallet"} end}}
+ StarterGui={WaitForChild=function(_,name) assert(name=="ShopDeskUI");return savedScreen end},
+ ReplicatedStorage={WaitForChild=function(_,name)
+  if name=="GuiTemplates" then return guiTemplates elseif name=="ShopSurfaces" then return shopSurfaces end
+  return {Config="Config",Items="Items",Grid="Grid",ItemTags="ItemTags",GridSnap="GridSnap",Wallet="Wallet"}
+ end}}
 local modules={Config=Config,Items=Items,Grid=GridFactory,ItemTags=Tags,GridSnap=Snap,Wallet=load("Wallet")}
 local boards={
  VisitorBoard={Name="VisitorBoard",Parent=true,rect={x=800,y=70,w=310,h=150}},
@@ -101,6 +146,17 @@ local env={workspace={CurrentCamera=camera,children={},GetChildren=function(self
  UDim2={new=dim,fromScale=function(a,b) return dim(a,0,b,0) end,fromOffset=function(a,b) return dim(0,a,0,b) end},TweenInfo={new=function(...) return {...} end},task=taskMock,script={Parent={GridWidget="GridWidget",SurfaceInput="SurfaceInput"}}}
 modules.SurfaceInput=load("SurfaceInput",env)
 modules.GridWidget=load("GridWidget",env)
+-- Simulate a designer changing native models before starting Play.
+local authoredMachine=savedScreen:FindFirstChild("MachineMenu",true);authoredMachine.Size=dim(0,630,0,460);authoredMachine.AnchorPoint=v(.1,.1)
+authoredMachine:FindFirstChild("pressGrid").Position=dim(.52,8,0,112)
+local authoredWallet=savedScreen:FindFirstChild("WalletGrid",true);authoredWallet.Size=dim(0,420,0,440)
+local authoredReceipt=savedScreen:FindFirstChild("Receipt",true);authoredReceipt.Size=dim(0,410,0,490);authoredReceipt.Position=dim(0,30,0,85)
+local authoredStock=shopSurfaces:FindFirstChild("inventorySurface"):FindFirstChild("InventoryGrid",true)
+authoredStock.Position=dim(.5,0,.5,0);authoredStock.AnchorPoint=v(.5,.5);authoredStock.Size=dim(1,-32,1,-16)
+local customBorder=Instance.new("UIStroke");customBorder.Name="DesignerBoardBorder";customBorder.Parent=authoredStock:FindFirstChild("GridBoard",true)
+guiTemplates:FindFirstChild("ItemCell"):FindFirstChild("UseCatalogColor").Value=false
+guiTemplates:FindFirstChild("ItemCell").BackgroundColor3={.8,.2,.7}
+guiTemplates:FindFirstChild("EmptyCell"):FindFirstChild("GridLine").Thickness=3
 local Controller=load("DeskController",env)
 local requests={}
 local desk=Controller.new(function(request) table.insert(requests,request) end)
@@ -118,20 +174,21 @@ desk.render(arrival)
 assert(find("VisitorDialogue",playerGui).Visible and find("Item_offer-1",playerGui),"visitor board or dialogue did not render")
 local function boardPoint(name,x,y,cols)
  local board=find("GridBoard",find(name,playerGui));local size=board.Size.X.Offset/cols
- local part=boards[if name=="03 / YOUR INVENTORY" then "InventoryBoard" else "VisitorBoard"]
+ local part=boards[if name=="InventoryGrid" then "InventoryBoard" else "VisitorBoard"]
  local layer=find(name,playerGui).Parent.Parent
- return {X=part.rect.x+(board.Position.X.Offset+(x+0.5)*size)/layer.CanvasSize.X*part.rect.w,
-  Y=part.rect.y+(board.Position.Y.Offset+(y+0.5)*size)/layer.CanvasSize.Y*part.rect.h}
+ local origin=board.AbsolutePosition;local surfaceRoot=layer:FindFirstChild("SurfaceRoot").AbsolutePosition
+ return {X=part.rect.x+(origin.X-surfaceRoot.X+(x+0.5)*size)/layer.CanvasSize.X*part.rect.w,
+  Y=part.rect.y+(origin.Y-surfaceRoot.Y+(y+0.5)*size)/layer.CanvasSize.Y*part.rect.h}
 end
 local staged=table.clone(arrival)
 staged.customer=table.clone(arrival.customer)
 staged.customer.basket={{id="offer-1",kind="blank1",gridX=0,gridY=0,rotation=0,stockX=3,stockY=0,stockRotation=0,qualityTag="standard"}}
 staged.customer.basketRevision=1
 desk.render(staged)
-local pendingView=find("Item_offer-1",find("03 / YOUR INVENTORY",playerGui))
+local pendingView=find("Item_offer-1",find("InventoryGrid",playerGui))
 assert(pendingView,"staged purchase preview missing")
-local start=boardPoint("03 / YOUR INVENTORY",3,0,15)
-local target=boardPoint("01 / VISITOR OFFERS",0,0,12)
+local start=boardPoint("InventoryGrid",3,0,15)
+local target=boardPoint("TradeGrid",0,0,12)
 cursor=start
 find("Hit",pendingView).InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=start})
 cursor=target;Input.InputChanged:Fire({UserInputType=Enum.UserInputType.MouseMovement,Position=target})
@@ -139,8 +196,8 @@ Input.InputEnded:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=ta
 assert(requests[#requests] and requests[#requests].action=="UnstageOffer","dragging preview back did not cancel purchase")
 local printer={id="printer-test",kind="printer1",gridX=5,gridY=0,rotation=0,qualityTag="standard",condition=100,paid=0,authentic=true,restricted=false,inspected=false}
 local withPrinter=table.clone(base);withPrinter.inventory={profile.inventory[1],printer};withPrinter.moveAck=requests[#requests].moveId;desk.render(withPrinter)
-local printerView=find("Item_printer-test",find("03 / YOUR INVENTORY",playerGui));assert(printerView)
-local pos=boardPoint("03 / YOUR INVENTORY",5,0,15);cursor=pos
+local printerView=find("Item_printer-test",find("InventoryGrid",playerGui));assert(printerView)
+local pos=boardPoint("InventoryGrid",5,0,15);cursor=pos
 find("Hit",printerView).InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=pos})
 Input.InputEnded:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=pos})
 find("Hit",printerView).InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=pos})
@@ -151,25 +208,26 @@ local function center(node)
 end
 local menu=find("MachineMenu",playerGui)
 local title=find("MachineHandle",menu)
+local beforeMenu=menu.AbsolutePosition
 local menuStart=center(title);cursor=menuStart
 title.InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=menuStart})
 cursor=v(menuStart.X+24,menuStart.Y+15);Input.InputChanged:Fire({UserInputType=Enum.UserInputType.MouseMovement,Position=cursor})
 Input.InputEnded:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=cursor})
-assert(menu.Position.X.Offset>0,"printer menu title did not drag")
+assert(math.abs(menu.AbsolutePosition.X-beforeMenu.X-24)<.01,"anchored printer menu jumped when dragged")
 local press=item("press-test","mintPress",12,0);press.qualityTag="standard"
 local paper=item("paper-test","paperlow",13,0);paper.qualityTag="standard"
 local testState=table.clone(withPrinter);testState.inventory={profile.inventory[1],printer,press,paper};desk.render(testState)
-local pressStart=boardPoint("03 / YOUR INVENTORY",12,0,15)
+local pressStart=boardPoint("InventoryGrid",12,0,15)
 local pressTarget=center(find("pressGrid",menu))
-cursor=pressStart;find("Hit",find("Item_press-test",find("03 / YOUR INVENTORY",playerGui))).InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=pressStart})
+cursor=pressStart;find("Hit",find("Item_press-test",find("InventoryGrid",playerGui))).InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=pressStart})
 cursor=pressTarget;Input.InputChanged:Fire({UserInputType=Enum.UserInputType.MouseMovement,Position=pressTarget})
 assert(find("MachinePhantom",menu).Visible,"Mint Press has no slot preview")
 Input.InputEnded:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=pressTarget})
 assert(requests[#requests].action=="MachineInsert" and requests[#requests].slot=="press" and requests[#requests].id=="press-test","Mint Press drop did not reach press slot")
 local ack=table.clone(testState);ack.moveAck=requests[#requests].moveId;desk.render(ack)
-local paperStart=boardPoint("03 / YOUR INVENTORY",13,0,15)
+local paperStart=boardPoint("InventoryGrid",13,0,15)
 local paperTarget=center(find("inputGrid",menu))
-cursor=paperStart;find("Hit",find("Item_paper-test",find("03 / YOUR INVENTORY",playerGui))).InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=paperStart})
+cursor=paperStart;find("Hit",find("Item_paper-test",find("InventoryGrid",playerGui))).InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=paperStart})
 cursor=paperTarget;Input.InputChanged:Fire({UserInputType=Enum.UserInputType.MouseMovement,Position=paperTarget})
 assert(find("MachinePhantom",menu).Visible,"paper has no input preview")
 Input.InputEnded:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=paperTarget})
@@ -189,19 +247,19 @@ find("MachineClose",menu).Activated:Fire()
 local closed=table.clone(testState);closed.moveAck=requests[#requests].moveId
 local cash=item("cash-test","cash100",14,0);cash.qualityTag="standard"
 closed.inventory={profile.inventory[1],printer,press,paper,cash};desk.render(closed)
-local closedPaperStart=boardPoint("03 / YOUR INVENTORY",13,0,15);local closedPrinterTarget=boardPoint("03 / YOUR INVENTORY",5,0,15)
-cursor=closedPaperStart;find("Hit",find("Item_paper-test",find("03 / YOUR INVENTORY",playerGui))).InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=closedPaperStart})
+local closedPaperStart=boardPoint("InventoryGrid",13,0,15);local closedPrinterTarget=boardPoint("InventoryGrid",5,0,15)
+cursor=closedPaperStart;find("Hit",find("Item_paper-test",find("InventoryGrid",playerGui))).InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=closedPaperStart})
 cursor=closedPrinterTarget;Input.InputChanged:Fire({UserInputType=Enum.UserInputType.MouseMovement,Position=closedPrinterTarget})
 Input.InputEnded:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=closedPrinterTarget})
 assert(requests[#requests].action=="MachineInsert" and requests[#requests].machineId=="printer-test" and requests[#requests].slot=="input","closed printer rejected paper")
 closed.moveAck=requests[#requests].moveId;desk.render(closed)
-local cashStart=boardPoint("03 / YOUR INVENTORY",14,0,15);local walletTarget=boardPoint("03 / YOUR INVENTORY",0,0,15)
-cursor=cashStart;find("Hit",find("Item_cash-test",find("03 / YOUR INVENTORY",playerGui))).InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=cashStart})
+local cashStart=boardPoint("InventoryGrid",14,0,15);local walletTarget=boardPoint("InventoryGrid",0,0,15)
+cursor=cashStart;find("Hit",find("Item_cash-test",find("InventoryGrid",playerGui))).InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=cashStart})
 cursor=walletTarget;Input.InputChanged:Fire({UserInputType=Enum.UserInputType.MouseMovement,Position=walletTarget})
-assert(find("GridPhantom",find("03 / YOUR INVENTORY",playerGui)),"closed wallet drop has no phantom")
+assert(find("GridPhantom",find("InventoryGrid",playerGui)),"closed wallet drop has no phantom")
 Input.InputEnded:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=walletTarget})
 assert(requests[#requests].action=="DepositMoney" and requests[#requests].id=="cash-test","closed wallet rejected clean money")
-cursor=walletTarget;find("Hit",find("Item_starter-wallet",find("03 / YOUR INVENTORY",playerGui))).InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=walletTarget})
+cursor=walletTarget;find("Hit",find("Item_starter-wallet",find("InventoryGrid",playerGui))).InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=walletTarget})
 Input.InputEnded:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=walletTarget})
 local walletMenu=find("WalletGrid",playerGui);assert(walletMenu.Visible,"wallet did not open")
 assert(not find("Item_wallet-1",walletMenu),"empty denominations appeared as items")
@@ -210,4 +268,16 @@ walletHandle.InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton1,Posi
 cursor=v(origin.X+30,origin.Y+10);Input.InputChanged:Fire({UserInputType=Enum.UserInputType.MouseMovement,Position=cursor})
 Input.InputEnded:Fire({UserInputType=Enum.UserInputType.MouseButton1,Position=cursor})
 assert(walletMenu.Position.X.Offset>0,"wallet menu title did not drag")
-print("Desk startup, machine slots, wallet deposits, and draggable menus passed")
+assert(menu.Size.X.Offset==630 and menu.Size.Y.Offset==460,"script overwrote authored machine dimensions")
+assert(walletMenu.Size.X.Offset==420 and walletMenu.Size.Y.Offset==440,"script overwrote authored wallet dimensions")
+local receiptMenu=find("Receipt",playerGui)
+assert(receiptMenu.Size.X.Offset==410 and receiptMenu.Position.X.Offset==30,"script overwrote authored receipt layout")
+assert(find("Rows",receiptMenu),"receipt redraw deleted its authored UIListLayout")
+local styled=find("ItemCell",find("Item_starter-wallet",find("InventoryGrid",playerGui)))
+assert(styled.BackgroundColor3[1]==.8,"item draw overwrote the designer's template color")
+assert(find("GridLine",find("InventoryGrid",playerGui)).Thickness==3,"grid did not clone the edited cell style")
+assert(find("DesignerBoardBorder",find("InventoryGrid",playerGui)),"grid rebuild deleted designer decorations")
+local quoted=table.clone(arrival);quoted.customer=table.clone(arrival.customer);quoted.customer.quote={id="quote-test",total=8,affordable=true,lines={{name="Blank item",price=8}}};desk.render(quoted)
+local receiptRow=find("ReceiptItem_1",receiptMenu);assert(receiptRow and find("Title",receiptRow).Text=="Blank item","receipt did not use its authored row")
+assert(find("Rows",receiptMenu),"itemized receipt lost its list layout")
+print("Authored GUI layouts, custom styles, resized slots, machine transfers, and wallet deposits passed")

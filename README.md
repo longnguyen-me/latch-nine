@@ -4,11 +4,11 @@ Open `LatchNine.rbxlx` in Roblox Studio and press Play/F5. This is a seller POV 
 
 The bottom 15×7 SurfaceGui is your stock; the upper visitor board is the shared trade grid. Drag a seller's item into a free stock cell to preview it there and prepare a purchase, or drag your stock onto the visitor board to prepare a sale. The register receipt opens on a drag and confirms the transfer; dropping a seller item retains the exact chosen stock position. Press **R** while dragging to rotate. Hover an item for price and visible tags.
 
-Click the physical **REGISTER** box to open the movable receipt and confirm the itemized transaction. The receipt does not open when staging. Hovering the box outlines it. The physical **NEXT CUSTOMER** button calls another visitor. Credits appear on the wall terminal. Numbered grid title bars and the old guide, expansion and label editor are absent.
+Click the physical **REGISTER** box to open the movable receipt and confirm the itemized transaction.  Hovering the box outlines it. The physical **NEXT CUSTOMER** button calls another visitor. Credits appear on the wall terminal. Numbered grid title bars and the old guide, expansion and label editor are absent.
 
 The active catalog has six unidentified placeholder items: 1×1, L, 2×2, 1×3, 1×4, and 3×3. Their shape tags are hidden catalog metadata; see `TAG_CONFIG.md`.
 
-Rare bulk sellers offer 5–15% off the whole remaining haul. The receipt shows both original and bulk prices. The physical register and next-customer controls have no text and outline on hover.
+Rare bulk sellers offer 5–15% off the whole remaining haul. The receipt shows both original and bulk prices. The physical controls have editable button titles and outline on hover.
 
 CameraMount in ShopTemplate controls the seller camera position and rotation. Move or rotate it in Studio Edit mode. Lighting is authored in Studio. InteractionControls groups the physical register, next-customer and dismiss buttons so they can be edited independently. Dialogue remains until a trade or explicit dismissal; Dismiss Customer sends the visitor right and leaves the counter empty.
 
@@ -16,13 +16,17 @@ When a Git update changes the physical template, open the updated `LatchNine.rbx
 
 In Studio Edit mode, move or decorate `Workspace → ShopTemplate` and save the place. Runtime clones preserve those changes. `SHOP_CUSTOMIZATION.md` describes the named interactive parts and source rebuild limits.
 
+## Editable Studio interface
+
+The interface is now authored in native GUI models. Edit screen menus under `StarterGui → ShopDeskUI → DeskRoot`, physical grids and buttons under `Workspace → ShopTemplate`, and repeated cell/item/receipt styles under `ReplicatedStorage → GuiTemplates`. Open the updated `LatchNine.rbxlx` once to get these models. See [GUI_CUSTOMIZATION.md](GUI_CUSTOMIZATION.md) for exact locations, preview steps, and saving designs back to Git.
+
 ## Live source sync
 
-The project root is the folder containing `default.project.json`. From that folder run `rojo serve`, open `LatchNine.rbxlx` in Studio, then connect the Rojo Studio plugin. Edit and save files under `src/` in VS Code; Rojo updates the connected place. Stop and restart Play to see runtime GUI changes. Changes to the physical `ShopTemplate` made in Studio should be saved to your place; they are not automatically written back to `assets/StagePreview.model.json`.
+The project root contains `default.project.json`. Run `rojo serve` there, open `LatchNine.rbxlx`, and connect the Rojo Studio plugin. Script edits under `src/` sync into the place. Stop and restart Play to use updated client logic. Receive future commits with `git pull`.
 
-After this project is pushed to GitHub, use `git pull` in this folder to receive future commits. Keep your Studio place saved separately when changing physical shop furniture.
+Native source models live in `assets/gui/`. Building the place does not regenerate the environment or GUI designs. Studio edits are saved in your place; export the edited roots back to their model files before reconnecting Rojo to preserve them in the project. `python tools/import_studio.py "path/to/custom.rbxlx"` can import all three saved roots at once.
 
-Studio uses session-only data by default; published servers use the cloud save code. Existing version 5 stock and legacy migrations remain supported. The receipt uses separate item rows and a fixed checkout area; item hover cards show a title, divider, price and tags. The project includes editable Luau sources, tests, build tools and the native `.rbxlx` place. All 17 scripts compile and 242 local checks pass. Actual Studio input, rendering, cloud saves and device performance still need a live playtest.
+Studio uses session-only data by default; published servers use cloud saves. Existing stock and save migrations remain supported. Run `python tools/check_gui.py --luau path/to/luau` to check the controller against the actual saved GUI models. Studio rendering, real pointer/touch input, and cloud saves still require an engine playtest.
 
 ## Continuous shop and wallet
 

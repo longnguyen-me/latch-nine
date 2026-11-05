@@ -1,11 +1,19 @@
 # Architecture
 
+## Authored interface
+
+The source of the shop environment is `assets/gui/ShopTemplate.rbxmx`. The screen interface is `assets/gui/ShopDeskUI.rbxmx`, mapped into StarterGui; repeated cells, item visuals, and receipt rows are `assets/gui/GuiTemplates.rbxmx` in ReplicatedStorage. These native models are editable in Studio, including while Play is stopped. The build command reads them without regenerating scenery or layouts. `tools/import_studio.py` extracts their three roots from a saved XML place.
+
+The server copies the saved physical GUI layouts from ShopTemplate into ReplicatedStorage/ShopSurfaces before creating player shops. Each client clones those layouts into PlayerGui and sets their Adornee to its own shop parts. The copies embedded in live world parts are disabled to prevent duplicate grids. Because avatars do not spawn, the client uses an existing ShopDeskUI or clones the saved StarterGui model if it has not been copied yet.
+
+DeskController binds named GUI objects and connects behavior. GridWidget clones saved visual templates for dynamic cells and shapes. Neither builds GUI structures with Instance.new. Menu sizing and initial positioning stay authored; grid cell geometry, current item text, visibility, progress, and drag positions remain dynamic. Grid hit tests account for custom frame positions, sizes, and anchors. Receipt redraws preserve UIListLayout and decorative children. `GUI_CUSTOMIZATION.md` documents the contract and design workflow.
+
 ## Runtime
 
 | Source | Responsibility |
 | --- | --- |
 | Shared / Config | Economy, timers, grid sizes and persistence settings |
-| Shared / Items | Ore definitions, shape masks, fixed Basic category and hidden rarity IDs |
+| Shared / Items | Item definitions, shape masks, fixed Basic category and hidden rarity IDs |
 | Shared / ItemTags | Configurable Basic/quality/criminality tags, rare bulk seller chance and rarity spawn weights |
 | Shared / Grid | Pure shape rotation, packing, collision and validation |
 | Shared / GridSnap | Fractional grab anchors, nearest-cell projection and click/touch thresholds |
@@ -13,12 +21,12 @@
 | Shared / Types | Item, profile and visitor shapes |
 | Server / Rules | Ownership, valuation, quality assignment, sale rules, expenses and migration |
 | Server / TradeService | Visitor selection, itemized quotes and atomic basket checkout |
-| Server / CustomerService | Visitor identity, patience and ore category request |
+| Server / CustomerService | Visitor identity and requested item category |
 | Server / Persistence | UpdateAsync session ownership, serialized writes and retries |
 | Server / Main.server | Remote validation, visitor timers, cash display updates and snapshots |
 | Client / SurfaceInput | Camera ray to local Back-face canvas projection, including tilted panels |
 | Client / GridWidget | Occupied-cell rendering and item category/quality badges |
-| Client / DeskController | Three-grid desk, snapped phantom dragging, physical grids, register receipt, hover details and keyboard rotation |
+| Client / DeskController | Authored desk GUI bindings, snapped phantom dragging, physical grids, register receipt, hover details and keyboard rotation |
 | Client / CameraController | Seller POV, whole-booth aspect framing and physical cash-terminal placement on viewport changes |
 | Client / Main.client | Controller startup, state subscription and local visitor presentation |
 
@@ -28,7 +36,7 @@ The booth-label editor, expansion action, inspection controls and booth/day/rent
 
 ## Physical grids and dragging
 
-InventoryBoard is a cabinet face below the desk. BuyBoard is tilted 22 degrees toward the seller on the counter. VisitorBoard is directly above the buy tray. RegisterBox is a separate physical box to the left. NextCustomerButton is a physical clickable part below it. These five anchored parts have CanQuery enabled for interaction. The client creates SurfaceGuis inside PlayerGui and uses Adornee to bind them to the local player's booth; each uses the Back face, a fixed canvas and world occlusion. SurfaceGui, CanQuery and Adornee behavior follow the Roblox Creator Hub SurfaceGui reference.
+InventoryBoard is a cabinet face below the desk. BuyBoard is tilted 22 degrees toward the seller on the counter. VisitorBoard is directly above the buy tray. RegisterBox is a separate physical box to the left. NextCustomerButton is a physical clickable part below it. These five anchored parts have CanQuery enabled for interaction. The client clones authored SurfaceGuis into PlayerGui and uses Adornee to bind them to the local player's booth; each uses the Back face, a fixed canvas and world occlusion. SurfaceGui, CanQuery and Adornee behavior follow the Roblox Creator Hub SurfaceGui reference.
 
 SurfaceInput transforms a viewport ray into the part's local coordinates, intersects its Back plane, then maps local X/Y into the canvas. GridWidget derives its board origin and hit bounds from the explicit canvas size and scroll offset; no surface hit test or grab anchor uses GuiObject.AbsolutePosition. Mouse drags sample GetMouseLocation rather than the stale MouseButton1 InputObject.Position. Touch positions add the GUI inset before viewport-ray projection. Held preview cell dimensions come from projecting local canvas deltas back into the viewport. Among overlapping surfaces, the nearest in-bounds face wins. Grid snapping and collision checks then use canvas coordinates. The open receipt blocks target projection beneath its rectangle. The cursor preview is screen UI; the phantom belongs to the actual SurfaceGui grid.
 
@@ -69,7 +77,7 @@ The cash terminal is wall-mounted in the desktop scene. The camera never resizes
 
 ## Editable shop
 
-The native place exposes Workspace/ShopTemplate. Startup retains that model in ServerStorage instead of deleting it. Scene.spawn clones it for each player and offsets descendant BasePart CFrames by the booth slot, preserving relative transforms and nested decorations. Scene.build is only the fallback when no template exists. Client bindings search recursively by unique part names. CameraMount sets camera position and orientation; VisitorStand, VisitorEntry and VisitorExit locate movement. Camera code does not rewrite authored cash-display transforms. SHOP_CUSTOMIZATION.md covers Studio editing and source rebuild limitations.
+The native place exposes Workspace/ShopTemplate. Startup retains that model in ServerStorage instead of deleting it. Scene.spawn clones it for each player and offsets descendant BasePart CFrames by the booth slot, preserving relative transforms and nested decorations. Server startup requires the authored template and its named GUI surfaces; Scene.build remains a legacy scenery builder. Client bindings search recursively by unique part names. CameraMount sets camera position and orientation; VisitorStand, VisitorEntry and VisitorExit locate movement. Camera code does not rewrite authored cash-display transforms. SHOP_CUSTOMIZATION.md covers Studio editing and source rebuild limitations.
 
 ## Persistence
 
@@ -81,14 +89,14 @@ Every session acquires a distinct UpdateAsync lease. Writes are serialized per k
 
 ## Build and verification
 
-The native place contains 17 source scripts and 119 serialized instances including services. Static scenery is anchored, with collision/touch/shadow work disabled. Only the five default interactive parts enable query; other scenery disables it. There is one visitor per player and no pathfinding or per-frame remote traffic. Real frame rate and device performance are unmeasured.
+The current native place embeds 20 exact source scripts and the authored GUI models. Dynamic item cells are cloned only when a grid's data or size changes. Pointer movement reuses drag previews. There is one visitor per player, no pathfinding, and no per-frame remote traffic. Real device performance is unmeasured.
 
 ```sh
-python3 tools/check.py --luau /path/to/luau
-python3 tools/build.py --luau /path/to/luau --rojo /path/to/rojo
+python tools/check_gui.py --luau /path/to/luau
+python tools/build.py --rojo /path/to/rojo
 ```
 
-The Luau tool folder must also contain luau-compile and luau-analyze. Build tools used here: Luau 0.745 and Rojo 7.7.1. The supplied default.project.json supports Rojo source syncing. This workspace is not connected to a shared repository or the user's local Studio.
+`default.project.json` maps native GUI and shop models alongside script sources. This repository is synced with GitHub. See TEST_REPORT.md for the current verification scope.
 
 Actual Studio input/rendering, physical SurfaceGui readability, private cloud saving, rapid rejoins, shutdowns and multiplayer/device performance remain unverified. Local checks use API/input doubles.
 

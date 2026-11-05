@@ -1,23 +1,24 @@
-# Verification — ore exchange and shared trade tray
+# Verification — editable Studio GUI conversion
 
 | Check | Result | Scope |
 | --- | --- | --- |
-| Luau compilation | Passed, 17/17 | Official Luau 0.745 compiler |
-| Strict static analysis | Passed | Pure rules, grid geometry, trade logic and snap projection with their CLI tests |
-| Domain tests | Passed, 21 | Economy, ownership, negotiation, ore catalog, rarity weights, quality/market/criminality value and tag validation |
-| Grid and migration | Passed, 20 | Footprints, holes, bounds, stored orientations, packing, migration and 500 deterministic moves |
-| Cart and item tags | Passed, 20 | Whole-haul bulk checkout, atomic/replayed checkout, stale plans, inspection preservation, tag valuation, non-compounding effects, ownership and booth-label removal migration |
-| Snap projection | Passed, 7 | Fractional anchors, different cell sizes, jitter, negative candidates and mouse/touch thresholds |
-| Server integration | Passed, 61 | Persistent dialogue and dismissal without automatic next customer; actual entry point with API/scheduler doubles; randomized ore supply, visible tags/hidden rarity, shared tray purchase and multi-unit sale, forged/replayed quote rejection, category validation, next-customer replacement, persistence and authored template retention |
-| Persistence | Passed, 22 | Actual save module with UpdateAsync double; ownership, retries, final saves, migration, placement and quality price restoration |
-| Desk interaction | Passed, 66 | Physical dismissal control; bulk prices and outlined physical controls; actual UI/widget and SurfaceInput doubles; snap phantom and touch/mouse dragging, 15×7 inventory, no visible grid title bars, hover card title/divider/price/tags including staged stock, fixed receipt item rows, buyer stock drag into middle tray, sale receipt confirmation, seller purchase flow, register and physical next button |
-| Surface geometry | Passed, 9 | Actual SurfaceInput source: canvas corners, center, tilt/translation, nearest distance, outside/parallel/rear/removed targets |
-| Editable shop | Passed, 4 | Actual Scene.spawn with model doubles preserves saved transforms/decorations, offsets other players, and keeps independent clones |
-| Customer dialogue | Passed, 4 | Actual CustomerService: seller intent, empty-shop buyer, out-of-stock gemstone request and alternating roles |
-| Physical cash display | Passed, 3 | Actual Scene.cash updates SurfaceGui balance, including zero |
-| Physical display framing | Passed, 5 | Authored CameraMount placement; actual camera code preserves cash-terminal placement and zooms out around the authored ViewTarget in desktop/portrait views |
-| Native place build | Passed | Query-enabled interaction boards and preserved counter tilt; Rojo 7.7.1 serialized scene properties and all 17 scripts |
-| Embedded source fidelity | Passed, 17/17 | Serialized script source exactly equals editable Luau files |
-| Roblox Studio, live cloud, visual/device QA and profiling | Not run | Roblox Studio was unavailable in this environment |
+| Luau compilation | Passed, 20 source files | Official Luau compiler |
+| Saved-model controller test | Passed | Loads the actual three native `.rbxmx` assets into layout/input doubles |
+| Designer customization | Passed | Changed menu dimensions, initial receipt position, grid size/position/anchor, item background, and grid line thickness remain in use |
+| Menu dragging | Passed | Wallet and anchored printer title handles, including unchanged authored dimensions |
+| Grid and machine interaction | Passed | Staged purchase return, Mint Press slot acceptance and phantom, paper insertion and rearrangement, closed printer insertion |
+| Wallet interaction | Passed | Closed-wallet deposit, grid rendering, hidden zero-count denominations, draggable menu |
+| Receipt rows | Passed | Saved ReceiptLine template populated with item text; authored list layout survives redraws |
+| Machine domain checks | Passed | Full output, bounded offline production, laundry success/failure, machine contents and progress validation, suspicion decay and save migration |
+| Wallet/trade domain checks | Passed | Wallet items, change, loose notes, wallet purchases, footprints and old stock repacking |
+| Native place build | Passed | 20 exact embedded script sources, 615 serialized instances, authored screen GUI and physical surfaces included |
+| Studio import | Passed | Three roots extracted from an XML place and rebuilt as native model sources |
+| Roblox Studio and live cloud/device QA | Not run | The environment has no Roblox Studio runtime |
 
-**242 local checks pass.** These exercise actual Luau source with API/input doubles; they do not certify Roblox rendering, input, networking or cloud behavior.
+Run the current interface check with:
+
+```sh
+python tools/check_gui.py --luau /path/to/luau
+```
+
+The interface check executes the real controller and widget code with saved model fixtures and API/input doubles. It does not certify Roblox engine rendering, networking, touch behavior, or cloud persistence. Older broad test fixtures contain superseded catalog/gameplay assumptions; the old aggregate pass count is not a current result.

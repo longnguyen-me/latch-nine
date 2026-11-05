@@ -3,26 +3,76 @@
   "tree": {
     "$className": "DataModel",
     "Workspace": {
-      "$properties": {"StreamingEnabled": false},
-      "ShopTemplate": {"$path": "assets/StagePreview.model.json"},
+      "$properties": {
+        "StreamingEnabled": false
+      },
+      "ShopTemplate": {
+        "$path": "assets/gui/ShopTemplate.rbxmx"
+      },
       "Camera": {
         "$className": "Camera",
         "$properties": {
           "FieldOfView": 28,
-          "CFrame": [0, 7, 50, 1, 0, 0, 0, 1, 0, 0, 0, 1],
-          "Focus": [0, 7, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]
+          "CFrame": [
+            0,
+            7,
+            50,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1
+          ],
+          "Focus": [
+            0,
+            7,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1
+          ]
         }
       }
     },
-    "ReplicatedStorage": {"Shared": {"$path": "src/shared"}},
-    "ServerScriptService": {"LatchNine": {"$path": "src/server"}},
-    "StarterPlayer": {
-      "$properties": {"EnableMouseLockOption": false},
-      "StarterPlayerScripts": {
-        "$className": "StarterPlayerScripts",
-        "LatchNine": {"$path": "src/client"}
+    "ReplicatedStorage": {
+      "Shared": {
+        "$path": "src/shared"
+      },
+      "GuiTemplates": {
+        "$path": "assets/gui/GuiTemplates.rbxmx"
       }
     },
-    "StarterGui": {"$className": "StarterGui"}
+    "ServerScriptService": {
+      "LatchNine": {
+        "$path": "src/server"
+      }
+    },
+    "StarterPlayer": {
+      "$properties": {
+        "EnableMouseLockOption": false
+      },
+      "StarterPlayerScripts": {
+        "$className": "StarterPlayerScripts",
+        "LatchNine": {
+          "$path": "src/client"
+        }
+      }
+    },
+    "StarterGui": {
+      "$className": "StarterGui",
+      "ShopDeskUI": {
+        "$path": "assets/gui/ShopDeskUI.rbxmx"
+      }
+    }
   }
 }

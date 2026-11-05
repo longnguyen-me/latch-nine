@@ -156,6 +156,7 @@ function Scene.spawn(template: Model?,parent: Instance,origin: Vector3,name: str
  local stage=template:Clone();stage.Name=name
  for _,object in ipairs(stage:GetDescendants()) do
   if object:IsA("BasePart") then object.CFrame=object.CFrame+origin end
+  if object:IsA("SurfaceGui") and table.find({"inventorySurface","offersSurface","registerSurface","nextSurface","dismissSurface","toggleSurface"},object.Name) then object.Enabled=false end
  end
  stage.Parent=parent;return stage
 end

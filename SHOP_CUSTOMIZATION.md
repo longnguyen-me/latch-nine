@@ -7,7 +7,7 @@
 
 After pulling a release that changes `ShopTemplate` parts, open the updated `LatchNine.rbxlx` from the cloned folder in Studio. A Rojo script sync alone may leave an older already-open place model unchanged. Copy any custom furniture from your older saved place into the updated template before saving.
 
-`CameraMount` is a visible cyan marker at about Z=70 in Edit mode. Select it in Explorer and press F to focus, then move or rotate it. The game hides that marker for the local player during Play. The three controls under `InteractionControls` have permanent, text-free SurfaceGui borders so they can be seen and edited even when Play is stopped; runtime code adds hover highlights and click behavior.
+`CameraMount` is a visible cyan marker at about Z=70 in Edit mode. Select it in Explorer and press F to focus, then move or rotate it. The game hides that marker for the local player during Play. The three controls under `InteractionControls` have editable SurfaceGui buttons, titles, and borders so they can be seen and edited even when Play is stopped; runtime code adds hover highlights and click behavior.
 
 Make permanent changes in Edit mode. During Play, the template lives in ServerStorage and each player gets a separate Shop_<UserId> clone. Play-mode movement is temporary.
 
@@ -25,13 +25,13 @@ Make permanent changes in Edit mode. During Play, the template lives in ServerSt
 | VisitorStand | Invisible marker where customers stop |
 | VisitorEntry | Invisible marker where customers enter and leave |
 
-These parts can be moved into nested folders/models, but keep their names unique. Keep the interactive boards anchored, with CanQuery enabled and their Back faces toward the camera. Their contents fit a fixed canvas; resizing the physical parts changes how large the grids appear in the world. Rotating or moving them changes their input projection automatically.
+These parts can be moved into nested folders/models, but keep their names unique. Keep the interactive boards anchored, with CanQuery enabled and their Back faces toward the camera. Their contents fit an adaptive canvas; resizing the physical parts changes how large the grids appear in the world. Rotating or moving them changes their input projection automatically.
 
 Select invisible markers through Explorer to move them. Keep ShopTemplate near the original origin; move ViewTarget to reframe your arrangement. Move and rotate CameraMount to set your own seller view. Lighting is saved in Studio; no runtime script sets it.
 
 Buyer requests are configured by BuyerCategories in src/shared/ItemTags.luau. Buyers can request a category without any matching stock. Sellers alternate with buyers and bring randomized placeholder batches.
 
-When using the supplied source build command, Scene.luau regenerates the default template asset. Preserve a separately saved copy of your customized place before rebuilding the source project. Studio furniture edits are not automatically written back to the source asset by Rojo.
+The source build now reads `assets/gui/ShopTemplate.rbxmx`; it does not regenerate the environment. Export your edited ShopTemplate to that model file, or use `tools/import_studio.py` on an Edit-mode `.rbxlx` place, to keep furniture and physical GUIs in Git. See `GUI_CUSTOMIZATION.md` for the full workflow.
 
 ShopToggle is a named physical part under ShopTemplate. The wallet is an inventory item; click it to open its screen grid.
 

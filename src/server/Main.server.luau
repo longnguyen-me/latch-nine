@@ -19,7 +19,16 @@ local Persistence = require(script.Parent.Persistence)
 local Customers = require(script.Parent.CustomerService)
 Players.CharacterAutoLoads = false
 local shopTemplate = workspace:FindFirstChild("ShopTemplate") or workspace:FindFirstChild("StagePreview")
-if shopTemplate then shopTemplate.Name="ShopTemplate";shopTemplate.Parent=game:GetService("ServerStorage") end
+assert(shopTemplate,"Workspace.ShopTemplate is missing. Open the updated LatchNine place.")
+-- Copy the Studio-authored physical GUI layouts before creating private player shops.
+local shopSurfaces=Instance.new("Folder");shopSurfaces.Name="ShopSurfaces"
+for _,name in ipairs({"inventorySurface","offersSurface","registerSurface","nextSurface","dismissSurface","toggleSurface"}) do
+ local layout=shopTemplate:FindFirstChild(name,true)
+ assert(layout and layout:IsA("SurfaceGui"),"ShopTemplate is missing editable GUI "..name)
+ local copy=layout:Clone();copy.Adornee=nil;copy.Parent=shopSurfaces
+end
+shopSurfaces.Parent=RS
+shopTemplate.Name="ShopTemplate";shopTemplate.Parent=game:GetService("ServerStorage")
 local remotes = Instance.new("Folder"); remotes.Name = "Remotes"; remotes.Parent = RS
 local action = Instance.new("RemoteEvent"); action.Name = "Action"; action.Parent = remotes
 local state = Instance.new("RemoteEvent"); state.Name = "State"; state.Parent = remotes

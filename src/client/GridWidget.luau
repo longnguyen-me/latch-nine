@@ -1,30 +1,44 @@
 --!strict
+-- The saved GUI owns appearance; this module only fills it with live grid data.
 local Shared=game:GetService("ReplicatedStorage"):WaitForChild("Shared")
+local Templates=game:GetService("ReplicatedStorage"):WaitForChild("GuiTemplates")
 local Items=require(Shared.Items)
 local Tags=require(Shared.ItemTags)
 local Widget={}
 local C=Color3.fromRGB
-local function make(class: string,props: any,parent: Instance): any
- local obj=Instance.new(class);for k,v in pairs(props) do (obj :: any)[k]=v end;obj.Parent=parent;return obj
+local function clone(name: string,parent: Instance): any
+ local view=Templates:WaitForChild(name):Clone();view.Parent=parent;return view
 end
-local function clear(parent: Instance) for _,child in ipairs(parent:GetChildren()) do child:Destroy() end end
+local function clear(parent: Instance)
+ for _,child in ipairs(parent:GetChildren()) do
+  if child.Name=="PreviewCell" or child:GetAttribute("RuntimeGrid") then child:Destroy() end
+ end
+end
+function Widget.previewColor(valid: boolean): Color3
+ return (Templates:WaitForChild(if valid then "PlacementValid" else "PlacementBlocked") :: Frame).BackgroundColor3
+end
 function Widget.draw(parent: Instance,item: any,cells: {any},w: number,h: number,size: number,ghost: boolean,onBegin: any,onHover: any?,cellHeight: number?): any
  local def=Items.Definitions[item.kind];local sy=cellHeight or size
- local frame=make("Frame",{Name="Item_"..item.id,BackgroundTransparency=1,Size=UDim2.fromOffset(w*size,h*sy),Active=false},parent)
+ local frame=clone("ItemView",parent);frame.Name="Item_"..item.id;frame.Size=UDim2.fromOffset(w*size,h*sy);frame:SetAttribute("RuntimeGrid",true)
  for index,cell in ipairs(cells) do
-  local piece=make("Frame",{Name="ItemCell",Position=UDim2.fromOffset(cell[1]*size+1,cell[2]*sy+1),Size=UDim2.fromOffset(size-2,sy-2),
-   BackgroundColor3=C(def.color[1],def.color[2],def.color[3]),BorderSizePixel=0,Active=false,ZIndex=if ghost then 41 else 2,BackgroundTransparency=if ghost then 0.3 elseif item.pending then 0.45 else 0},frame)
+  local piece=clone(if ghost then "PlacementValid" else "ItemCell",frame)
+  piece.Name="ItemCell";piece.Position=UDim2.fromOffset(cell[1]*size+1,cell[2]*sy+1);piece.Size=UDim2.fromOffset(size-2,sy-2)
   if not ghost then
+   local tint=piece:FindFirstChild("UseCatalogColor")
+   if tint and tint.Value then piece.BackgroundColor3=C(def.color[1],def.color[2],def.color[3]) end
+   if item.pending then piece.BackgroundTransparency=math.max(piece.BackgroundTransparency,0.45) end
+   local glyph=piece:WaitForChild("Glyph");local badge=piece:WaitForChild("QualityTag")
+   glyph.Visible=index==1;badge.Visible=index==1
    if index==1 then
-    make("TextLabel",{Name="Glyph",Text=def.glyph,Size=UDim2.fromScale(1,1),BackgroundTransparency=1,Font=Enum.Font.Code,TextSize=math.max(10,math.floor(size*0.3)),TextColor3=C(24,31,37),Active=false,ZIndex=3},piece)
+    glyph.Text=def.glyph
     local q=Tags.Qualities[item.qualityTag or Tags.DefaultQuality]
-    make("TextLabel",{Name="QualityTag",Text=if item.walletCount~=nil then "×"..item.walletCount else q.badge,Position=UDim2.new(0,2,0.73,0),Size=UDim2.new(1,-4,0.27,-1),BorderSizePixel=0,
-     BackgroundColor3=C(q.color[1],q.color[2],q.color[3]),Font=Enum.Font.Code,TextSize=8,TextColor3=C(24,31,37),Active=false,ZIndex=4},piece)
+    badge.Text=if item.walletCount~=nil then "×"..item.walletCount else q.badge
+    local useTagColor=badge:FindFirstChild("UseTagColor")
+    if useTagColor and useTagColor.Value then badge.BackgroundColor3=C(q.color[1],q.color[2],q.color[3]) end
    end
-   -- A transparent hit target sits above all text/badges; decorations never intercept the item.
-   local hit=make("TextButton",{Name="Hit",Size=UDim2.fromScale(1,1),Text="",BackgroundTransparency=1,BorderSizePixel=0,AutoButtonColor=false,Active=true,ZIndex=8},piece)
+   local hit=piece:WaitForChild("Hit")
    hit.InputBegan:Connect(function(input: InputObject)
-    if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then onBegin(item,input) end
+    if onBegin and (input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch) then onBegin(item,input) end
    end)
    if onHover then
     hit.MouseEnter:Connect(function(x: number,y: number) onHover(item,x,y) end)
@@ -36,28 +50,31 @@ function Widget.draw(parent: Instance,item: any,cells: {any},w: number,h: number
 end
 function Widget.new(parent: Instance,title: string,onBegin: any,onHover: any?): any
  local self: any={cellSize=24,items={},columns=15,rows=7}
- self.frame=make("Frame",{Name=title,BackgroundTransparency=1,BorderSizePixel=0,ClipsDescendants=true},parent)
- self.heading=make("TextLabel",{Name="Heading",Size=UDim2.new(1,0,0,28),BackgroundColor3=C(35,43,52),BorderSizePixel=0,Text="",
-  Font=Enum.Font.Code,TextSize=14,TextColor3=C(225,229,207),Active=false},self.frame)
- self.heading.Visible=false
- self.scroll=make("ScrollingFrame",{Name="GridScroll",Position=UDim2.fromOffset(0,0),Size=UDim2.new(1,0,1,0),BackgroundTransparency=1,BorderSizePixel=0,
-  CanvasSize=UDim2.new(),CanvasPosition=Vector2.zero,ScrollBarThickness=4,ScrollBarImageColor3=C(85,99,84),ScrollingDirection=Enum.ScrollingDirection.Y},self.frame)
- self.board=make("Frame",{Name="GridBoard",Position=UDim2.fromOffset(4,4),BackgroundTransparency=1,BorderSizePixel=0},self.scroll)
+ self.frame=parent:WaitForChild(title)
+ self.heading=self.frame:WaitForChild("Heading")
+ self.scroll=self.frame:WaitForChild("GridScroll")
+ self.board=self.scroll:WaitForChild("GridBoard")
  function self.render(items: {any},cols: number,rows: number,geometry: any,canvas: Vector2?)
-  local bounds=canvas or self.frame.AbsoluteSize
-  self.canvasWidth=bounds.X;self.canvasHeight=bounds.Y
-  local size=math.max(4,math.floor(math.min((bounds.X-8)/cols,(bounds.Y-8)/rows)))
-  local signature=cols..":"..rows..":"..size..":"..bounds.X..":"..bounds.Y
+  local parentBounds=canvas or parent.AbsoluteSize
+  local fsize=self.frame.Size;local fpos=self.frame.Position;local ssize=self.scroll.Size;local spos=self.scroll.Position
+  local fw=parentBounds.X*fsize.X.Scale+fsize.X.Offset;local fh=parentBounds.Y*fsize.Y.Scale+fsize.Y.Offset
+  local fa=self.frame.AnchorPoint or Vector2.zero;local sa=self.scroll.AnchorPoint or Vector2.zero
+  local width=math.max(1,fw*ssize.X.Scale+ssize.X.Offset);local height=math.max(1,fh*ssize.Y.Scale+ssize.Y.Offset)
+  self.viewX=parentBounds.X*fpos.X.Scale+fpos.X.Offset-fw*fa.X+fw*spos.X.Scale+spos.X.Offset-width*sa.X
+  self.viewY=parentBounds.Y*fpos.Y.Scale+fpos.Y.Offset-fh*fa.Y+fh*spos.Y.Scale+spos.Y.Offset-height*sa.Y
+  self.canvasWidth=width;self.canvasHeight=height
+  local size=math.max(4,math.floor(math.min((width-8)/cols,(height-8)/rows)))
+  local signature=cols..":"..rows..":"..size..":"..width..":"..height
   for _,i in ipairs(items) do signature..="|"..i.id..":"..i.gridX..":"..i.gridY..":"..i.rotation..":"..(i.qualityTag or "standard")..":"..(i.walletCount or "") end
   self.items=items;self.columns=cols;self.rows=rows;self.geometry=geometry
   if self.signature==signature then return end
   self.signature=signature;self.cellSize=size;self.views={};clear(self.board)
   self.board.Size=UDim2.fromOffset(cols*size,rows*size)
-  self.boardX=math.max(4,math.floor((bounds.X-cols*size)/2));self.boardY=math.max(4,math.floor((bounds.Y-rows*size)/2));self.board.Position=UDim2.fromOffset(self.boardX,self.boardY)
+  self.boardX=math.max(4,math.floor((width-cols*size)/2));self.boardY=math.max(4,math.floor((height-rows*size)/2))
+  self.board.Position=UDim2.fromOffset(self.boardX,self.boardY)
   self.scroll.CanvasSize=UDim2.fromOffset(0,rows*size+self.boardY*2)
   for y=0,rows-1 do for x=0,cols-1 do
-   local cell=make("Frame",{Name="EmptyCell",Position=UDim2.fromOffset(x*size,y*size),Size=UDim2.fromOffset(size,size),BackgroundTransparency=1,BorderSizePixel=0,Active=false},self.board)
-   make("UIStroke",{Color=C(94,145,155),Transparency=0.28,Thickness=1},cell)
+   local cell=clone("EmptyCell",self.board);cell:SetAttribute("RuntimeGrid",true);cell.Position=UDim2.fromOffset(x*size,y*size);cell.Size=UDim2.fromOffset(size,size)
   end end
   for _,item in ipairs(items) do
    local cells,w,h=geometry.cells(item.kind,item.rotation)
@@ -65,11 +82,11 @@ function Widget.new(parent: Instance,title: string,onBegin: any,onHover: any?): 
   end
  end
  function self.origin(): Vector2
-  return Vector2.new(self.boardX or 4,(self.boardY or 4)-self.scroll.CanvasPosition.Y)
+  return Vector2.new((self.viewX or 0)+(self.boardX or 4),(self.viewY or 0)+(self.boardY or 4)-self.scroll.CanvasPosition.Y)
  end
  function self.contains(point: Vector2): boolean
-  local b=self.origin()
-  return point.X>=b.X and point.Y>=math.max(0,b.Y) and point.X<math.min(self.canvasWidth,b.X+self.columns*self.cellSize) and point.Y<math.min(self.canvasHeight,b.Y+self.rows*self.cellSize)
+  local b=self.origin();local vx,vy=self.viewX or 0,self.viewY or 0
+  return point.X>=math.max(vx,b.X) and point.Y>=math.max(vy,b.Y) and point.X<math.min(vx+self.canvasWidth,b.X+self.columns*self.cellSize) and point.Y<math.min(vy+self.canvasHeight,b.Y+self.rows*self.cellSize)
  end
  return self
 end
