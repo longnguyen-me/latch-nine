@@ -15,7 +15,7 @@ subprocess.run([str(cli),str(root/'tests/Grid.spec.luau')],check=True)
 subprocess.run([str(cli),str(root/'tests/Trade.spec.luau')],check=True)
 subprocess.run([str(cli),str(root/'tests/Snap.spec.luau')],check=True)
 sources={f.stem:f.read_text() for f in files}
-for test in ['Runtime.spec.luau','Persistence.spec.luau','Desk.spec.luau','Surface.spec.luau','Shop.spec.luau','Customers.spec.luau','Scene.spec.luau','Camera.spec.luau']:
+for test in ['Runtime.spec.luau','Persistence.spec.luau','Desk.spec.luau','DeskSmoke.spec.luau','Surface.spec.luau','Shop.spec.luau','Customers.spec.luau','Scene.spec.luau','Camera.spec.luau']:
  path=root/'tests'/test
  if not path.exists(): continue
  header='local Sources = {\n'+''.join(f'[{k!r}]=[====[\n{v}\n]====],\n' for k,v in sources.items())+'}\n'
