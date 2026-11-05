@@ -92,11 +92,11 @@ local function push(player: Player,message: string?, moveAck: number?, moveOk: b
  end
  local p=s.profile
  local cols,rows=Grid.size(p)
- state:FireClient(player,{cash=p.cash,day=p.day,inventory=inventory,customer=customer,
+ state:FireClient(player,{cash=p.cash,inventory=inventory,customer=customer,
   capacity=Rules.capacity(p),gridColumns=cols,gridRows=rows,gridUsed=Grid.used(p),gridRevision=p.gridRevision,moveAck=moveAck,moveOk=moveOk,bill=Rules.bill(p),rent=Config.Rent+p.upgrade*5,operating=Config.OperatingCost,
   reputation=p.reputation,upgrade=p.upgrade,legacyRows=p.legacyRows,revenue=p.revenue,costs=p.costs,profit=p.tradeProfit,
   walletTier=p.walletTier or 0,walletSlots=p.walletSlots or {},walletStacks=Wallet.stacks(p.cash,p.walletTier or 0),
-  visits=p.visits,maxVisits=Config.DailyVisitors(p.day),shopOpen=s.shopOpen,aidDay=p.aidDay,origin=s.origin,stageName=s.stage.Name,
+  shopOpen=s.shopOpen,origin=s.origin,stageName=s.stage.Name,
   saveStatus=s.saveStatus,message=message,receipts=p.receipts,pendingArrival=s.pendingArrival,working=s.working})
 end
 local schedule: (Player)->()
@@ -111,7 +111,7 @@ local function leave(player: Player,message: string,line: string?,callNext: bool
 end
 schedule=function(player: Player)
  local s=sessions[player]
- if not s or s.closed or not s.shopOpen or s.profile.visits>=Config.DailyVisitors(s.profile.day) or s.working or s.customer or s.pendingArrival
+ if not s or s.closed or not s.shopOpen or s.working or s.customer or s.pendingArrival
   then return end
  s.pendingArrival=true; local epoch=s.epoch; push(player)
  task.delay(Config.ArrivalSeconds,function()
@@ -213,14 +213,8 @@ action.OnServerEvent:Connect(function(player: Player,request: any)
   else s.shopOpen=true;push(player,"Shop open.");schedule(player) end
   return
  end
- if name=="Sleep" then
-  if s.shopOpen or s.customer or s.pendingArrival then push(player,"Close the shop before sleeping.");return end
-  local ok,message=Rules.endDay(s.profile)
-  if ok then s.epoch+=1;s.pendingArrival=false end
-  push(player,message);return
- end
  if name=="NextCustomer" then
-  if not s.shopOpen or s.profile.visits>=Config.DailyVisitors(s.profile.day) then push(player,"Close the shop when the day's customers are done.");return end
+  if not s.shopOpen then push(player,"Close the shop when the day's customers are done.");return end
   if s.working then push(player,"Freight shift active.");return end
   if s.customer then
    if s.customer.state~="Leave" then leave(player,"",nil,true) end
@@ -306,7 +300,6 @@ action.OnServerEvent:Connect(function(player: Player,request: any)
   end
  elseif name=="Refuse" then
   if matchingCustomer(s,request) then leave(player,"You declined the deal."); return end
- elseif name=="EndDay" then message="Use the sleeping bag after closing the shop."
  elseif name=="Work" then
   if s.customer or s.profile.cash>=Rules.bill(s.profile) then message="Freight work is available when bills are unaffordable and the counter is clear."
   else
@@ -320,7 +313,6 @@ action.OnServerEvent:Connect(function(player: Player,request: any)
    end)
    return
   end
- elseif name=="Aid" then ok,message=Rules.aid(s.profile)
  end
  push(player,message)
  if ok then schedule(player) end

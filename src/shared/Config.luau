@@ -8,9 +8,6 @@ return table.freeze({
 	MaxLegacyRows = 36,
 	Rent = 18,
 	OperatingCost = 6,
-	VisitsPerDay = 5,
-	-- Add one visitor every two days, capped at twelve.
-	DailyVisitors = function(day: number): number return math.min(12,3+math.floor((day-1)/2)) end,
 	ArrivalSeconds = 2.5,
 	WalkSeconds = 1.5,
 	ServiceSeconds = 180,

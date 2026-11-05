@@ -121,7 +121,7 @@ return function(config: any, definitions: any, grid: any, tags: any)
 		return nil, nil
 	end
 	function Rules.log(p: any, message: string)
-		table.insert(p.receipts, 1, "D" .. p.day .. " / " .. message)
+		table.insert(p.receipts, 1, message)
 		if #p.receipts > 12 then table.remove(p.receipts) end
 	end
 	function Rules.purchase(p: any, item: any, price: number): (boolean, string)
@@ -179,17 +179,6 @@ return function(config: any, definitions: any, grid: any, tags: any)
 		p.reputation = math.clamp(p.reputation + (if honest then 1 else -1) - (if fine > 0 then 2 else 0), -20, 20)
 		Rules.log(p, "Sold " .. definitions[item.kind].name .. " for " .. price .. (if fine > 0 then "; Watch fine " .. fine else ""))
 		return true, "Sold for " .. price .. " Eddies." .. (if fine > 0 then " Restricted tech: 25-credit Watch fine." else "")
-	end
-	function Rules.endDay(p: any): (boolean, string)
-		p.day += 1; p.visits = 0
-		Rules.log(p, "Slept and started day " .. p.day)
-		return true, "A new day begins. Open the shop when ready."
-	end
-	function Rules.aid(p: any): (boolean, string)
-		if p.cash > Rules.bill(p) + 24 or p.aidDay == p.day then return false, "Emergency credit is available once per day when funds are low." end
-		p.cash += 40; p.aidDay = p.day; p.reputation = math.max(-20, p.reputation - 2)
-		Rules.log(p, "Emergency credit +40; trust -2")
-		return true, "The dock union advances 40 Eddies. Trust falls by 2."
 	end
 	return Rules
 end

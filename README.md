@@ -24,8 +24,8 @@ After this project is pushed to GitHub, use `git pull` in this folder to receive
 
 Studio uses session-only data by default; published servers use the cloud save code. Existing version 5 stock and legacy migrations remain supported. The receipt uses separate item rows and a fixed checkout area; item hover cards show a title, divider, price and tags. The project includes editable Luau sources, tests, build tools and the native `.rbxlx` place. All 17 scripts compile and 242 local checks pass. Actual Studio input, rendering, cloud saves and device performance still need a live playtest.
 
-## Days and wallet
+## Continuous shop and wallet
 
-The screen HUD shows the day and visitors served. The shop starts closed; click the physical shop switch to open for visitors. The visitor limit starts at three and gains one every two days (maximum twelve). You can close early, even during a visit; the customer leaves. Click the separate sleeping bag while closed to advance a day without a fee, then use the switch to reopen.
+The shop runs continuously. Click the physical switch to open for customers or close early; there is no day limit or sleep action. Customers are called with the physical next-customer control.
 
 Your starter 2×3 wallet occupies 2×3 stock cells. Click it to open its grid and drag denomination stacks to another wallet cell, into stock as individual 1×1 notes, or onto the visitor trade grid as payment. Drag a loose note back onto the open wallet to deposit it. The BUY button automatically takes Eddies from the wallet and, if needed, loose stock notes. Manual overpayment returns whole Eddie change to your wallet. Street (3×3), Courier (3×4), and Vault (4×4) wallets are uncommon, rare, and legendary seller offers; buying one replaces your current wallet.

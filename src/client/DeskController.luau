@@ -177,18 +177,6 @@ function Desk.new(send: (any)->())
  local dismissOutline=make("Highlight",{Name="DismissCustomerOutline",Enabled=false,FillTransparency=1,OutlineTransparency=0,OutlineColor=P.red,DepthMode=Enum.HighlightDepthMode.Occluded},workspace)
  dismissButton.MouseEnter:Connect(function() dismissOutline.Enabled=true end)
  dismissButton.MouseLeave:Connect(function() dismissOutline.Enabled=false end)
- local dayLabel=text(root,"",UDim2.fromOffset(16,14),UDim2.fromOffset(280,26),17,P.gold)
- local shopLabel=text(root,"",UDim2.fromOffset(16,40),UDim2.fromOffset(280,22),12,P.teal)
- local sleepPrompt=panel(root,"SleepConfirmation");sleepPrompt.Size=UDim2.fromOffset(310,150);sleepPrompt.Position=UDim2.new(0.5,-155,0.5,-75);sleepPrompt.Visible=false;sleepPrompt.ZIndex=80
- text(sleepPrompt,"Sleep and advance to the next day?",UDim2.fromOffset(14,12),UDim2.fromOffset(282,60),17)
- button(sleepPrompt,"CANCEL",UDim2.fromOffset(14,98),UDim2.fromOffset(130,36),function() sleepPrompt.Visible=false end)
- button(sleepPrompt,"SLEEP",UDim2.fromOffset(160,98),UDim2.fromOffset(136,36),function() sleepPrompt.Visible=false;request("Sleep") end)
- local sleepSurface=surface("sleep",240,100)
- sleepSurface.gui.Face=Enum.NormalId.Top
- local sleepButton=button(sleepSurface.root,"",UDim2.new(),UDim2.fromScale(1,1),function() if self.state and not self.state.shopOpen then sleepPrompt.Visible=true else notice("Close the shop first.",P.red) end end);sleepButton.BackgroundTransparency=1
- local sleepOutline=make("Highlight",{Name="SleepOutline",Enabled=false,FillTransparency=1,OutlineColor=P.teal,DepthMode=Enum.HighlightDepthMode.Occluded},workspace)
- sleepButton.MouseEnter:Connect(function() sleepOutline.Adornee=sleepSurface.part;sleepOutline.Enabled=true end)
- sleepButton.MouseLeave:Connect(function() sleepOutline.Enabled=false end)
  local toggleSurface=surface("toggle",240,100)
  local toggleButton=button(toggleSurface.root,"",UDim2.new(),UDim2.fromScale(1,1),function() request("ToggleShop") end);toggleButton.BackgroundTransparency=1
  local toggleOutline=make("Highlight",{Name="ShopToggleOutline",Enabled=false,FillTransparency=1,OutlineColor=P.teal,DepthMode=Enum.HighlightDepthMode.Occluded},workspace)
@@ -259,12 +247,12 @@ function Desk.new(send: (any)->())
   if mountedStage==name then return end
   mountedStage=name;mountEpoch+=1;local epoch=mountEpoch
   for _,layer in pairs(surfaces) do layer.part=nil;layer.gui.Adornee=nil;layer.gui.Enabled=false end
-  outline.Enabled=false;outline.Adornee=nil;nextOutline.Enabled=false;nextOutline.Adornee=nil;dismissOutline.Enabled=false;dismissOutline.Adornee=nil;sleepOutline.Enabled=false;sleepOutline.Adornee=nil;toggleOutline.Enabled=false;toggleOutline.Adornee=nil
+  outline.Enabled=false;outline.Adornee=nil;nextOutline.Enabled=false;nextOutline.Adornee=nil;dismissOutline.Enabled=false;dismissOutline.Adornee=nil;toggleOutline.Enabled=false;toggleOutline.Adornee=nil
   local function attempt()
    if epoch~=mountEpoch then return end
    local stage=if name then workspace:FindFirstChild(name) else nil
    local complete=true
-   for key,partName in pairs({inventory="InventoryBoard",basket="BuyBoard",offers="VisitorBoard",register="RegisterBox",next="NextCustomerButton",dismiss="DismissCustomerButton",sleep="SleepingBag",toggle="ShopToggle"}) do
+   for key,partName in pairs({inventory="InventoryBoard",basket="BuyBoard",offers="VisitorBoard",register="RegisterBox",next="NextCustomerButton",dismiss="DismissCustomerButton",toggle="ShopToggle"}) do
     local part=if stage then stage:FindFirstChild(partName,true) else nil
     local layer=surfaces[key];layer.part=part;layer.gui.Adornee=part;layer.gui.Enabled=part~=nil
     if part and (key=="inventory" or key=="basket" or key=="offers") then
@@ -415,7 +403,6 @@ function Desk.new(send: (any)->())
  end
  render=function()
   local s=self.state;if not s then return end;bindStage(s.stageName);layout()
-  dayLabel.Text="DAY "..s.day.." / "..s.visits.." OF "..s.maxVisits.." VISITORS"
   shopLabel.Text=if s.shopOpen then "SHOP OPEN" else "SHOP CLOSED"
   if walletPanel.Visible then drawWallet(s) end
   local c=s.customer
